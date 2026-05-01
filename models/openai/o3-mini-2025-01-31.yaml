@@ -1,0 +1,30 @@
+id: o3-mini-2025-01-31
+provider: openai
+display_name: o3-mini (Jan 2025 snapshot)
+status: active
+release_date: 2025-01-31
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 200000
+max_output_tokens: 100000
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: true
+  vision: false
+  streaming: true
+  json_mode: false
+  prompt_caching: false
+parameters:
+  supported: [max_completion_tokens, stream, stop, tools, reasoning_effort]
+  rejected: [temperature, top_p, frequency_penalty, presence_penalty]
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 1.10
+  output: 4.40
+sources:
+  - url: https://platform.openai.com/docs/models/o3-mini
+    last_verified: 2026-05-02

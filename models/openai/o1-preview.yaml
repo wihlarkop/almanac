@@ -1,0 +1,30 @@
+id: o1-preview
+provider: openai
+display_name: o1 Preview
+status: deprecated
+release_date: 2024-09-12
+deprecation_date: 2024-12-17
+sunset_date: null
+replacement: o1
+context_window: 128000
+max_output_tokens: 32768
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+  prompt_caching: false
+parameters:
+  supported: [max_completion_tokens]
+  rejected: [temperature, top_p, tools, frequency_penalty, presence_penalty]
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 15.00
+  output: 60.00
+sources:
+  - url: https://platform.openai.com/docs/models/o1
+    last_verified: 2026-05-02

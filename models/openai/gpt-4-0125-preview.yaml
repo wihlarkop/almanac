@@ -1,0 +1,30 @@
+id: gpt-4-0125-preview
+provider: openai
+display_name: GPT-4 Turbo Preview (Jan 2024)
+status: deprecated
+release_date: 2024-01-25
+deprecation_date: 2024-04-09
+sunset_date: null
+replacement: gpt-4-turbo
+context_window: 128000
+max_output_tokens: 4096
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: true
+  vision: false
+  streaming: true
+  json_mode: true
+  prompt_caching: false
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop, tools, response_format, seed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 10.00
+  output: 30.00
+sources:
+  - url: https://platform.openai.com/docs/models/gpt-4
+    last_verified: 2026-05-02
