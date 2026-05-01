@@ -17,3 +17,6 @@ jobs:
 
       - name: Validate all YAML files
         run: cargo run -p almanac-validator
+
+      - name: Build server
+        run: cargo build -p almanac-server
