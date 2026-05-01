@@ -1,0 +1,26 @@
+id: codellama-34b-instruct
+provider: meta
+display_name: Code Llama 34B Instruct
+status: deprecated
+release_date: 2023-08-24
+deprecation_date: 2024-07-23
+sunset_date: null
+replacement: llama-3.1-70b-instruct
+context_window: 16384
+max_output_tokens: 4096
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+  prompt_caching: false
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop]
+  rejected: []
+  deprecated_for_this_model: []
+sources:
+  - url: https://llama.meta.com/docs/model-cards-and-prompt-formats/code-llama/
+    last_verified: 2026-05-02
