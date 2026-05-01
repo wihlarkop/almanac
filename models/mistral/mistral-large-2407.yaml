@@ -1,0 +1,30 @@
+id: mistral-large-2407
+provider: mistral
+display_name: Mistral Large (Jul 2024)
+status: deprecated
+release_date: 2024-07-24
+deprecation_date: 2024-11-18
+sunset_date: null
+replacement: mistral-large-2411
+context_window: 131072
+max_output_tokens: 4096
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: true
+  vision: false
+  streaming: true
+  json_mode: true
+  prompt_caching: false
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop, tools, response_format]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 3.00
+  output: 9.00
+sources:
+  - url: https://docs.mistral.ai/getting-started/models/
+    last_verified: 2026-05-02
