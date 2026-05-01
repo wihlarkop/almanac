@@ -1,0 +1,27 @@
+id: gemini-exp-1206
+provider: google
+display_name: Gemini Experimental 1206
+status: deprecated
+release_date: 2024-12-06
+deprecation_date: 2025-02-05
+sunset_date: null
+replacement: gemini-2.0-flash
+context_window: 1048576
+max_output_tokens: 8192
+modalities:
+  input: [text, image, audio, video]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  streaming: true
+  json_mode: true
+  prompt_caching: false
+  experimental: true
+parameters:
+  supported: [temperature, top_p, max_output_tokens, stream, stop, tools, response_mime_type]
+  rejected: []
+  deprecated_for_this_model: []
+sources:
+  - url: https://ai.google.dev/gemini-api/docs/models/gemini
+    last_verified: 2026-05-02
