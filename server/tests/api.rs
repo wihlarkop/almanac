@@ -84,3 +84,100 @@ async fn providers_etag_returns_304() {
 
     assert_eq!(response.status(), StatusCode::NOT_MODIFIED);
 }
+
+#[tokio::test]
+async fn models_returns_all_with_cache_headers() {
+    let response = app()
+        .await
+        .oneshot(Request::builder().uri("/v1/models").body(Body::empty()).unwrap())
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+    assert_eq!(
+        response.headers().get("cache-control").unwrap(),
+        "public, max-age=300"
+    );
+    assert!(response.headers().contains_key("etag"));
+
+    let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+    assert!(json.as_array().unwrap().len() >= 30);
+}
+
+#[tokio::test]
+async fn models_filter_by_provider() {
+    let response = app()
+        .await
+        .oneshot(
+            Request::builder()
+                .uri("/v1/models?provider=anthropic")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+    let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+    let models = json.as_array().unwrap();
+    assert!(!models.is_empty());
+    assert!(models
+        .iter()
+        .all(|m| m["provider"].as_str() == Some("anthropic")));
+}
+
+#[tokio::test]
+async fn models_filter_by_status() {
+    let response = app()
+        .await
+        .oneshot(
+            Request::builder()
+                .uri("/v1/models?status=active")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+    let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+    let models = json.as_array().unwrap();
+    assert!(!models.is_empty());
+    assert!(models
+        .iter()
+        .all(|m| m["status"].as_str() == Some("active")));
+}
+
+#[tokio::test]
+async fn models_filter_by_capability() {
+    let response = app()
+        .await
+        .oneshot(
+            Request::builder()
+                .uri("/v1/models?capability=vision")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+    let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+    let models = json.as_array().unwrap();
+    assert!(!models.is_empty());
+    assert!(models
+        .iter()
+        .all(|m| m["capabilities"]["vision"].as_bool() == Some(true)));
+}
