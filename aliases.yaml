@@ -28,3 +28,20 @@ aliases:
   gemini-2.0-flash-latest: gemini-2.0-flash
   gemini-1.5-pro-latest: gemini-1.5-pro
   gemini-1.5-flash-latest: gemini-1.5-flash
+
+  # Mistral shorthand aliases
+  mistral-large-latest: mistral-large-2411
+  mistral-small-latest: mistral-small-2409
+  pixtral-large-latest: pixtral-large-2411
+
+  # Meta shorthand aliases
+  llama-3.3-latest: llama-3.3-70b-instruct
+  llama-3.1-latest: llama-3.1-405b-instruct
+
+  # Cohere shorthand aliases
+  command-r-plus-latest: command-r-plus-08-2024
+  command-r-latest: command-r-08-2024
+
+  # DeepSeek shorthand aliases
+  deepseek-v3-latest: deepseek-v3
+  deepseek-r1-latest: deepseek-r1
