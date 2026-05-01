@@ -1,11 +1,30 @@
-use axum::{extract::State, response::Json};
+use axum::{
+    extract::State,
+    http::{HeaderMap, HeaderValue, StatusCode},
+    response::{IntoResponse, Json},
+};
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use crate::state::AppState;
 
 pub async fn list_providers(
     State(state): State<Arc<RwLock<AppState>>>,
-) -> Json<serde_json::Value> {
+    headers: HeaderMap,
+) -> impl IntoResponse {
     let state = state.read().await;
-    Json(serde_json::Value::Array(state.providers.clone()))
+
+    if let Some(inm) = headers.get("if-none-match") {
+        if inm.as_bytes() == state.etag.as_bytes() {
+            return StatusCode::NOT_MODIFIED.into_response();
+        }
+    }
+
+    let mut resp_headers = HeaderMap::new();
+    resp_headers.insert(
+        "cache-control",
+        HeaderValue::from_static("public, max-age=300"),
+    );
+    resp_headers.insert("etag", HeaderValue::from_str(&state.etag).unwrap());
+
+    (resp_headers, Json(state.providers.clone())).into_response()
 }
