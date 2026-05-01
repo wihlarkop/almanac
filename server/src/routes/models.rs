@@ -1,5 +1,5 @@
 use axum::{
-    extract::{Query, State},
+    extract::{Path, Query, State},
     http::{HeaderMap, HeaderValue, StatusCode},
     response::{IntoResponse, Json},
 };
@@ -64,6 +64,40 @@ pub async fn list_models(
     (resp_headers, Json(models)).into_response()
 }
 
-pub async fn get_model() -> StatusCode {
-    StatusCode::NOT_FOUND
+pub async fn get_model(
+    State(state): State<Arc<RwLock<AppState>>>,
+    Path((provider, id)): Path<(String, String)>,
+    headers: HeaderMap,
+) -> impl IntoResponse {
+    let state = state.read().await;
+
+    let model = state.models.iter().find(|m| {
+        m["provider"].as_str() == Some(provider.as_str())
+            && m["id"].as_str() == Some(id.as_str())
+    });
+
+    match model {
+        None => (
+            StatusCode::NOT_FOUND,
+            Json(serde_json::json!({
+                "error": "not found",
+                "code": "MODEL_NOT_FOUND"
+            })),
+        )
+            .into_response(),
+        Some(m) => {
+            if let Some(inm) = headers.get("if-none-match") {
+                if inm.as_bytes() == state.etag.as_bytes() {
+                    return StatusCode::NOT_MODIFIED.into_response();
+                }
+            }
+            let mut resp_headers = HeaderMap::new();
+            resp_headers.insert(
+                "cache-control",
+                HeaderValue::from_static("public, max-age=300"),
+            );
+            resp_headers.insert("etag", HeaderValue::from_str(&state.etag).unwrap());
+            (resp_headers, Json(m.clone())).into_response()
+        }
+    }
 }
