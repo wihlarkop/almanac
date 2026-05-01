@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["id", "display_name", "website"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]*$",
+      "description": "Lowercase slug, matches the directory name under models/"
+    },
+    "display_name": {
+      "type": "string"
+    },
+    "website": {
+      "type": "string"
+    },
+    "api_docs": {
+      "type": "string"
+    }
+  }
+}
