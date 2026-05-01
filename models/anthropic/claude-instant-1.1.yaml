@@ -1,0 +1,26 @@
+id: claude-instant-1.1
+provider: anthropic
+display_name: Claude Instant 1.1
+status: retired
+release_date: 2023-03-14
+deprecation_date: 2023-08-09
+sunset_date: 2024-11-08
+replacement: claude-instant-1.2
+context_window: 100000
+max_output_tokens: 4096
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+  prompt_caching: false
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop]
+  rejected: []
+  deprecated_for_this_model: []
+sources:
+  - url: https://docs.anthropic.com/en/docs/about-claude/models
+    last_verified: 2026-05-02
