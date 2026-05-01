@@ -1,0 +1,30 @@
+id: claude-3-5-sonnet-20241022
+provider: anthropic
+display_name: Claude 3.5 Sonnet
+status: active
+release_date: 2024-10-22
+deprecation_date: null
+sunset_date: null
+replacement: claude-sonnet-4-6
+context_window: 200000
+max_output_tokens: 8192
+modalities:
+  input: [text, image]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  streaming: true
+  json_mode: true
+  prompt_caching: true
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop, tools]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 3.00
+  output: 15.00
+sources:
+  - url: https://docs.anthropic.com/en/docs/about-claude/models
+    last_verified: 2026-05-02

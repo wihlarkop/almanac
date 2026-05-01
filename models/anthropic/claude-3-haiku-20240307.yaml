@@ -1,0 +1,30 @@
+id: claude-3-haiku-20240307
+provider: anthropic
+display_name: Claude 3 Haiku
+status: deprecating
+release_date: 2024-03-07
+deprecation_date: null
+sunset_date: 2026-07-21
+replacement: claude-3-5-haiku-20241022
+context_window: 200000
+max_output_tokens: 4096
+modalities:
+  input: [text, image]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  streaming: true
+  json_mode: false
+  prompt_caching: true
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop, tools]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.25
+  output: 1.25
+sources:
+  - url: https://docs.anthropic.com/en/docs/about-claude/models
+    last_verified: 2026-05-02

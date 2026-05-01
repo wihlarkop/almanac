@@ -1,0 +1,26 @@
+id: claude-2.1
+provider: anthropic
+display_name: Claude 2.1
+status: deprecated
+release_date: 2023-11-21
+deprecation_date: 2024-03-07
+sunset_date: null
+replacement: claude-3-haiku-20240307
+context_window: 200000
+max_output_tokens: 4096
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: true
+  vision: false
+  streaming: true
+  json_mode: false
+  prompt_caching: false
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop]
+  rejected: []
+  deprecated_for_this_model: []
+sources:
+  - url: https://docs.anthropic.com/en/docs/about-claude/models
+    last_verified: 2026-05-02
