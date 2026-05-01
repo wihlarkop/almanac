@@ -1,0 +1,30 @@
+id: gpt-4o-mini
+provider: openai
+display_name: GPT-4o mini
+status: active
+release_date: 2024-07-18
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 128000
+max_output_tokens: 16384
+modalities:
+  input: [text, image]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  streaming: true
+  json_mode: true
+  prompt_caching: false
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop, tools, response_format, seed, frequency_penalty, presence_penalty]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.15
+  output: 0.60
+sources:
+  - url: https://platform.openai.com/docs/models/gpt-4o-mini
+    last_verified: 2026-05-02

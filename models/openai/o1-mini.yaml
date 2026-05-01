@@ -1,0 +1,30 @@
+id: o1-mini
+provider: openai
+display_name: o1-mini
+status: deprecating
+release_date: 2024-09-12
+deprecation_date: null
+sunset_date: null
+replacement: o3-mini
+context_window: 128000
+max_output_tokens: 65536
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+  prompt_caching: false
+parameters:
+  supported: [max_completion_tokens, stream]
+  rejected: [temperature, top_p, tools, frequency_penalty, presence_penalty]
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 1.10
+  output: 4.40
+sources:
+  - url: https://platform.openai.com/docs/models/o1-mini
+    last_verified: 2026-05-02
