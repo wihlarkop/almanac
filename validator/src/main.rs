@@ -16,17 +16,16 @@ fn repo_root() -> PathBuf {
 fn load_schema(path: &Path) -> Result<jsonschema::Validator> {
     let raw = std::fs::read_to_string(path)
         .with_context(|| format!("reading schema {}", path.display()))?;
-    let schema: serde_json::Value = serde_json::from_str(&raw)
-        .with_context(|| format!("parsing schema {}", path.display()))?;
+    let schema: serde_json::Value =
+        serde_json::from_str(&raw).with_context(|| format!("parsing schema {}", path.display()))?;
     jsonschema::validator_for(&schema)
         .with_context(|| format!("compiling schema {}", path.display()))
 }
 
 fn load_yaml(path: &Path) -> Result<serde_json::Value> {
-    let raw = std::fs::read_to_string(path)
-        .with_context(|| format!("reading {}", path.display()))?;
-    serde_yaml::from_str(&raw)
-        .with_context(|| format!("parsing YAML {}", path.display()))
+    let raw =
+        std::fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
+    serde_yaml::from_str(&raw).with_context(|| format!("parsing YAML {}", path.display()))
 }
 
 fn yaml_files_in(dir: &Path) -> Vec<PathBuf> {
@@ -37,7 +36,7 @@ fn yaml_files_in(dir: &Path) -> Vec<PathBuf> {
         .max_depth(1)
         .into_iter()
         .filter_map(|e| e.ok())
-        .filter(|e| e.path().extension().map_or(false, |x| x == "yaml"))
+        .filter(|e| e.path().extension().is_some_and(|x| x == "yaml"))
         .map(|e| e.path().to_path_buf())
         .collect();
     paths.sort();
@@ -51,7 +50,7 @@ fn yaml_files_recursive(dir: &Path) -> Vec<PathBuf> {
     let mut paths: Vec<_> = WalkDir::new(dir)
         .into_iter()
         .filter_map(|e| e.ok())
-        .filter(|e| e.path().extension().map_or(false, |x| x == "yaml"))
+        .filter(|e| e.path().extension().is_some_and(|x| x == "yaml"))
         .map(|e| e.path().to_path_buf())
         .collect();
     paths.sort();
@@ -59,7 +58,9 @@ fn yaml_files_recursive(dir: &Path) -> Vec<PathBuf> {
 }
 
 fn stem(path: &Path) -> &str {
-    path.file_stem().and_then(|s| s.to_str()).unwrap_or_default()
+    path.file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or_default()
 }
 
 fn main() -> Result<()> {
@@ -73,7 +74,11 @@ fn main() -> Result<()> {
     // --- Providers ---
     println!("Validating providers...");
     for path in yaml_files_in(&root.join("providers")) {
-        let rel = path.strip_prefix(&root).unwrap_or(&path).display().to_string();
+        let rel = path
+            .strip_prefix(&root)
+            .unwrap_or(&path)
+            .display()
+            .to_string();
         match load_yaml(&path) {
             Err(e) => {
                 println!("  \u{2717} {rel}: {e}");
@@ -105,7 +110,11 @@ fn main() -> Result<()> {
     // --- Models ---
     println!("\nValidating models...");
     for path in yaml_files_recursive(&root.join("models")) {
-        let rel = path.strip_prefix(&root).unwrap_or(&path).display().to_string();
+        let rel = path
+            .strip_prefix(&root)
+            .unwrap_or(&path)
+            .display()
+            .to_string();
         match load_yaml(&path) {
             Err(e) => {
                 println!("  \u{2717} {rel}: {e}");
@@ -128,7 +137,8 @@ fn main() -> Result<()> {
                     } else {
                         let provider = data["provider"].as_str().unwrap_or_default();
                         if !provider_ids.is_empty() && !provider_ids.contains(provider) {
-                            let msg = format!("{rel}: provider '{provider}' not found in providers/");
+                            let msg =
+                                format!("{rel}: provider '{provider}' not found in providers/");
                             println!("  \u{2717} {msg}");
                             errors.push(msg);
                         } else {
