@@ -1,0 +1,26 @@
+id: gemini-pro-vision
+provider: google
+display_name: Gemini Pro Vision
+status: retired
+release_date: 2023-12-06
+deprecation_date: 2024-04-09
+sunset_date: 2025-01-14
+replacement: gemini-1.5-pro
+context_window: 16384
+max_output_tokens: 2048
+modalities:
+  input: [text, image]
+  output: [text]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+  prompt_caching: false
+parameters:
+  supported: [temperature, top_p, max_output_tokens]
+  rejected: []
+  deprecated_for_this_model: []
+sources:
+  - url: https://ai.google.dev/gemini-api/docs/models/gemini
+    last_verified: 2026-05-02

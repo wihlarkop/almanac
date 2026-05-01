@@ -1,0 +1,30 @@
+id: gemini-2.0-flash-lite
+provider: google
+display_name: Gemini 2.0 Flash Lite
+status: active
+release_date: 2025-02-05
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 1048576
+max_output_tokens: 8192
+modalities:
+  input: [text, image, audio, video]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  streaming: true
+  json_mode: true
+  prompt_caching: false
+parameters:
+  supported: [temperature, top_p, max_output_tokens, stream, stop, tools, response_mime_type]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.075
+  output: 0.30
+sources:
+  - url: https://ai.google.dev/gemini-api/docs/models/gemini
+    last_verified: 2026-05-02
