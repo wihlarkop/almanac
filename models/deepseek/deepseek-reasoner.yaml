@@ -1,0 +1,27 @@
+id: deepseek-reasoner
+provider: deepseek
+display_name: DeepSeek Reasoner (R1 alias)
+status: deprecated
+release_date: 2025-01-20
+deprecation_date: 2026-07-24
+sunset_date: null
+replacement: deepseek-v4-flash
+context_window: 65536
+max_output_tokens: 32768
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: true
+  prompt_caching: false
+  thinking: true
+parameters:
+  supported: [temperature, max_tokens, stream, stop]
+  rejected: []
+  deprecated_for_this_model: []
+sources:
+  - url: https://platform.deepseek.com/api-docs/
+    last_verified: 2026-05-02

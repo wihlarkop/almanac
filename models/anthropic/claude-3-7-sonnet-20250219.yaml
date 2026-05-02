@@ -1,0 +1,27 @@
+id: claude-3-7-sonnet-20250219
+provider: anthropic
+display_name: Claude 3.7 Sonnet
+status: deprecated
+release_date: 2025-02-19
+deprecation_date: 2025-10-28
+sunset_date: 2026-02-19
+replacement: claude-sonnet-4-6
+context_window: 200000
+max_output_tokens: 64000
+modalities:
+  input: [text, image]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  streaming: true
+  json_mode: true
+  prompt_caching: true
+  thinking: true
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop, tools]
+  rejected: []
+  deprecated_for_this_model: []
+sources:
+  - url: https://docs.anthropic.com/en/docs/about-claude/models
+    last_verified: 2026-05-02
