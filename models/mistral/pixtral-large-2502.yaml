@@ -1,0 +1,30 @@
+id: pixtral-large-2502
+provider: mistral
+display_name: Pixtral Large (Feb 2025)
+status: active
+release_date: 2025-02-01
+deprecation_date: null
+sunset_date: null
+replacement: pixtral-large-2411
+context_window: 131072
+max_output_tokens: 4096
+modalities:
+  input: [text, image]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  streaming: true
+  json_mode: true
+  prompt_caching: false
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop, tools]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 2.00
+  output: 6.00
+sources:
+  - url: https://docs.mistral.ai/getting-started/models/models_overview/
+    last_verified: 2026-05-02

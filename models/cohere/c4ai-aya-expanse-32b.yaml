@@ -1,0 +1,30 @@
+id: c4ai-aya-expanse-32b
+provider: cohere
+display_name: Aya Expanse 32B
+status: active
+release_date: 2024-10-09
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 128000
+max_output_tokens: 4096
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+  prompt_caching: false
+parameters:
+  supported: [temperature, max_tokens, stream, stop]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.50
+  output: 1.50
+sources:
+  - url: https://docs.cohere.com/docs/models
+    last_verified: 2026-05-02

@@ -1,0 +1,30 @@
+id: o4-mini-2025-04-16
+provider: openai
+display_name: o4-mini (Apr 2025)
+status: active
+release_date: 2025-04-16
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 200000
+max_output_tokens: 100000
+modalities:
+  input: [text, image]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  streaming: true
+  json_mode: false
+  prompt_caching: true
+parameters:
+  supported: [max_completion_tokens, stream, stop, tools, reasoning_effort]
+  rejected: [temperature, top_p, frequency_penalty, presence_penalty]
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 1.10
+  output: 4.40
+sources:
+  - url: https://platform.openai.com/docs/models/o4-mini
+    last_verified: 2026-05-02

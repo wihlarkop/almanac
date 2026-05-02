@@ -1,0 +1,30 @@
+id: codestral-2501
+provider: mistral
+display_name: Codestral (Jan 2025)
+status: active
+release_date: 2025-01-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 262144
+max_output_tokens: 4096
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: true
+  prompt_caching: false
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.30
+  output: 0.90
+sources:
+  - url: https://docs.mistral.ai/getting-started/models/models_overview/
+    last_verified: 2026-05-02

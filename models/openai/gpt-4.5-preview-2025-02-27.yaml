@@ -1,0 +1,30 @@
+id: gpt-4.5-preview-2025-02-27
+provider: openai
+display_name: GPT-4.5 Preview (Feb 2025)
+status: deprecated
+release_date: 2025-02-27
+deprecation_date: 2025-07-14
+sunset_date: null
+replacement: gpt-4.1
+context_window: 128000
+max_output_tokens: 16384
+modalities:
+  input: [text, image]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  streaming: true
+  json_mode: true
+  prompt_caching: false
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop, tools, response_format, seed, frequency_penalty, presence_penalty]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 75.00
+  output: 150.00
+sources:
+  - url: https://platform.openai.com/docs/models/gpt-4.5
+    last_verified: 2026-05-02
