@@ -7,18 +7,24 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, utoipa::IntoParams)]
 pub struct SuggestQuery {
     pub q: String,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, utoipa::ToSchema)]
 pub struct SuggestResult {
     pub id: String,
     pub provider: String,
     pub score: f64,
 }
 
+#[utoipa::path(
+    get,
+    path = "/v1/suggest",
+    params(SuggestQuery),
+    responses((status = 200, description = "Ranked suggestions", body = [SuggestResult]))
+)]
 pub async fn suggest(
     State(state): State<Arc<RwLock<AppState>>>,
     Query(params): Query<SuggestQuery>,

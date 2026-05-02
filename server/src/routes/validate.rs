@@ -4,21 +4,22 @@ use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, sync::Arc};
 use tokio::sync::RwLock;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, utoipa::ToSchema)]
 pub struct ValidateRequest {
     pub model: String,
     pub provider: Option<String>,
+    #[schema(value_type = Object)]
     pub parameters: Option<HashMap<String, serde_json::Value>>,
     pub modalities: Option<ValidateModalities>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, utoipa::ToSchema)]
 pub struct ValidateModalities {
     pub input: Option<Vec<String>>,
     pub output: Option<Vec<String>>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, utoipa::ToSchema)]
 pub struct ValidateResponse {
     pub valid: bool,
     pub canonical_id: Option<String>,
@@ -26,7 +27,7 @@ pub struct ValidateResponse {
     pub warnings: Vec<ValidationIssue>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, utoipa::ToSchema)]
 pub struct ValidationIssue {
     pub code: String,
     pub message: String,
@@ -39,6 +40,12 @@ pub struct ValidationIssue {
     pub direction: Option<String>,
 }
 
+#[utoipa::path(
+    post,
+    path = "/v1/validate",
+    request_body = ValidateRequest,
+    responses((status = 200, description = "Validation result", body = ValidateResponse))
+)]
 pub async fn validate(
     State(state): State<Arc<RwLock<AppState>>>,
     Json(req): Json<ValidateRequest>,

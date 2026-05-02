@@ -219,9 +219,11 @@ async fn models_filter_by_provider() {
     let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
     let models = json["data"].as_array().unwrap();
     assert!(!models.is_empty());
-    assert!(models
-        .iter()
-        .all(|m| m["provider"].as_str() == Some("anthropic")));
+    assert!(
+        models
+            .iter()
+            .all(|m| m["provider"].as_str() == Some("anthropic"))
+    );
 }
 
 #[tokio::test]
@@ -244,9 +246,11 @@ async fn models_filter_by_status() {
     let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
     let models = json["data"].as_array().unwrap();
     assert!(!models.is_empty());
-    assert!(models
-        .iter()
-        .all(|m| m["status"].as_str() == Some("active")));
+    assert!(
+        models
+            .iter()
+            .all(|m| m["status"].as_str() == Some("active"))
+    );
 }
 
 #[tokio::test]
@@ -269,9 +273,11 @@ async fn models_filter_by_capability() {
     let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
     let models = json["data"].as_array().unwrap();
     assert!(!models.is_empty());
-    assert!(models
-        .iter()
-        .all(|m| m["capabilities"]["vision"].as_bool() == Some(true)));
+    assert!(
+        models
+            .iter()
+            .all(|m| m["capabilities"]["vision"].as_bool() == Some(true))
+    );
 }
 
 #[tokio::test]
@@ -498,9 +504,11 @@ async fn validate_unknown_model_returns_not_found_with_suggestions() {
     assert_eq!(json["errors"][0]["code"], "MODEL_NOT_FOUND");
     let suggestions = json["errors"][0]["suggestions"].as_array().unwrap();
     assert!(!suggestions.is_empty());
-    assert!(suggestions
-        .iter()
-        .any(|s| s.as_str() == Some("claude-opus-4-7") || s.as_str() == Some("claude-opus-4")));
+    assert!(
+        suggestions
+            .iter()
+            .any(|s| s.as_str() == Some("claude-opus-4-7") || s.as_str() == Some("claude-opus-4"))
+    );
 }
 
 #[tokio::test]
@@ -602,11 +610,13 @@ async fn validate_rejected_parameter_returns_error() {
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
     assert_eq!(json["valid"], false);
-    assert!(json["errors"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .any(|e| e["code"] == "PARAMETER_REJECTED" && e["parameter"] == "reasoning_effort"));
+    assert!(
+        json["errors"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|e| e["code"] == "PARAMETER_REJECTED" && e["parameter"] == "reasoning_effort")
+    );
 }
 
 #[tokio::test]
@@ -635,11 +645,13 @@ async fn validate_unsupported_parameter_returns_warning() {
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
     assert_eq!(json["valid"], true);
-    assert!(json["warnings"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .any(|e| e["code"] == "PARAMETER_UNSUPPORTED" && e["parameter"] == "temperature"));
+    assert!(
+        json["warnings"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|e| e["code"] == "PARAMETER_UNSUPPORTED" && e["parameter"] == "temperature")
+    );
 }
 
 #[tokio::test]
@@ -669,11 +681,13 @@ async fn validate_modality_mismatch_returns_error() {
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
     assert_eq!(json["valid"], false);
-    assert!(json["errors"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .any(|e| e["code"] == "MODALITY_UNSUPPORTED" && e["modality"] == "image"));
+    assert!(
+        json["errors"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|e| e["code"] == "MODALITY_UNSUPPORTED" && e["modality"] == "image")
+    );
 }
 
 #[tokio::test]
@@ -734,9 +748,11 @@ async fn suggest_returns_ranked_matches() {
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
     let results = json.as_array().unwrap();
     assert!(!results.is_empty());
-    assert!(results
-        .iter()
-        .any(|r| r["id"].as_str() == Some("claude-opus-4-7")));
+    assert!(
+        results
+            .iter()
+            .any(|r| r["id"].as_str() == Some("claude-opus-4-7"))
+    );
     if results.len() > 1 {
         assert!(results[0]["score"].as_f64() >= results[1]["score"].as_f64());
     }

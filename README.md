@@ -46,6 +46,10 @@ Optional environment variables:
 
 - `PORT` - server port.
 - `DATA_DIR` - directory containing `providers/`, `models/`, and `aliases.yaml`.
+- `RUST_LOG` - tracing filter, for example `almanac_server=debug,tower_http=info`.
+
+The server logs startup, catalog loading, request traces, and shutdown events. It handles Ctrl+C
+and SIGTERM as graceful shutdown signals.
 
 ## API Examples
 

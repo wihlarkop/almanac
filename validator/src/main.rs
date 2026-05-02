@@ -320,7 +320,9 @@ fn main() -> Result<()> {
                             if provider != provider_dir {
                                 report_error(
                                     &mut errors,
-                                    format!("{rel}: provider '{provider}' must match directory '{provider_dir}'"),
+                                    format!(
+                                        "{rel}: provider '{provider}' must match directory '{provider_dir}'"
+                                    ),
                                 );
                                 continue;
                             }
@@ -328,7 +330,9 @@ fn main() -> Result<()> {
                             if let Some(previous) = model_ids.get(actual) {
                                 report_error(
                                     &mut errors,
-                                    format!("{rel}: duplicate model id '{actual}' already defined in {previous}"),
+                                    format!(
+                                        "{rel}: duplicate model id '{actual}' already defined in {previous}"
+                                    ),
                                 );
                                 continue;
                             }
@@ -423,7 +427,9 @@ fn main() -> Result<()> {
                     for (alias, target) in entries {
                         let t = target.as_str().unwrap_or_default();
                         if !known_ids.contains(t) {
-                            let msg = format!("aliases.yaml: '{alias}' \u{2192} '{t}' does not match any model id");
+                            let msg = format!(
+                                "aliases.yaml: '{alias}' \u{2192} '{t}' does not match any model id"
+                            );
                             println!("  \u{2717} {msg}");
                             errors.push(msg);
                         } else if let Some(target) = model_meta.get(t) {
@@ -555,12 +561,16 @@ mod tests {
         validate_no_parameter_overlap(&mut errors, "models/test/test-model.yaml", &meta);
 
         assert_eq!(errors.len(), 2);
-        assert!(errors
-            .iter()
-            .any(|e| e.contains("temperature") && e.contains("supported and rejected")));
-        assert!(errors
-            .iter()
-            .any(|e| e.contains("top_p") && e.contains("supported and deprecated")));
+        assert!(
+            errors
+                .iter()
+                .any(|e| e.contains("temperature") && e.contains("supported and rejected"))
+        );
+        assert!(
+            errors
+                .iter()
+                .any(|e| e.contains("top_p") && e.contains("supported and deprecated"))
+        );
     }
 
     #[test]

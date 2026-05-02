@@ -8,7 +8,7 @@ use serde::Deserialize;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, utoipa::IntoParams)]
 pub struct ModelFilter {
     provider: Option<String>,
     status: Option<String>,
@@ -23,6 +23,15 @@ pub struct ModelFilter {
     max_input_price: Option<f64>,
 }
 
+#[utoipa::path(
+    get,
+    path = "/v1/models",
+    params(ModelFilter),
+    responses(
+        (status = 200, description = "Paginated model list"),
+        (status = 304, description = "Catalog not modified")
+    )
+)]
 pub async fn list_models(
     State(state): State<Arc<RwLock<AppState>>>,
     Query(filter): Query<ModelFilter>,
@@ -114,6 +123,19 @@ pub async fn list_models(
         .into_response()
 }
 
+#[utoipa::path(
+    get,
+    path = "/v1/models/{provider}/{id}",
+    params(
+        ("provider" = String, Path, description = "Provider id"),
+        ("id" = String, Path, description = "Model id")
+    ),
+    responses(
+        (status = 200, description = "Model metadata"),
+        (status = 304, description = "Catalog not modified"),
+        (status = 404, description = "Model not found")
+    )
+)]
 pub async fn get_model(
     State(state): State<Arc<RwLock<AppState>>>,
     Path((provider, id)): Path<(String, String)>,

@@ -7,6 +7,14 @@ use axum::{
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
+#[utoipa::path(
+    get,
+    path = "/v1/providers",
+    responses(
+        (status = 200, description = "Provider list"),
+        (status = 304, description = "Catalog not modified")
+    )
+)]
 pub async fn list_providers(
     State(state): State<Arc<RwLock<AppState>>>,
     headers: HeaderMap,
