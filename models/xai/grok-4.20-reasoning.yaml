@@ -22,6 +22,9 @@ parameters:
   supported: [temperature, top_p, max_tokens, stream, tools, response_format, seed]
   rejected: [reasoning_effort, logprobs]
   deprecated_for_this_model: []
+last_verified: 2026-05-03
+confidence: official
+endpoint_family: chat_completions
 sources:
   - url: https://docs.x.ai/developers/models
     last_verified: 2026-05-03

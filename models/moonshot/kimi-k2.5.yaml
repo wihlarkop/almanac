@@ -27,6 +27,9 @@ pricing:
   currency: USD
   input: 0.60
   output: 3.00
+last_verified: 2026-05-03
+confidence: official
+endpoint_family: chat_completions
 sources:
   - url: https://platform.kimi.ai/docs/models
     last_verified: 2026-05-03

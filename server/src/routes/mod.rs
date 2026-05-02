@@ -9,6 +9,7 @@ use tower_http::trace::TraceLayer;
 
 mod health;
 mod models;
+mod openapi;
 mod providers;
 mod suggest;
 mod validate;
@@ -21,6 +22,9 @@ pub fn router(state: Arc<RwLock<AppState>>) -> Router {
         .route("/v1/models/{provider}/{id}", get(models::get_model))
         .route("/v1/validate", post(validate::validate))
         .route("/v1/suggest", get(suggest::suggest))
+        .route("/openapi.json", get(openapi::openapi_json))
+        .route("/swagger-ui/", get(openapi::swagger_ui))
+        .route("/scalar", get(openapi::scalar))
         .with_state(state)
         .layer(TraceLayer::new_for_http())
 }

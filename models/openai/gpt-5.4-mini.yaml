@@ -26,6 +26,9 @@ pricing:
   currency: USD
   input: 0.75
   output: 4.50
+last_verified: 2026-05-02
+confidence: official
+endpoint_family: responses
 sources:
   - url: https://openai.com/index/introducing-gpt-5-4-mini-and-nano/
     last_verified: 2026-05-02

@@ -21,6 +21,9 @@ parameters:
   supported: [temperature, top_p, max_tokens, stream, stop, tools]
   rejected: []
   deprecated_for_this_model: []
+last_verified: 2026-05-02
+confidence: official
+endpoint_family: chat_completions
 sources:
   - url: https://llama.meta.com/docs/model-cards-and-prompt-formats/llama3_3/
     last_verified: 2026-05-02

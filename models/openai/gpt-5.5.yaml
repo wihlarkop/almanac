@@ -26,6 +26,9 @@ pricing:
   currency: USD
   input: 5.00
   output: 30.00
+last_verified: 2026-05-02
+confidence: official
+endpoint_family: responses
 sources:
   - url: https://developers.openai.com/api/docs/models
     last_verified: 2026-05-02

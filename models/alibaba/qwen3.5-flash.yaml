@@ -26,6 +26,9 @@ pricing:
   currency: USD
   input: 0.10
   output: 0.40
+last_verified: 2026-05-03
+confidence: official
+endpoint_family: chat_completions
 sources:
   - url: https://www.alibabacloud.com/help/en/model-studio/models
     last_verified: 2026-05-03

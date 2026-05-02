@@ -25,6 +25,9 @@ pricing:
   currency: USD
   input: 0.50
   output: 1.50
+last_verified: 2026-05-02
+confidence: official
+endpoint_family: chat_completions
 sources:
   - url: https://platform.openai.com/docs/models/gpt-3-5-turbo
     last_verified: 2026-05-02

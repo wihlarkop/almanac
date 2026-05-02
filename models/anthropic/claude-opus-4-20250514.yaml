@@ -26,6 +26,9 @@ pricing:
   currency: USD
   input: 15.00
   output: 75.00
+last_verified: 2026-05-02
+confidence: official
+endpoint_family: custom
 sources:
   - url: https://docs.anthropic.com/en/docs/about-claude/models
     last_verified: 2026-05-02

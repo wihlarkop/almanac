@@ -25,6 +25,9 @@ pricing:
   currency: USD
   input: 0.075
   output: 0.30
+last_verified: 2026-05-02
+confidence: official
+endpoint_family: custom
 sources:
   - url: https://ai.google.dev/gemini-api/docs/models/gemini
     last_verified: 2026-05-02

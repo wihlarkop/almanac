@@ -27,6 +27,9 @@ pricing:
   currency: USD
   input: 0.20
   output: 1.50
+last_verified: 2026-05-03
+confidence: official
+endpoint_family: chat_completions
 sources:
   - url: https://docs.x.ai/docs/models
     last_verified: 2026-05-03

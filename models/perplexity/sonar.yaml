@@ -28,6 +28,9 @@ pricing:
   currency: USD
   input: 1.00
   output: 1.00
+last_verified: 2026-05-03
+confidence: official
+endpoint_family: search
 sources:
   - url: https://docs.perplexity.ai/docs/sonar/models/sonar
     last_verified: 2026-05-03

@@ -25,6 +25,9 @@ pricing:
   currency: USD
   input: 1.10
   output: 4.40
+last_verified: 2026-05-02
+confidence: official
+endpoint_family: responses
 sources:
   - url: https://platform.openai.com/docs/models/o1-mini
     last_verified: 2026-05-02

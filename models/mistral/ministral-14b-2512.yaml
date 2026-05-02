@@ -25,6 +25,9 @@ pricing:
   currency: USD
   input: 0.20
   output: 0.20
+last_verified: 2026-05-02
+confidence: official
+endpoint_family: chat_completions
 sources:
   - url: https://docs.mistral.ai/models/ministral-3-14b-25-12
     last_verified: 2026-05-02

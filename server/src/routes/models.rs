@@ -13,6 +13,14 @@ pub struct ModelFilter {
     provider: Option<String>,
     status: Option<String>,
     capability: Option<String>,
+    limit: Option<usize>,
+    offset: Option<usize>,
+    sort: Option<String>,
+    order: Option<String>,
+    modality_input: Option<String>,
+    modality_output: Option<String>,
+    min_context: Option<u64>,
+    max_input_price: Option<f64>,
 }
 
 pub async fn list_models(
@@ -28,7 +36,7 @@ pub async fn list_models(
         }
     }
 
-    let models: Vec<serde_json::Value> = state
+    let mut models: Vec<serde_json::Value> = state
         .models
         .iter()
         .filter(|m| {
@@ -49,10 +57,41 @@ pub async fn list_models(
                     }
                 }
             }
+            if let Some(ref modalities) = filter.modality_input {
+                for modality in modalities.split(',') {
+                    if !array_contains(&m["modalities"]["input"], modality.trim()) {
+                        return false;
+                    }
+                }
+            }
+            if let Some(ref modalities) = filter.modality_output {
+                for modality in modalities.split(',') {
+                    if !array_contains(&m["modalities"]["output"], modality.trim()) {
+                        return false;
+                    }
+                }
+            }
+            if let Some(min_context) = filter.min_context {
+                if m["context_window"].as_u64().unwrap_or(0) < min_context {
+                    return false;
+                }
+            }
+            if let Some(max_input_price) = filter.max_input_price {
+                if m["pricing"]["input"].as_f64().unwrap_or(f64::MAX) > max_input_price {
+                    return false;
+                }
+            }
             true
         })
         .cloned()
         .collect();
+
+    sort_models(&mut models, filter.sort.as_deref(), filter.order.as_deref());
+
+    let total = models.len();
+    let offset = filter.offset.unwrap_or(0).min(total);
+    let limit = filter.limit.unwrap_or(total.saturating_sub(offset));
+    let data: Vec<_> = models.into_iter().skip(offset).take(limit).collect();
 
     let mut resp_headers = HeaderMap::new();
     resp_headers.insert(
@@ -61,7 +100,18 @@ pub async fn list_models(
     );
     resp_headers.insert("etag", HeaderValue::from_str(&state.etag).unwrap());
 
-    (resp_headers, Json(models)).into_response()
+    (
+        resp_headers,
+        Json(serde_json::json!({
+            "data": data,
+            "meta": {
+                "total": total,
+                "limit": limit,
+                "offset": offset
+            }
+        })),
+    )
+        .into_response()
 }
 
 pub async fn get_model(
@@ -99,4 +149,45 @@ pub async fn get_model(
             (resp_headers, Json(m.clone())).into_response()
         }
     }
+}
+
+fn array_contains(value: &serde_json::Value, expected: &str) -> bool {
+    value
+        .as_array()
+        .map(|items| items.iter().any(|item| item.as_str() == Some(expected)))
+        .unwrap_or(false)
+}
+
+fn sort_models(models: &mut [serde_json::Value], sort: Option<&str>, order: Option<&str>) {
+    let sort = sort.unwrap_or("provider");
+    let descending = order == Some("desc");
+
+    models.sort_by(|a, b| {
+        let ordering = match sort {
+            "context_window" | "max_output_tokens" => a[sort]
+                .as_u64()
+                .unwrap_or(0)
+                .cmp(&b[sort].as_u64().unwrap_or(0)),
+            "status" | "id" | "provider" => a[sort]
+                .as_str()
+                .unwrap_or_default()
+                .cmp(b[sort].as_str().unwrap_or_default()),
+            _ => a["provider"]
+                .as_str()
+                .unwrap_or_default()
+                .cmp(b["provider"].as_str().unwrap_or_default())
+                .then(
+                    a["id"]
+                        .as_str()
+                        .unwrap_or_default()
+                        .cmp(b["id"].as_str().unwrap_or_default()),
+                ),
+        };
+
+        if descending {
+            ordering.reverse()
+        } else {
+            ordering
+        }
+    });
 }

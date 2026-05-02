@@ -26,6 +26,9 @@ pricing:
   currency: USD
   input: 21.00
   output: 168.00
+last_verified: 2026-05-02
+confidence: official
+endpoint_family: responses
 sources:
   - url: https://developers.openai.com/api/docs/models/gpt-5.2-pro
     last_verified: 2026-05-02

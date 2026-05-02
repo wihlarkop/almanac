@@ -73,6 +73,12 @@ Filter models:
 curl "http://localhost:8080/v1/models?provider=openai&status=active&capability=vision"
 ```
 
+Paginate, sort, and filter models:
+
+```bash
+curl "http://localhost:8080/v1/models?limit=20&offset=0&sort=context_window&order=desc&modality_input=image&min_context=100000"
+```
+
 Get one model:
 
 ```bash
@@ -87,11 +93,35 @@ curl -X POST http://localhost:8080/v1/validate \
   -d '{"model":"gpt-4o","provider":"openai"}'
 ```
 
+Validate request compatibility:
+
+```bash
+curl -X POST http://localhost:8080/v1/validate \
+  -H "content-type: application/json" \
+  -d '{
+    "model":"grok-4.20-reasoning",
+    "provider":"xai",
+    "parameters":{"temperature":0.7,"stream":true},
+    "modalities":{"input":["text","image"],"output":["text"]}
+  }'
+```
+
 Suggest likely model IDs:
 
 ```bash
 curl "http://localhost:8080/v1/suggest?q=claude-opus-4.7"
 ```
+
+API documentation:
+
+```bash
+curl http://localhost:8080/openapi.json
+```
+
+Interactive docs are available at:
+
+- `http://localhost:8080/swagger-ui/`
+- `http://localhost:8080/scalar`
 
 ## Model File Format
 
@@ -107,6 +137,9 @@ Each model YAML file includes:
 - modalities
 - capabilities
 - supported, rejected, and deprecated parameters
+- model-level last verified date
+- metadata confidence
+- endpoint family
 - pricing
 - source URLs with verification dates
 
@@ -122,7 +155,8 @@ When adding or changing a model:
 4. Add a `replacement` when deprecating or retiring a model, if a successor exists.
 5. Update `aliases.yaml` only when the alias should resolve to a non-retired canonical model.
 6. Include at least one source URL and `last_verified` date.
-7. Run:
+7. Keep model-level `last_verified`, `confidence`, and `endpoint_family` current.
+8. Run:
 
 ```bash
 cargo run -p almanac-validator

@@ -25,6 +25,9 @@ pricing:
   currency: USD
   input: 0.15
   output: 0.60
+last_verified: 2026-05-02
+confidence: official
+endpoint_family: chat_completions
 sources:
   - url: https://platform.openai.com/docs/models/gpt-4o-mini
     last_verified: 2026-05-02

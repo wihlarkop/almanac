@@ -76,6 +76,14 @@ struct ModelMeta {
     parameters_deprecated: Vec<String>,
 }
 
+#[derive(Debug, PartialEq, Eq)]
+struct FreshnessStats {
+    total_models: usize,
+    stale_models: usize,
+    missing_pricing: usize,
+    missing_last_verified: usize,
+}
+
 fn optional_string(data: &serde_json::Value, key: &str) -> Option<String> {
     data[key]
         .as_str()
@@ -160,6 +168,67 @@ fn validate_no_parameter_overlap(errors: &mut Vec<String>, rel: &str, meta: &Mod
     }
 }
 
+fn parse_ymd(value: &str) -> Option<(i32, u32, u32)> {
+    let mut parts = value.split('-');
+    let year = parts.next()?.parse().ok()?;
+    let month = parts.next()?.parse().ok()?;
+    let day = parts.next()?.parse().ok()?;
+    if parts.next().is_some() || !(1..=12).contains(&month) || !(1..=31).contains(&day) {
+        return None;
+    }
+    Some((year, month, day))
+}
+
+fn days_from_civil(year: i32, month: u32, day: u32) -> i64 {
+    let year = year - i32::from(month <= 2);
+    let era = if year >= 0 { year } else { year - 399 } / 400;
+    let yoe = year - era * 400;
+    let month = month as i32;
+    let day = day as i32;
+    let doy = (153 * (month + if month > 2 { -3 } else { 9 }) + 2) / 5 + day - 1;
+    let doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+    (era * 146097 + doe - 719468) as i64
+}
+
+fn days_between(left: &str, right: &str) -> Option<i64> {
+    let (left_year, left_month, left_day) = parse_ymd(left)?;
+    let (right_year, right_month, right_day) = parse_ymd(right)?;
+    Some(
+        days_from_civil(right_year, right_month, right_day)
+            - days_from_civil(left_year, left_month, left_day),
+    )
+}
+
+fn freshness_stats(
+    models: &[serde_json::Value],
+    today: &str,
+    stale_after_days: i64,
+) -> FreshnessStats {
+    let mut stats = FreshnessStats {
+        total_models: models.len(),
+        stale_models: 0,
+        missing_pricing: 0,
+        missing_last_verified: 0,
+    };
+
+    for model in models {
+        if model["pricing"].as_object().is_none() {
+            stats.missing_pricing += 1;
+        }
+
+        match model["last_verified"].as_str() {
+            None => stats.missing_last_verified += 1,
+            Some(last_verified) => {
+                if days_between(last_verified, today).unwrap_or(0) > stale_after_days {
+                    stats.stale_models += 1;
+                }
+            }
+        }
+    }
+
+    stats
+}
+
 fn main() -> Result<()> {
     let root = repo_root();
     let provider_validator = load_schema(&root.join("schema/provider.schema.json"))?;
@@ -169,6 +238,7 @@ fn main() -> Result<()> {
     let mut provider_ids: HashSet<String> = HashSet::new();
     let mut model_ids: HashMap<String, String> = HashMap::new();
     let mut model_meta: HashMap<String, ModelMeta> = HashMap::new();
+    let mut model_values: Vec<serde_json::Value> = Vec::new();
 
     // --- Providers ---
     println!("Validating providers...");
@@ -287,6 +357,7 @@ fn main() -> Result<()> {
                                     ),
                                 },
                             );
+                            model_values.push(data);
                             println!("  \u{2713} {rel}");
                         }
                     }
@@ -381,6 +452,15 @@ fn main() -> Result<()> {
     let total = provider_count + model_count + alias_count;
 
     println!("\n{}", "\u{2500}".repeat(40));
+    let freshness = freshness_stats(&model_values, "2026-05-03", 90);
+    println!(
+        "Freshness report: {} model(s), {} stale > 90 days, {} missing pricing, {} missing last_verified",
+        freshness.total_models,
+        freshness.stale_models,
+        freshness.missing_pricing,
+        freshness.missing_last_verified
+    );
+
     if errors.is_empty() {
         println!("All {total} file(s) valid");
         Ok(())
@@ -481,5 +561,31 @@ mod tests {
         assert!(errors
             .iter()
             .any(|e| e.contains("top_p") && e.contains("supported and deprecated")));
+    }
+
+    #[test]
+    fn freshness_stats_count_stale_and_missing_pricing_models() {
+        let models = vec![
+            json!({
+                "id": "fresh-priced",
+                "last_verified": "2026-05-01",
+                "pricing": {"currency": "USD", "input": 1.0, "output": 2.0}
+            }),
+            json!({
+                "id": "stale-unpriced",
+                "last_verified": "2025-12-31"
+            }),
+            json!({
+                "id": "missing-date",
+                "pricing": {"currency": "USD", "input": 1.0, "output": 2.0}
+            }),
+        ];
+
+        let stats = freshness_stats(&models, "2026-05-03", 90);
+
+        assert_eq!(stats.total_models, 3);
+        assert_eq!(stats.stale_models, 1);
+        assert_eq!(stats.missing_pricing, 1);
+        assert_eq!(stats.missing_last_verified, 1);
     }
 }

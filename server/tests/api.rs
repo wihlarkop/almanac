@@ -101,6 +101,76 @@ async fn providers_etag_returns_304() {
 }
 
 #[tokio::test]
+async fn openapi_json_returns_spec() {
+    let response = app()
+        .await
+        .oneshot(
+            Request::builder()
+                .uri("/openapi.json")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+    let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+    assert_eq!(json["openapi"], "3.1.0");
+    assert_eq!(json["info"]["title"], "Almanac API");
+    assert!(json["paths"]["/v1/models"].is_object());
+    assert!(json["paths"]["/v1/validate"].is_object());
+}
+
+#[tokio::test]
+async fn swagger_ui_route_serves_html() {
+    let response = app()
+        .await
+        .oneshot(
+            Request::builder()
+                .uri("/swagger-ui/")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+    let content_type = response.headers().get("content-type").unwrap();
+    assert!(content_type.to_str().unwrap().contains("text/html"));
+    let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let html = String::from_utf8(body.to_vec()).unwrap();
+    assert!(html.contains("Swagger UI"));
+}
+
+#[tokio::test]
+async fn scalar_route_serves_html() {
+    let response = app()
+        .await
+        .oneshot(
+            Request::builder()
+                .uri("/scalar")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+    let content_type = response.headers().get("content-type").unwrap();
+    assert!(content_type.to_str().unwrap().contains("text/html"));
+    let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let html = String::from_utf8(body.to_vec()).unwrap();
+    assert!(html.to_lowercase().contains("scalar"));
+}
+
+#[tokio::test]
 async fn models_returns_all_with_cache_headers() {
     let response = app()
         .await
@@ -124,7 +194,9 @@ async fn models_returns_all_with_cache_headers() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
-    assert!(json.as_array().unwrap().len() >= 30);
+    assert!(json["data"].as_array().unwrap().len() >= 30);
+    assert!(json["meta"]["total"].as_u64().unwrap() >= 30);
+    assert_eq!(json["meta"]["offset"], 0);
 }
 
 #[tokio::test]
@@ -145,7 +217,7 @@ async fn models_filter_by_provider() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
-    let models = json.as_array().unwrap();
+    let models = json["data"].as_array().unwrap();
     assert!(!models.is_empty());
     assert!(models
         .iter()
@@ -170,7 +242,7 @@ async fn models_filter_by_status() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
-    let models = json.as_array().unwrap();
+    let models = json["data"].as_array().unwrap();
     assert!(!models.is_empty());
     assert!(models
         .iter()
@@ -195,11 +267,80 @@ async fn models_filter_by_capability() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
-    let models = json.as_array().unwrap();
+    let models = json["data"].as_array().unwrap();
     assert!(!models.is_empty());
     assert!(models
         .iter()
         .all(|m| m["capabilities"]["vision"].as_bool() == Some(true)));
+}
+
+#[tokio::test]
+async fn models_support_limit_offset_and_sorting() {
+    let response = app()
+        .await
+        .oneshot(
+            Request::builder()
+                .uri("/v1/models?limit=3&offset=2&sort=id&order=desc")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+    let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+    let models = json["data"].as_array().unwrap();
+    assert_eq!(models.len(), 3);
+    assert_eq!(json["meta"]["limit"], 3);
+    assert_eq!(json["meta"]["offset"], 2);
+    assert!(json["meta"]["total"].as_u64().unwrap() >= 3);
+
+    let ids: Vec<_> = models
+        .iter()
+        .map(|m| m["id"].as_str().unwrap().to_string())
+        .collect();
+    let mut sorted = ids.clone();
+    sorted.sort_by(|a, b| b.cmp(a));
+    assert_eq!(ids, sorted);
+}
+
+#[tokio::test]
+async fn models_filter_by_modality_context_and_price() {
+    let response = app()
+        .await
+        .oneshot(
+            Request::builder()
+                .uri("/v1/models?modality_input=image&modality_output=text&min_context=100000&max_input_price=1")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+    let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+    let models = json["data"].as_array().unwrap();
+    assert!(!models.is_empty());
+    assert!(models.iter().all(|m| {
+        m["modalities"]["input"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|v| v.as_str() == Some("image"))
+            && m["modalities"]["output"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|v| v.as_str() == Some("text"))
+            && m["context_window"].as_u64().unwrap() >= 100000
+            && m["pricing"]["input"].as_f64().unwrap_or(f64::MAX) <= 1.0
+    }));
 }
 
 #[tokio::test]
@@ -433,6 +574,142 @@ async fn validate_provider_mismatch_returns_error() {
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
     assert_eq!(json["valid"], false);
     assert_eq!(json["errors"][0]["code"], "PROVIDER_MISMATCH");
+}
+
+#[tokio::test]
+async fn validate_rejected_parameter_returns_error() {
+    let body = serde_json::json!({
+        "model": "grok-4.20-reasoning",
+        "parameters": {
+            "reasoning_effort": "high"
+        }
+    });
+    let response = app()
+        .await
+        .oneshot(
+            Request::builder()
+                .method("POST")
+                .uri("/v1/validate")
+                .header("content-type", "application/json")
+                .body(Body::from(body.to_string()))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(json["valid"], false);
+    assert!(json["errors"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|e| e["code"] == "PARAMETER_REJECTED" && e["parameter"] == "reasoning_effort"));
+}
+
+#[tokio::test]
+async fn validate_unsupported_parameter_returns_warning() {
+    let body = serde_json::json!({
+        "model": "sonar",
+        "parameters": {
+            "temperature": 0.3
+        }
+    });
+    let response = app()
+        .await
+        .oneshot(
+            Request::builder()
+                .method("POST")
+                .uri("/v1/validate")
+                .header("content-type", "application/json")
+                .body(Body::from(body.to_string()))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(json["valid"], true);
+    assert!(json["warnings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|e| e["code"] == "PARAMETER_UNSUPPORTED" && e["parameter"] == "temperature"));
+}
+
+#[tokio::test]
+async fn validate_modality_mismatch_returns_error() {
+    let body = serde_json::json!({
+        "model": "sonar",
+        "modalities": {
+            "input": ["image"],
+            "output": ["text"]
+        }
+    });
+    let response = app()
+        .await
+        .oneshot(
+            Request::builder()
+                .method("POST")
+                .uri("/v1/validate")
+                .header("content-type", "application/json")
+                .body(Body::from(body.to_string()))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(json["valid"], false);
+    assert!(json["errors"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|e| e["code"] == "MODALITY_UNSUPPORTED" && e["modality"] == "image"));
+}
+
+#[tokio::test]
+async fn validate_supported_request_shape_stays_valid() {
+    let body = serde_json::json!({
+        "model": "grok-4.20-reasoning",
+        "provider": "xai",
+        "parameters": {
+            "temperature": 0.7,
+            "stream": true
+        },
+        "modalities": {
+            "input": ["text", "image"],
+            "output": ["text"]
+        }
+    });
+    let response = app()
+        .await
+        .oneshot(
+            Request::builder()
+                .method("POST")
+                .uri("/v1/validate")
+                .header("content-type", "application/json")
+                .body(Body::from(body.to_string()))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(json["valid"], true);
+    assert_eq!(json["canonical_id"], "grok-4.20-reasoning");
+    assert!(json["errors"].as_array().unwrap().is_empty());
 }
 
 // ── suggest ───────────────────────────────────────────────────────────────────

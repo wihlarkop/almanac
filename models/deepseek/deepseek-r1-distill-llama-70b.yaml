@@ -26,6 +26,9 @@ pricing:
   currency: USD
   input: 0.23
   output: 0.69
+last_verified: 2026-05-02
+confidence: official
+endpoint_family: chat_completions
 sources:
   - url: https://platform.deepseek.com/api-docs/
     last_verified: 2026-05-02

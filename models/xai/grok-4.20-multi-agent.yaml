@@ -23,6 +23,9 @@ parameters:
   supported: [max_tokens, stream, tools, response_format, seed, reasoning]
   rejected: [logprobs]
   deprecated_for_this_model: []
+last_verified: 2026-05-03
+confidence: official
+endpoint_family: chat_completions
 sources:
   - url: https://docs.x.ai/developers/model-capabilities/text/multi-agent
     last_verified: 2026-05-03

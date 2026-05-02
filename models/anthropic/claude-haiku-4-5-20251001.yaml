@@ -25,6 +25,9 @@ pricing:
   currency: USD
   input: 1.00
   output: 5.00
+last_verified: 2026-05-02
+confidence: official
+endpoint_family: custom
 sources:
   - url: https://platform.claude.com/docs/claude/docs/models-overview
     last_verified: 2026-05-02

@@ -27,6 +27,9 @@ pricing:
   currency: USD
   input: 1.40
   output: 4.40
+last_verified: 2026-05-03
+confidence: official
+endpoint_family: chat_completions
 sources:
   - url: https://docs.z.ai/guides/llm/glm-5.1
     last_verified: 2026-05-03

@@ -11,6 +11,9 @@
     "modalities",
     "capabilities",
     "parameters",
+    "last_verified",
+    "confidence",
+    "endpoint_family",
     "sources"
   ],
   "additionalProperties": false,
@@ -111,6 +114,21 @@
         }
       }
     },
+    "last_verified": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "Date this model entry was last reviewed against its sources."
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["official", "inferred", "community", "unknown"],
+      "description": "Confidence level for the model metadata."
+    },
+    "endpoint_family": {
+      "type": "string",
+      "enum": ["chat_completions", "responses", "custom", "agent", "search"],
+      "description": "Primary API shape used by this provider/model."
+    },
     "pricing": {
       "type": "object",
       "required": ["currency", "input", "output"],
@@ -129,6 +147,39 @@
           "type": "number",
           "minimum": 0,
           "description": "Price per 1M output tokens"
+        },
+        "cached_input": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Cached input price per 1M tokens, when published."
+        },
+        "batch_input": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Batch input price per 1M tokens, when published."
+        },
+        "batch_output": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Batch output price per 1M tokens, when published."
+        },
+        "request_fee": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Flat request fee, when applicable."
+        },
+        "search_fee": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Search fee, when applicable."
+        },
+        "reasoning": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Reasoning-token price per 1M tokens, when separate."
+        },
+        "pricing_notes": {
+          "type": "string"
         }
       }
     },
