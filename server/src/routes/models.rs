@@ -8,6 +8,8 @@ use serde::Deserialize;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
+const DEFAULT_LIMIT: usize = 20;
+
 #[derive(Deserialize, utoipa::IntoParams)]
 pub struct ModelFilter {
     provider: Option<String>,
@@ -21,6 +23,40 @@ pub struct ModelFilter {
     modality_output: Option<String>,
     min_context: Option<u64>,
     max_input_price: Option<f64>,
+}
+
+impl ModelFilter {
+    fn provider(&self) -> Option<&str> {
+        non_empty(self.provider.as_deref())
+    }
+
+    fn status(&self) -> Option<&str> {
+        non_empty(self.status.as_deref())
+    }
+
+    fn capability(&self) -> Option<&str> {
+        non_empty(self.capability.as_deref())
+    }
+
+    fn modality_input(&self) -> Option<&str> {
+        non_empty(self.modality_input.as_deref())
+    }
+
+    fn modality_output(&self) -> Option<&str> {
+        non_empty(self.modality_output.as_deref())
+    }
+
+    fn sort(&self) -> Option<&str> {
+        non_empty(self.sort.as_deref())
+    }
+
+    fn order(&self) -> Option<&str> {
+        non_empty(self.order.as_deref())
+    }
+
+    fn limit(&self) -> Option<usize> {
+        self.limit.filter(|limit| *limit > 0)
+    }
 }
 
 #[utoipa::path(
@@ -49,31 +85,31 @@ pub async fn list_models(
         .models
         .iter()
         .filter(|m| {
-            if let Some(ref p) = filter.provider {
-                if m["provider"].as_str() != Some(p.as_str()) {
+            if let Some(provider) = filter.provider() {
+                if m["provider"].as_str() != Some(provider) {
                     return false;
                 }
             }
-            if let Some(ref s) = filter.status {
-                if m["status"].as_str() != Some(s.as_str()) {
+            if let Some(status) = filter.status() {
+                if m["status"].as_str() != Some(status) {
                     return false;
                 }
             }
-            if let Some(ref caps) = filter.capability {
+            if let Some(caps) = filter.capability() {
                 for cap in caps.split(',') {
                     if m["capabilities"][cap.trim()].as_bool() != Some(true) {
                         return false;
                     }
                 }
             }
-            if let Some(ref modalities) = filter.modality_input {
+            if let Some(modalities) = filter.modality_input() {
                 for modality in modalities.split(',') {
                     if !array_contains(&m["modalities"]["input"], modality.trim()) {
                         return false;
                     }
                 }
             }
-            if let Some(ref modalities) = filter.modality_output {
+            if let Some(modalities) = filter.modality_output() {
                 for modality in modalities.split(',') {
                     if !array_contains(&m["modalities"]["output"], modality.trim()) {
                         return false;
@@ -95,11 +131,14 @@ pub async fn list_models(
         .cloned()
         .collect();
 
-    sort_models(&mut models, filter.sort.as_deref(), filter.order.as_deref());
+    sort_models(&mut models, filter.sort(), filter.order());
 
     let total = models.len();
     let offset = filter.offset.unwrap_or(0).min(total);
-    let limit = filter.limit.unwrap_or(total.saturating_sub(offset));
+    let limit = filter
+        .limit()
+        .unwrap_or(DEFAULT_LIMIT)
+        .min(total.saturating_sub(offset));
     let data: Vec<_> = models.into_iter().skip(offset).take(limit).collect();
 
     let mut resp_headers = HeaderMap::new();
@@ -178,6 +217,13 @@ fn array_contains(value: &serde_json::Value, expected: &str) -> bool {
         .as_array()
         .map(|items| items.iter().any(|item| item.as_str() == Some(expected)))
         .unwrap_or(false)
+}
+
+fn non_empty(value: Option<&str>) -> Option<&str> {
+    value.and_then(|value| {
+        let value = value.trim();
+        if value.is_empty() { None } else { Some(value) }
+    })
 }
 
 fn sort_models(models: &mut [serde_json::Value], sort: Option<&str>, order: Option<&str>) {

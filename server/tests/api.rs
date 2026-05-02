@@ -194,8 +194,34 @@ async fn models_returns_all_with_cache_headers() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
-    assert!(json["data"].as_array().unwrap().len() >= 30);
+    assert_eq!(json["data"].as_array().unwrap().len(), 20);
     assert!(json["meta"]["total"].as_u64().unwrap() >= 30);
+    assert_eq!(json["meta"]["limit"], 20);
+    assert_eq!(json["meta"]["offset"], 0);
+}
+
+#[tokio::test]
+async fn models_ignores_blank_query_filters_and_zero_limit() {
+    let response = app()
+        .await
+        .oneshot(
+            Request::builder()
+                .uri("/v1/models?provider=&status=&capability=&limit=0&offset=0&sort=&order=&modality_input=&modality_output=")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+    let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+
+    assert_eq!(json["data"].as_array().unwrap().len(), 20);
+    assert!(json["meta"]["total"].as_u64().unwrap() >= 30);
+    assert_eq!(json["meta"]["limit"], 20);
     assert_eq!(json["meta"]["offset"], 0);
 }
 

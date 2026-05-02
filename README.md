@@ -83,6 +83,8 @@ Paginate, sort, and filter models:
 curl "http://localhost:8080/v1/models?limit=20&offset=0&sort=context_window&order=desc&modality_input=image&min_context=100000"
 ```
 
+Model list pagination defaults to `limit=20` and `offset=0`.
+
 Get one model:
 
 ```bash
