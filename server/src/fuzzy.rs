@@ -1,5 +1,5 @@
-use strsim::jaro_winkler;
 use crate::state::AppState;
+use strsim::jaro_winkler;
 
 pub fn top_matches(
     state: &AppState,
@@ -12,7 +12,11 @@ pub fn top_matches(
     let mut candidates: Vec<(String, f64)> = state
         .models
         .iter()
-        .filter_map(|m| m["id"].as_str().map(|id| (id.to_string(), jaro_winkler(query, id))))
+        .filter_map(|m| {
+            m["id"]
+                .as_str()
+                .map(|id| (id.to_string(), jaro_winkler(query, id)))
+        })
         .chain(
             state
                 .aliases

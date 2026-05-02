@@ -1,0 +1,27 @@
+id: c4ai-aya-vision-8b
+provider: cohere
+display_name: Aya Vision 8B
+status: retired
+release_date: null
+deprecation_date: 2026-04-04
+sunset_date: 2026-04-04
+replacement: c4ai-aya-vision-32b
+context_window: 16000
+max_output_tokens: 4000
+modalities:
+  input: [text, image]
+  output: [text]
+capabilities:
+  tools: false
+  vision: true
+  streaming: true
+  json_mode: false
+  prompt_caching: false
+  multilingual: true
+parameters:
+  supported: [temperature, max_tokens, stream, stop]
+  rejected: []
+  deprecated_for_this_model: []
+sources:
+  - url: https://docs.cohere.com/v2/docs/models/
+    last_verified: 2026-05-02

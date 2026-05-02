@@ -1,0 +1,30 @@
+id: ministral-14b-2512
+provider: mistral
+display_name: Ministral 3 14B
+status: active
+release_date: 2025-12-02
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 256000
+max_output_tokens: 8192
+modalities:
+  input: [text, image]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  streaming: true
+  json_mode: true
+  prompt_caching: false
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop, tools, response_format]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.20
+  output: 0.20
+sources:
+  - url: https://docs.mistral.ai/models/ministral-3-14b-25-12
+    last_verified: 2026-05-02

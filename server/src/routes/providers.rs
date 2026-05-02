@@ -1,3 +1,4 @@
+use crate::state::AppState;
 use axum::{
     extract::State,
     http::{HeaderMap, HeaderValue, StatusCode},
@@ -5,7 +6,6 @@ use axum::{
 };
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use crate::state::AppState;
 
 pub async fn list_providers(
     State(state): State<Arc<RwLock<AppState>>>,

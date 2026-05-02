@@ -1,0 +1,27 @@
+id: tiny-aya-fire
+provider: cohere
+display_name: Tiny Aya Fire
+status: active
+release_date: null
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 8192
+max_output_tokens: 8192
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+  prompt_caching: false
+  multilingual: true
+parameters:
+  supported: [temperature, max_tokens, stream, stop]
+  rejected: []
+  deprecated_for_this_model: []
+sources:
+  - url: https://docs.cohere.com/v2/docs/models/
+    last_verified: 2026-05-02

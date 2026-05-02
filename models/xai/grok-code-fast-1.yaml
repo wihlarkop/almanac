@@ -1,0 +1,34 @@
+id: grok-code-fast-1
+provider: xai
+display_name: Grok Code Fast 1
+status: active
+release_date: null
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 256000
+max_output_tokens: 128000
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: true
+  vision: false
+  streaming: true
+  json_mode: true
+  prompt_caching: true
+  thinking: false
+  coding: true
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, tools, response_format, seed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.20
+  output: 1.50
+sources:
+  - url: https://docs.x.ai/docs/models
+    last_verified: 2026-05-03
+  - url: https://docs.x.ai/developers/advanced-api-usage/use-with-code-editors
+    last_verified: 2026-05-03

@@ -7,7 +7,7 @@ deprecation_date: null
 sunset_date: null
 replacement: null
 context_window: 400000
-max_output_tokens: 32768
+max_output_tokens: 128000
 modalities:
   input: [text, image]
   output: [text]
@@ -17,9 +17,9 @@ capabilities:
   streaming: true
   json_mode: true
   prompt_caching: true
-  thinking: false
+  thinking: true
 parameters:
-  supported: [temperature, top_p, max_completion_tokens, stream, stop, tools, response_format, seed]
+  supported: [max_completion_tokens, stream, stop, tools, response_format, seed, reasoning_effort]
   rejected: []
   deprecated_for_this_model: []
 pricing:
@@ -27,5 +27,5 @@ pricing:
   input: 0.20
   output: 1.25
 sources:
-  - url: https://developers.openai.com/api/docs/pricing
+  - url: https://developers.openai.com/api/docs/models/gpt-5.4-nano
     last_verified: 2026-05-02

@@ -24,7 +24,12 @@ async fn app() -> axum::Router {
 async fn health_returns_ok() {
     let response = app()
         .await
-        .oneshot(Request::builder().uri("/v1/health").body(Body::empty()).unwrap())
+        .oneshot(
+            Request::builder()
+                .uri("/v1/health")
+                .body(Body::empty())
+                .unwrap(),
+        )
         .await
         .unwrap();
 
@@ -42,7 +47,12 @@ async fn health_returns_ok() {
 async fn providers_returns_array_with_cache_headers() {
     let response = app()
         .await
-        .oneshot(Request::builder().uri("/v1/providers").body(Body::empty()).unwrap())
+        .oneshot(
+            Request::builder()
+                .uri("/v1/providers")
+                .body(Body::empty())
+                .unwrap(),
+        )
         .await
         .unwrap();
 
@@ -66,7 +76,12 @@ async fn providers_etag_returns_304() {
 
     let response = app
         .clone()
-        .oneshot(Request::builder().uri("/v1/providers").body(Body::empty()).unwrap())
+        .oneshot(
+            Request::builder()
+                .uri("/v1/providers")
+                .body(Body::empty())
+                .unwrap(),
+        )
         .await
         .unwrap();
     let etag = response.headers().get("etag").unwrap().clone();
@@ -89,7 +104,12 @@ async fn providers_etag_returns_304() {
 async fn models_returns_all_with_cache_headers() {
     let response = app()
         .await
-        .oneshot(Request::builder().uri("/v1/models").body(Body::empty()).unwrap())
+        .oneshot(
+            Request::builder()
+                .uri("/v1/models")
+                .body(Body::empty())
+                .unwrap(),
+        )
         .await
         .unwrap();
 
@@ -279,7 +299,9 @@ async fn validate_known_active_model() {
         .unwrap();
 
     assert_eq!(response.status(), StatusCode::OK);
-    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX).await.unwrap();
+    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
     assert_eq!(json["valid"], true);
     assert_eq!(json["canonical_id"], "claude-opus-4-7");
@@ -302,7 +324,9 @@ async fn validate_alias_resolves_to_canonical() {
         .await
         .unwrap();
 
-    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX).await.unwrap();
+    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
     assert_eq!(json["valid"], true);
     assert_eq!(json["canonical_id"], "claude-opus-4-7");
@@ -324,15 +348,18 @@ async fn validate_unknown_model_returns_not_found_with_suggestions() {
         .await
         .unwrap();
 
-    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX).await.unwrap();
+    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
     assert_eq!(json["valid"], false);
     assert!(json["canonical_id"].is_null());
     assert_eq!(json["errors"][0]["code"], "MODEL_NOT_FOUND");
     let suggestions = json["errors"][0]["suggestions"].as_array().unwrap();
     assert!(!suggestions.is_empty());
-    assert!(suggestions.iter().any(|s| s.as_str() == Some("claude-opus-4-7")
-        || s.as_str() == Some("claude-opus-4")));
+    assert!(suggestions
+        .iter()
+        .any(|s| s.as_str() == Some("claude-opus-4-7") || s.as_str() == Some("claude-opus-4")));
 }
 
 #[tokio::test]
@@ -351,7 +378,9 @@ async fn validate_retired_model_returns_error() {
         .await
         .unwrap();
 
-    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX).await.unwrap();
+    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
     assert_eq!(json["valid"], false);
     assert_eq!(json["errors"][0]["code"], "MODEL_RETIRED");
@@ -373,7 +402,9 @@ async fn validate_deprecated_model_returns_warning() {
         .await
         .unwrap();
 
-    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX).await.unwrap();
+    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
     assert_eq!(json["valid"], true);
     assert!(json["errors"].as_array().unwrap().is_empty());
@@ -396,7 +427,9 @@ async fn validate_provider_mismatch_returns_error() {
         .await
         .unwrap();
 
-    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX).await.unwrap();
+    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
     assert_eq!(json["valid"], false);
     assert_eq!(json["errors"][0]["code"], "PROVIDER_MISMATCH");
@@ -418,11 +451,15 @@ async fn suggest_returns_ranked_matches() {
         .unwrap();
 
     assert_eq!(response.status(), StatusCode::OK);
-    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX).await.unwrap();
+    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
     let results = json.as_array().unwrap();
     assert!(!results.is_empty());
-    assert!(results.iter().any(|r| r["id"].as_str() == Some("claude-opus-4-7")));
+    assert!(results
+        .iter()
+        .any(|r| r["id"].as_str() == Some("claude-opus-4-7")));
     if results.len() > 1 {
         assert!(results[0]["score"].as_f64() >= results[1]["score"].as_f64());
     }
@@ -442,7 +479,9 @@ async fn suggest_no_matches_returns_empty() {
         .unwrap();
 
     assert_eq!(response.status(), StatusCode::OK);
-    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX).await.unwrap();
+    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
     assert!(json.as_array().unwrap().is_empty());
 }
@@ -460,7 +499,9 @@ async fn suggest_max_five_results() {
         .await
         .unwrap();
 
-    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX).await.unwrap();
+    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
     assert!(json.as_array().unwrap().len() <= 5);
 }

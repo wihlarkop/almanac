@@ -27,5 +27,5 @@ pricing:
   input: 1.74
   output: 3.48
 sources:
-  - url: https://platform.deepseek.com/api-docs/
+  - url: https://api-docs.deepseek.com/quick_start/pricing
     last_verified: 2026-05-02

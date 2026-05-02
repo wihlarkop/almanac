@@ -20,7 +20,12 @@ pub fn load_state(data_dir: &Path) -> Result<AppState> {
     hasher.update(serde_json::to_string(&models)?.as_bytes());
     let etag = format!("\"{}\"", hex::encode(hasher.finalize()));
 
-    Ok(AppState { providers, models, aliases, etag })
+    Ok(AppState {
+        providers,
+        models,
+        aliases,
+        etag,
+    })
 }
 
 fn load_yaml_dir(dir: &Path) -> Result<Vec<serde_json::Value>> {
@@ -38,8 +43,7 @@ fn load_yaml_dir(dir: &Path) -> Result<Vec<serde_json::Value>> {
         .map(|path| {
             let raw = std::fs::read_to_string(&path)
                 .with_context(|| format!("reading {}", path.display()))?;
-            serde_yaml::from_str(&raw)
-                .with_context(|| format!("parsing {}", path.display()))
+            serde_yaml::from_str(&raw).with_context(|| format!("parsing {}", path.display()))
         })
         .collect()
 }
@@ -60,8 +64,7 @@ fn load_yaml_recursive(dir: &Path) -> Result<Vec<serde_json::Value>> {
         .map(|path| {
             let raw = std::fs::read_to_string(&path)
                 .with_context(|| format!("reading {}", path.display()))?;
-            serde_yaml::from_str(&raw)
-                .with_context(|| format!("parsing {}", path.display()))
+            serde_yaml::from_str(&raw).with_context(|| format!("parsing {}", path.display()))
         })
         .collect()
 }
@@ -70,10 +73,10 @@ fn load_aliases(path: &Path) -> Result<HashMap<String, String>> {
     if !path.exists() {
         return Ok(HashMap::new());
     }
-    let raw = std::fs::read_to_string(path)
-        .with_context(|| format!("reading {}", path.display()))?;
-    let val: serde_json::Value = serde_yaml::from_str(&raw)
-        .with_context(|| format!("parsing {}", path.display()))?;
+    let raw =
+        std::fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
+    let val: serde_json::Value =
+        serde_yaml::from_str(&raw).with_context(|| format!("parsing {}", path.display()))?;
     let mut aliases = HashMap::new();
     if let Some(map) = val["aliases"].as_object() {
         for (k, v) in map {

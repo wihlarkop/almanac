@@ -1,0 +1,35 @@
+id: sonar-reasoning-pro
+provider: perplexity
+display_name: Sonar Reasoning Pro
+status: active
+release_date: null
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 128000
+max_output_tokens: 128000
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+  prompt_caching: false
+  thinking: true
+  web_search: true
+  citations: true
+parameters:
+  supported: [max_tokens, stream, search_context_size, reasoning_effort]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 2.00
+  output: 8.00
+sources:
+  - url: https://docs.perplexity.ai/docs/sonar/models/sonar-reasoning-pro
+    last_verified: 2026-05-03
+  - url: https://docs.perplexity.ai/docs/getting-started/pricing
+    last_verified: 2026-05-03

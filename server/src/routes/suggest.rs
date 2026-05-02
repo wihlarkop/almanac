@@ -1,3 +1,4 @@
+use crate::{fuzzy, state::AppState};
 use axum::{
     extract::{Query, State},
     response::Json,
@@ -5,7 +6,6 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use crate::{fuzzy, state::AppState};
 
 #[derive(Deserialize)]
 pub struct SuggestQuery {
@@ -28,7 +28,11 @@ pub async fn suggest(
     let results: Vec<SuggestResult> = fuzzy::top_matches(&state, &params.q, 5, 0.7)
         .into_iter()
         .filter_map(|(id, score)| {
-            let canonical = state.aliases.get(&id).cloned().unwrap_or_else(|| id.clone());
+            let canonical = state
+                .aliases
+                .get(&id)
+                .cloned()
+                .unwrap_or_else(|| id.clone());
             let model = state
                 .models
                 .iter()

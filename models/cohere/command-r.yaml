@@ -1,9 +1,9 @@
 id: command-r
 provider: cohere
 display_name: Command R
-status: active
+status: deprecated
 release_date: 2024-03-11
-deprecation_date: null
+deprecation_date: 2025-09-15
 sunset_date: null
 replacement: command-r-08-2024
 context_window: 128000
@@ -26,5 +26,5 @@ pricing:
   input: 0.15
   output: 0.60
 sources:
-  - url: https://docs.cohere.com/docs/models
+  - url: https://docs.cohere.com/v2/docs/models/
     last_verified: 2026-05-02

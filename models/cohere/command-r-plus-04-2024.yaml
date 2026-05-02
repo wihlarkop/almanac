@@ -1,9 +1,9 @@
 id: command-r-plus-04-2024
 provider: cohere
 display_name: Command R+ (Apr 2024)
-status: active
+status: deprecated
 release_date: 2024-04-04
-deprecation_date: null
+deprecation_date: 2025-09-15
 sunset_date: null
 replacement: command-r-plus-08-2024
 context_window: 128000

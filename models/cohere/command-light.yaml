@@ -1,9 +1,9 @@
 id: command-light
 provider: cohere
 display_name: Command Light
-status: deprecating
+status: deprecated
 release_date: 2021-11-15
-deprecation_date: null
+deprecation_date: 2025-09-15
 sunset_date: null
 replacement: command-r
 context_window: 4096
@@ -26,5 +26,5 @@ pricing:
   input: 0.30
   output: 0.60
 sources:
-  - url: https://docs.cohere.com/docs/models
+  - url: https://docs.cohere.com/v2/docs/models/
     last_verified: 2026-05-02

@@ -1,5 +1,5 @@
 use std::{
-    collections::HashSet,
+    collections::{HashMap, HashSet},
     path::{Path, PathBuf},
 };
 
@@ -63,6 +63,103 @@ fn stem(path: &Path) -> &str {
         .unwrap_or_default()
 }
 
+#[derive(Clone)]
+struct ModelMeta {
+    path: PathBuf,
+    status: String,
+    replacement: Option<String>,
+    release_date: Option<String>,
+    deprecation_date: Option<String>,
+    sunset_date: Option<String>,
+    parameters_supported: Vec<String>,
+    parameters_rejected: Vec<String>,
+    parameters_deprecated: Vec<String>,
+}
+
+fn optional_string(data: &serde_json::Value, key: &str) -> Option<String> {
+    data[key]
+        .as_str()
+        .filter(|s| !s.is_empty())
+        .map(|s| s.to_string())
+}
+
+fn string_array(data: &serde_json::Value, path: &[&str]) -> Vec<String> {
+    let mut current = data;
+    for key in path {
+        current = &current[*key];
+    }
+    current
+        .as_array()
+        .map(|items| {
+            items
+                .iter()
+                .filter_map(|item| item.as_str().map(|s| s.to_string()))
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+fn rel_path(root: &Path, path: &Path) -> String {
+    path.strip_prefix(root)
+        .unwrap_or(path)
+        .display()
+        .to_string()
+}
+
+fn report_error(errors: &mut Vec<String>, message: String) {
+    println!("  \u{2717} {message}");
+    errors.push(message);
+}
+
+fn validate_date_order(
+    errors: &mut Vec<String>,
+    rel: &str,
+    left_name: &str,
+    left: &Option<String>,
+    right_name: &str,
+    right: &Option<String>,
+) {
+    if let (Some(left), Some(right)) = (left, right) {
+        if left > right {
+            report_error(
+                errors,
+                format!("{rel}: {left_name} '{left}' must be on or before {right_name} '{right}'"),
+            );
+        }
+    }
+}
+
+fn validate_no_parameter_overlap(errors: &mut Vec<String>, rel: &str, meta: &ModelMeta) {
+    let supported: HashSet<_> = meta.parameters_supported.iter().collect();
+    let rejected: HashSet<_> = meta.parameters_rejected.iter().collect();
+    let deprecated: HashSet<_> = meta.parameters_deprecated.iter().collect();
+
+    for param in supported.intersection(&rejected) {
+        report_error(
+            errors,
+            format!("{rel}: parameter '{param}' cannot be both supported and rejected"),
+        );
+    }
+
+    for param in supported.intersection(&deprecated) {
+        report_error(
+            errors,
+            format!(
+                "{rel}: parameter '{param}' cannot be both supported and deprecated for this model"
+            ),
+        );
+    }
+
+    for param in rejected.intersection(&deprecated) {
+        report_error(
+            errors,
+            format!(
+                "{rel}: parameter '{param}' cannot be both rejected and deprecated for this model"
+            ),
+        );
+    }
+}
+
 fn main() -> Result<()> {
     let root = repo_root();
     let provider_validator = load_schema(&root.join("schema/provider.schema.json"))?;
@@ -70,6 +167,8 @@ fn main() -> Result<()> {
 
     let mut errors: Vec<String> = Vec::new();
     let mut provider_ids: HashSet<String> = HashSet::new();
+    let mut model_ids: HashMap<String, String> = HashMap::new();
+    let mut model_meta: HashMap<String, ModelMeta> = HashMap::new();
 
     // --- Providers ---
     println!("Validating providers...");
@@ -142,6 +241,52 @@ fn main() -> Result<()> {
                             println!("  \u{2717} {msg}");
                             errors.push(msg);
                         } else {
+                            let provider_dir = path
+                                .parent()
+                                .and_then(|p| p.file_name())
+                                .and_then(|s| s.to_str())
+                                .unwrap_or_default();
+
+                            if provider != provider_dir {
+                                report_error(
+                                    &mut errors,
+                                    format!("{rel}: provider '{provider}' must match directory '{provider_dir}'"),
+                                );
+                                continue;
+                            }
+
+                            if let Some(previous) = model_ids.get(actual) {
+                                report_error(
+                                    &mut errors,
+                                    format!("{rel}: duplicate model id '{actual}' already defined in {previous}"),
+                                );
+                                continue;
+                            }
+
+                            model_ids.insert(actual.to_string(), rel.clone());
+                            model_meta.insert(
+                                actual.to_string(),
+                                ModelMeta {
+                                    path: path.clone(),
+                                    status: data["status"].as_str().unwrap_or_default().to_string(),
+                                    replacement: optional_string(&data, "replacement"),
+                                    release_date: optional_string(&data, "release_date"),
+                                    deprecation_date: optional_string(&data, "deprecation_date"),
+                                    sunset_date: optional_string(&data, "sunset_date"),
+                                    parameters_supported: string_array(
+                                        &data,
+                                        &["parameters", "supported"],
+                                    ),
+                                    parameters_rejected: string_array(
+                                        &data,
+                                        &["parameters", "rejected"],
+                                    ),
+                                    parameters_deprecated: string_array(
+                                        &data,
+                                        &["parameters", "deprecated_for_this_model"],
+                                    ),
+                                },
+                            );
                             println!("  \u{2713} {rel}");
                         }
                     }
@@ -151,13 +296,49 @@ fn main() -> Result<()> {
     }
 
     // --- Aliases ---
+    for meta in model_meta.values() {
+        let rel = rel_path(&root, &meta.path);
+
+        if let Some(replacement) = &meta.replacement {
+            if !model_meta.contains_key(replacement) {
+                report_error(
+                    &mut errors,
+                    format!("{rel}: replacement '{replacement}' does not match any model id"),
+                );
+            }
+        }
+
+        validate_date_order(
+            &mut errors,
+            &rel,
+            "release_date",
+            &meta.release_date,
+            "deprecation_date",
+            &meta.deprecation_date,
+        );
+        validate_date_order(
+            &mut errors,
+            &rel,
+            "deprecation_date",
+            &meta.deprecation_date,
+            "sunset_date",
+            &meta.sunset_date,
+        );
+        validate_date_order(
+            &mut errors,
+            &rel,
+            "release_date",
+            &meta.release_date,
+            "sunset_date",
+            &meta.sunset_date,
+        );
+        validate_no_parameter_overlap(&mut errors, &rel, meta);
+    }
+
     println!("\nValidating aliases...");
     let aliases_path = root.join("aliases.yaml");
     if aliases_path.exists() {
-        let known_ids: HashSet<String> = yaml_files_recursive(&root.join("models"))
-            .iter()
-            .map(|p| stem(p).to_string())
-            .collect();
+        let known_ids: HashSet<String> = model_meta.keys().cloned().collect();
 
         match load_yaml(&aliases_path) {
             Err(e) => {
@@ -174,6 +355,16 @@ fn main() -> Result<()> {
                             let msg = format!("aliases.yaml: '{alias}' \u{2192} '{t}' does not match any model id");
                             println!("  \u{2717} {msg}");
                             errors.push(msg);
+                        } else if let Some(target) = model_meta.get(t) {
+                            if target.status == "retired" {
+                                let msg = format!(
+                                    "aliases.yaml: '{alias}' \u{2192} '{t}' points to retired model"
+                                );
+                                println!("  \u{2717} {msg}");
+                                errors.push(msg);
+                                continue;
+                            }
+                            println!("  \u{2713} {alias} \u{2192} {t}");
                         } else {
                             println!("  \u{2713} {alias} \u{2192} {t}");
                         }
@@ -196,5 +387,99 @@ fn main() -> Result<()> {
     } else {
         println!("Found {} error(s) across {total} file(s)", errors.len());
         std::process::exit(1);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    fn meta_with_parameters(
+        supported: Vec<&str>,
+        rejected: Vec<&str>,
+        deprecated: Vec<&str>,
+    ) -> ModelMeta {
+        ModelMeta {
+            path: PathBuf::from("models/test/test-model.yaml"),
+            status: "active".to_string(),
+            replacement: None,
+            release_date: None,
+            deprecation_date: None,
+            sunset_date: None,
+            parameters_supported: supported.into_iter().map(str::to_string).collect(),
+            parameters_rejected: rejected.into_iter().map(str::to_string).collect(),
+            parameters_deprecated: deprecated.into_iter().map(str::to_string).collect(),
+        }
+    }
+
+    #[test]
+    fn optional_string_ignores_null_and_empty_values() {
+        let data = json!({
+            "missing_date": null,
+            "empty_replacement": "",
+            "replacement": "gpt-4o"
+        });
+
+        assert_eq!(optional_string(&data, "missing_date"), None);
+        assert_eq!(optional_string(&data, "empty_replacement"), None);
+        assert_eq!(
+            optional_string(&data, "replacement"),
+            Some("gpt-4o".to_string())
+        );
+    }
+
+    #[test]
+    fn string_array_reads_nested_string_arrays() {
+        let data = json!({
+            "parameters": {
+                "supported": ["temperature", "top_p"]
+            }
+        });
+
+        assert_eq!(
+            string_array(&data, &["parameters", "supported"]),
+            vec!["temperature".to_string(), "top_p".to_string()]
+        );
+        assert!(string_array(&data, &["parameters", "rejected"]).is_empty());
+    }
+
+    #[test]
+    fn date_order_validation_reports_later_left_date() {
+        let mut errors = Vec::new();
+
+        validate_date_order(
+            &mut errors,
+            "models/test/test-model.yaml",
+            "release_date",
+            &Some("2025-01-02".to_string()),
+            "deprecation_date",
+            &Some("2025-01-01".to_string()),
+        );
+
+        assert_eq!(errors.len(), 1);
+        assert!(errors[0].contains(
+            "release_date '2025-01-02' must be on or before deprecation_date '2025-01-01'"
+        ));
+    }
+
+    #[test]
+    fn parameter_overlap_validation_reports_conflicting_arrays() {
+        let mut errors = Vec::new();
+        let meta = meta_with_parameters(
+            vec!["temperature", "top_p"],
+            vec!["temperature"],
+            vec!["top_p"],
+        );
+
+        validate_no_parameter_overlap(&mut errors, "models/test/test-model.yaml", &meta);
+
+        assert_eq!(errors.len(), 2);
+        assert!(errors
+            .iter()
+            .any(|e| e.contains("temperature") && e.contains("supported and rejected")));
+        assert!(errors
+            .iter()
+            .any(|e| e.contains("top_p") && e.contains("supported and deprecated")));
     }
 }

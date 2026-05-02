@@ -1,8 +1,8 @@
+use crate::{fuzzy, state::AppState};
 use axum::{extract::State, response::Json};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use crate::{fuzzy, state::AppState};
 
 #[derive(Deserialize)]
 pub struct ValidateRequest {

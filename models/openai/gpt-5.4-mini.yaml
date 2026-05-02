@@ -7,7 +7,7 @@ deprecation_date: null
 sunset_date: null
 replacement: null
 context_window: 400000
-max_output_tokens: 65536
+max_output_tokens: 128000
 modalities:
   input: [text, image]
   output: [text]
@@ -27,5 +27,5 @@ pricing:
   input: 0.75
   output: 4.50
 sources:
-  - url: https://developers.openai.com/api/docs/pricing
+  - url: https://openai.com/index/introducing-gpt-5-4-mini-and-nano/
     last_verified: 2026-05-02

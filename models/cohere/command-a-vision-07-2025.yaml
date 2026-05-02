@@ -1,0 +1,26 @@
+id: command-a-vision-07-2025
+provider: cohere
+display_name: Command A Vision (Jul 2025)
+status: active
+release_date: 2025-07-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 128000
+max_output_tokens: 8192
+modalities:
+  input: [text, image]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  streaming: true
+  json_mode: true
+  prompt_caching: false
+parameters:
+  supported: [temperature, max_tokens, stream, stop, tools]
+  rejected: []
+  deprecated_for_this_model: []
+sources:
+  - url: https://docs.cohere.com/docs/models
+    last_verified: 2026-05-02

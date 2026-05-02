@@ -6,7 +6,7 @@ release_date: 2026-01-01
 deprecation_date: null
 sunset_date: null
 replacement: null
-context_window: 400000
+context_window: 1050000
 max_output_tokens: 128000
 modalities:
   input: [text, image]
@@ -27,5 +27,5 @@ pricing:
   input: 30.00
   output: 180.00
 sources:
-  - url: https://developers.openai.com/api/docs/pricing
+  - url: https://developers.openai.com/api/docs/models/gpt-5.4
     last_verified: 2026-05-02

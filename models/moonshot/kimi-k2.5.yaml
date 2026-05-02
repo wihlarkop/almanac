@@ -1,0 +1,34 @@
+id: kimi-k2.5
+provider: moonshot
+display_name: Kimi K2.5
+status: active
+release_date: null
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 262144
+max_output_tokens: 32768
+modalities:
+  input: [text, image, video]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  video: true
+  streaming: true
+  json_mode: true
+  prompt_caching: true
+  thinking: true
+parameters:
+  supported: [max_tokens, stream, tools, response_format, thinking]
+  rejected: [temperature, top_p, n, presence_penalty, frequency_penalty]
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.60
+  output: 3.00
+sources:
+  - url: https://platform.kimi.ai/docs/models
+    last_verified: 2026-05-03
+  - url: https://platform.kimi.ai
+    last_verified: 2026-05-03

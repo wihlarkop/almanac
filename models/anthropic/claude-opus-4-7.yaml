@@ -7,7 +7,7 @@ deprecation_date: null
 sunset_date: null
 replacement: null
 context_window: 200000
-max_output_tokens: 16384
+max_output_tokens: 128000
 modalities:
   input: [text, image]
   output: [text]
@@ -23,8 +23,8 @@ parameters:
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 15.00
-  output: 75.00
+  input: 5.00
+  output: 25.00
 sources:
-  - url: https://docs.anthropic.com/en/docs/about-claude/models
+  - url: https://platform.claude.com/docs/claude/docs/models-overview
     last_verified: 2026-05-02

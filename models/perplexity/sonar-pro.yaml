@@ -1,0 +1,35 @@
+id: sonar-pro
+provider: perplexity
+display_name: Sonar Pro
+status: active
+release_date: null
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 200000
+max_output_tokens: 200000
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+  prompt_caching: false
+  thinking: false
+  web_search: true
+  citations: true
+parameters:
+  supported: [max_tokens, stream, search_context_size, search_type]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 3.00
+  output: 15.00
+sources:
+  - url: https://docs.perplexity.ai/docs/sonar/models/sonar-pro
+    last_verified: 2026-05-03
+  - url: https://docs.perplexity.ai/docs/getting-started/pricing
+    last_verified: 2026-05-03

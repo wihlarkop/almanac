@@ -1,3 +1,4 @@
+use crate::state::AppState;
 use axum::{
     extract::{Path, Query, State},
     http::{HeaderMap, HeaderValue, StatusCode},
@@ -6,7 +7,6 @@ use axum::{
 use serde::Deserialize;
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use crate::state::AppState;
 
 #[derive(Deserialize)]
 pub struct ModelFilter {
@@ -72,8 +72,7 @@ pub async fn get_model(
     let state = state.read().await;
 
     let model = state.models.iter().find(|m| {
-        m["provider"].as_str() == Some(provider.as_str())
-            && m["id"].as_str() == Some(id.as_str())
+        m["provider"].as_str() == Some(provider.as_str()) && m["id"].as_str() == Some(id.as_str())
     });
 
     match model {
