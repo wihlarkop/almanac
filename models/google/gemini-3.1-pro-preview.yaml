@@ -1,0 +1,31 @@
+id: gemini-3.1-pro-preview
+provider: google
+display_name: Gemini 3.1 Pro Preview
+status: retired
+release_date: 2025-12-01
+deprecation_date: 2026-03-01
+sunset_date: 2026-03-09
+replacement: gemini-2.5-pro
+context_window: 2097152
+max_output_tokens: 65536
+modalities:
+  input: [text, image, audio, video]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  streaming: true
+  json_mode: true
+  prompt_caching: false
+  thinking: true
+parameters:
+  supported: [temperature, top_p, max_output_tokens, stream, stop, tools, response_mime_type, thinking_budget]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 2.00
+  output: 12.00
+sources:
+  - url: https://ai.google.dev/gemini-api/docs/models
+    last_verified: 2026-05-02

@@ -1,11 +1,11 @@
 id: gemini-2.0-flash
 provider: google
 display_name: Gemini 2.0 Flash
-status: active
+status: deprecated
 release_date: 2025-02-05
-deprecation_date: null
-sunset_date: null
-replacement: null
+deprecation_date: 2026-03-01
+sunset_date: 2026-06-01
+replacement: gemini-3-flash-preview
 context_window: 1048576
 max_output_tokens: 8192
 modalities:

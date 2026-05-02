@@ -1,0 +1,31 @@
+id: gpt-5.5-pro
+provider: openai
+display_name: GPT-5.5 Pro
+status: active
+release_date: 2026-02-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 400000
+max_output_tokens: 128000
+modalities:
+  input: [text, image]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  streaming: true
+  json_mode: true
+  prompt_caching: true
+  thinking: true
+parameters:
+  supported: [max_completion_tokens, stream, stop, tools, response_format, seed, reasoning_effort]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 30.00
+  output: 180.00
+sources:
+  - url: https://developers.openai.com/api/docs/pricing
+    last_verified: 2026-05-02

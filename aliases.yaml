@@ -12,9 +12,17 @@ aliases:
   o3-latest: o3
   o3-mini-latest: o3-mini
   o4-mini-latest: o4-mini
+  o3-pro-latest: o3-pro
   gpt-4.1-latest: gpt-4.1
   gpt-4.1-mini-latest: gpt-4.1-mini
   gpt-4.1-nano-latest: gpt-4.1-nano
+  gpt-5-latest: gpt-5
+  gpt-5-mini-latest: gpt-5-mini
+  gpt-5-nano-latest: gpt-5-nano
+  gpt-5.4-latest: gpt-5.4
+  gpt-5.4-mini-latest: gpt-5.4-mini
+  gpt-5.4-nano-latest: gpt-5.4-nano
+  gpt-5.5-latest: gpt-5.5
 
   # Anthropic shorthand aliases
   claude-opus-4: claude-opus-4-7
@@ -30,6 +38,7 @@ aliases:
   gemini-2.5-pro-latest: gemini-2.5-pro
   gemini-2.5-flash-latest: gemini-2.5-flash
   gemini-2.0-flash-latest: gemini-2.0-flash
+  gemini-3-flash-latest: gemini-3-flash-preview
   gemini-1.5-pro-latest: gemini-1.5-pro
   gemini-1.5-flash-latest: gemini-1.5-flash
 
