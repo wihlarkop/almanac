@@ -1,7 +1,11 @@
-use crate::state::AppState;
+use crate::{
+    error::ApiError,
+    response::{ApiResponse, catalog_headers},
+    state::AppState,
+};
 use axum::{
-    extract::{Path, Query, State},
-    http::{HeaderMap, HeaderValue, StatusCode},
+    extract::{Path, Query, State, rejection::QueryRejection},
+    http::{HeaderMap, StatusCode},
     response::{IntoResponse, Json},
 };
 use serde::Deserialize;
@@ -65,14 +69,24 @@ impl ModelFilter {
     params(ModelFilter),
     responses(
         (status = 200, description = "Paginated model list"),
+        (status = 400, description = "Invalid query parameters", body = ApiResponse<crate::response::EmptyData>),
         (status = 304, description = "Catalog not modified")
     )
 )]
 pub async fn list_models(
     State(state): State<Arc<RwLock<AppState>>>,
-    Query(filter): Query<ModelFilter>,
+    query: Result<Query<ModelFilter>, QueryRejection>,
     headers: HeaderMap,
 ) -> impl IntoResponse {
+    let Query(filter) = match query {
+        Ok(query) => query,
+        Err(error) => {
+            return ApiError::BadRequest {
+                message: error.body_text(),
+            }
+            .into_response();
+        }
+    };
     let state = state.read().await;
 
     if let Some(inm) = headers.get("if-none-match") {
@@ -141,23 +155,9 @@ pub async fn list_models(
         .min(total.saturating_sub(offset));
     let data: Vec<_> = models.into_iter().skip(offset).take(limit).collect();
 
-    let mut resp_headers = HeaderMap::new();
-    resp_headers.insert(
-        "cache-control",
-        HeaderValue::from_static("public, max-age=300"),
-    );
-    resp_headers.insert("etag", HeaderValue::from_str(&state.etag).unwrap());
-
     (
-        resp_headers,
-        Json(serde_json::json!({
-            "data": data,
-            "meta": {
-                "total": total,
-                "limit": limit,
-                "offset": offset
-            }
-        })),
+        catalog_headers(&state.etag),
+        Json(ApiResponse::paginated(data, limit, offset, total)),
     )
         .into_response()
 }
@@ -172,7 +172,7 @@ pub async fn list_models(
     responses(
         (status = 200, description = "Model metadata"),
         (status = 304, description = "Catalog not modified"),
-        (status = 404, description = "Model not found")
+        (status = 404, description = "Model not found", body = ApiResponse<crate::response::EmptyData>)
     )
 )]
 pub async fn get_model(
@@ -187,27 +187,18 @@ pub async fn get_model(
     });
 
     match model {
-        None => (
-            StatusCode::NOT_FOUND,
-            Json(serde_json::json!({
-                "error": "not found",
-                "code": "MODEL_NOT_FOUND"
-            })),
-        )
-            .into_response(),
+        None => ApiError::ModelNotFound { provider, id }.into_response(),
         Some(m) => {
             if let Some(inm) = headers.get("if-none-match") {
                 if inm.as_bytes() == state.etag.as_bytes() {
                     return StatusCode::NOT_MODIFIED.into_response();
                 }
             }
-            let mut resp_headers = HeaderMap::new();
-            resp_headers.insert(
-                "cache-control",
-                HeaderValue::from_static("public, max-age=300"),
-            );
-            resp_headers.insert("etag", HeaderValue::from_str(&state.etag).unwrap());
-            (resp_headers, Json(m.clone())).into_response()
+            (
+                catalog_headers(&state.etag),
+                Json(ApiResponse::ok(m.clone())),
+            )
+                .into_response()
         }
     }
 }

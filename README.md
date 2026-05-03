@@ -51,6 +51,23 @@ Optional environment variables:
 The server logs startup, catalog loading, request traces, and shutdown events. It handles Ctrl+C
 and SIGTERM as graceful shutdown signals.
 
+Successful JSON responses use this envelope:
+
+```json
+{
+  "success": true,
+  "message": "OK",
+  "data": {},
+  "meta": {
+    "timestamp": "2026-05-02T21:12:00Z"
+  },
+  "error": null
+}
+```
+
+Paginated responses add `limit`, `offset`, and `total_data` to `meta`. Error responses use the
+same envelope with `success=false`, `data=null`, and an `error.code` value.
+
 ## API Examples
 
 Health:

@@ -20,6 +20,13 @@ async fn app() -> axum::Router {
     routes::router(shared)
 }
 
+fn assert_success_envelope(json: &serde_json::Value) {
+    assert_eq!(json["success"], true);
+    assert_eq!(json["message"], "OK");
+    assert!(json["error"].is_null());
+    assert!(json["meta"]["timestamp"].as_str().is_some());
+}
+
 #[tokio::test]
 async fn health_returns_ok() {
     let response = app()
@@ -39,8 +46,9 @@ async fn health_returns_ok() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
-    assert_eq!(json["status"], "ok");
-    assert_eq!(json["version"], "0.1.0");
+    assert_success_envelope(&json);
+    assert_eq!(json["data"]["status"], "ok");
+    assert_eq!(json["data"]["version"], "0.1.0");
 }
 
 #[tokio::test]
@@ -67,7 +75,8 @@ async fn providers_returns_array_with_cache_headers() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
-    assert!(json.as_array().unwrap().len() >= 3);
+    assert_success_envelope(&json);
+    assert!(json["data"].as_array().unwrap().len() >= 3);
 }
 
 #[tokio::test]
@@ -194,8 +203,9 @@ async fn models_returns_all_with_cache_headers() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+    assert_success_envelope(&json);
     assert_eq!(json["data"].as_array().unwrap().len(), 20);
-    assert!(json["meta"]["total"].as_u64().unwrap() >= 30);
+    assert!(json["meta"]["total_data"].as_u64().unwrap() >= 30);
     assert_eq!(json["meta"]["limit"], 20);
     assert_eq!(json["meta"]["offset"], 0);
 }
@@ -219,10 +229,36 @@ async fn models_ignores_blank_query_filters_and_zero_limit() {
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
 
+    assert_success_envelope(&json);
     assert_eq!(json["data"].as_array().unwrap().len(), 20);
-    assert!(json["meta"]["total"].as_u64().unwrap() >= 30);
+    assert!(json["meta"]["total_data"].as_u64().unwrap() >= 30);
     assert_eq!(json["meta"]["limit"], 20);
     assert_eq!(json["meta"]["offset"], 0);
+}
+
+#[tokio::test]
+async fn models_invalid_query_returns_error_envelope() {
+    let response = app()
+        .await
+        .oneshot(
+            Request::builder()
+                .uri("/v1/models?limit=not-a-number")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+    let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+
+    assert_eq!(json["success"], false);
+    assert!(json["data"].is_null());
+    assert_eq!(json["error"]["code"], "BAD_REQUEST");
+    assert!(json["meta"]["timestamp"].as_str().is_some());
 }
 
 #[tokio::test]
@@ -243,6 +279,7 @@ async fn models_filter_by_provider() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+    assert_success_envelope(&json);
     let models = json["data"].as_array().unwrap();
     assert!(!models.is_empty());
     assert!(
@@ -270,6 +307,7 @@ async fn models_filter_by_status() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+    assert_success_envelope(&json);
     let models = json["data"].as_array().unwrap();
     assert!(!models.is_empty());
     assert!(
@@ -297,6 +335,7 @@ async fn models_filter_by_capability() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+    assert_success_envelope(&json);
     let models = json["data"].as_array().unwrap();
     assert!(!models.is_empty());
     assert!(
@@ -324,11 +363,12 @@ async fn models_support_limit_offset_and_sorting() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+    assert_success_envelope(&json);
     let models = json["data"].as_array().unwrap();
     assert_eq!(models.len(), 3);
     assert_eq!(json["meta"]["limit"], 3);
     assert_eq!(json["meta"]["offset"], 2);
-    assert!(json["meta"]["total"].as_u64().unwrap() >= 3);
+    assert!(json["meta"]["total_data"].as_u64().unwrap() >= 3);
 
     let ids: Vec<_> = models
         .iter()
@@ -357,6 +397,7 @@ async fn models_filter_by_modality_context_and_price() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+    assert_success_envelope(&json);
     let models = json["data"].as_array().unwrap();
     assert!(!models.is_empty());
     assert!(models.iter().all(|m| {
@@ -398,8 +439,9 @@ async fn get_model_found() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
-    assert_eq!(json["id"], "claude-opus-4-7");
-    assert_eq!(json["provider"], "anthropic");
+    assert_success_envelope(&json);
+    assert_eq!(json["data"]["id"], "claude-opus-4-7");
+    assert_eq!(json["data"]["provider"], "anthropic");
 }
 
 #[tokio::test]
@@ -420,7 +462,13 @@ async fn get_model_not_found() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
-    assert_eq!(json["code"], "MODEL_NOT_FOUND");
+    assert_eq!(json["success"], false);
+    assert!(json["data"].is_null());
+    assert_eq!(json["message"], "model not found");
+    assert_eq!(json["error"]["code"], "MODEL_NOT_FOUND");
+    assert_eq!(json["error"]["details"]["provider"], "openai");
+    assert_eq!(json["error"]["details"]["id"], "does-not-exist");
+    assert!(json["meta"]["timestamp"].as_str().is_some());
 }
 
 #[tokio::test]
@@ -476,9 +524,37 @@ async fn validate_known_active_model() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
-    assert_eq!(json["valid"], true);
-    assert_eq!(json["canonical_id"], "claude-opus-4-7");
-    assert!(json["errors"].as_array().unwrap().is_empty());
+    assert_success_envelope(&json);
+    assert_eq!(json["data"]["valid"], true);
+    assert_eq!(json["data"]["canonical_id"], "claude-opus-4-7");
+    assert!(json["data"]["errors"].as_array().unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn validate_invalid_json_returns_error_envelope() {
+    let response = app()
+        .await
+        .oneshot(
+            Request::builder()
+                .method("POST")
+                .uri("/v1/validate")
+                .header("content-type", "application/json")
+                .body(Body::from("{"))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+
+    assert_eq!(json["success"], false);
+    assert!(json["data"].is_null());
+    assert_eq!(json["error"]["code"], "BAD_REQUEST");
+    assert!(json["meta"]["timestamp"].as_str().is_some());
 }
 
 #[tokio::test]
@@ -501,8 +577,9 @@ async fn validate_alias_resolves_to_canonical() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
-    assert_eq!(json["valid"], true);
-    assert_eq!(json["canonical_id"], "claude-opus-4-7");
+    assert_success_envelope(&json);
+    assert_eq!(json["data"]["valid"], true);
+    assert_eq!(json["data"]["canonical_id"], "claude-opus-4-7");
 }
 
 #[tokio::test]
@@ -525,10 +602,11 @@ async fn validate_unknown_model_returns_not_found_with_suggestions() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
-    assert_eq!(json["valid"], false);
-    assert!(json["canonical_id"].is_null());
-    assert_eq!(json["errors"][0]["code"], "MODEL_NOT_FOUND");
-    let suggestions = json["errors"][0]["suggestions"].as_array().unwrap();
+    assert_success_envelope(&json);
+    assert_eq!(json["data"]["valid"], false);
+    assert!(json["data"]["canonical_id"].is_null());
+    assert_eq!(json["data"]["errors"][0]["code"], "MODEL_NOT_FOUND");
+    let suggestions = json["data"]["errors"][0]["suggestions"].as_array().unwrap();
     assert!(!suggestions.is_empty());
     assert!(
         suggestions
@@ -557,8 +635,9 @@ async fn validate_retired_model_returns_error() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
-    assert_eq!(json["valid"], false);
-    assert_eq!(json["errors"][0]["code"], "MODEL_RETIRED");
+    assert_success_envelope(&json);
+    assert_eq!(json["data"]["valid"], false);
+    assert_eq!(json["data"]["errors"][0]["code"], "MODEL_RETIRED");
 }
 
 #[tokio::test]
@@ -581,9 +660,10 @@ async fn validate_deprecated_model_returns_warning() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
-    assert_eq!(json["valid"], true);
-    assert!(json["errors"].as_array().unwrap().is_empty());
-    assert_eq!(json["warnings"][0]["code"], "MODEL_DEPRECATED");
+    assert_success_envelope(&json);
+    assert_eq!(json["data"]["valid"], true);
+    assert!(json["data"]["errors"].as_array().unwrap().is_empty());
+    assert_eq!(json["data"]["warnings"][0]["code"], "MODEL_DEPRECATED");
 }
 
 #[tokio::test]
@@ -606,8 +686,9 @@ async fn validate_provider_mismatch_returns_error() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
-    assert_eq!(json["valid"], false);
-    assert_eq!(json["errors"][0]["code"], "PROVIDER_MISMATCH");
+    assert_success_envelope(&json);
+    assert_eq!(json["data"]["valid"], false);
+    assert_eq!(json["data"]["errors"][0]["code"], "PROVIDER_MISMATCH");
 }
 
 #[tokio::test]
@@ -635,9 +716,10 @@ async fn validate_rejected_parameter_returns_error() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
-    assert_eq!(json["valid"], false);
+    assert_success_envelope(&json);
+    assert_eq!(json["data"]["valid"], false);
     assert!(
-        json["errors"]
+        json["data"]["errors"]
             .as_array()
             .unwrap()
             .iter()
@@ -670,9 +752,10 @@ async fn validate_unsupported_parameter_returns_warning() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
-    assert_eq!(json["valid"], true);
+    assert_success_envelope(&json);
+    assert_eq!(json["data"]["valid"], true);
     assert!(
-        json["warnings"]
+        json["data"]["warnings"]
             .as_array()
             .unwrap()
             .iter()
@@ -706,9 +789,10 @@ async fn validate_modality_mismatch_returns_error() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
-    assert_eq!(json["valid"], false);
+    assert_success_envelope(&json);
+    assert_eq!(json["data"]["valid"], false);
     assert!(
-        json["errors"]
+        json["data"]["errors"]
             .as_array()
             .unwrap()
             .iter()
@@ -747,9 +831,10 @@ async fn validate_supported_request_shape_stays_valid() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
-    assert_eq!(json["valid"], true);
-    assert_eq!(json["canonical_id"], "grok-4.20-reasoning");
-    assert!(json["errors"].as_array().unwrap().is_empty());
+    assert_success_envelope(&json);
+    assert_eq!(json["data"]["valid"], true);
+    assert_eq!(json["data"]["canonical_id"], "grok-4.20-reasoning");
+    assert!(json["data"]["errors"].as_array().unwrap().is_empty());
 }
 
 // ── suggest ───────────────────────────────────────────────────────────────────
@@ -772,7 +857,8 @@ async fn suggest_returns_ranked_matches() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
-    let results = json.as_array().unwrap();
+    assert_success_envelope(&json);
+    let results = json["data"].as_array().unwrap();
     assert!(!results.is_empty());
     assert!(
         results
@@ -782,6 +868,31 @@ async fn suggest_returns_ranked_matches() {
     if results.len() > 1 {
         assert!(results[0]["score"].as_f64() >= results[1]["score"].as_f64());
     }
+}
+
+#[tokio::test]
+async fn suggest_missing_query_returns_error_envelope() {
+    let response = app()
+        .await
+        .oneshot(
+            Request::builder()
+                .uri("/v1/suggest")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+
+    assert_eq!(json["success"], false);
+    assert!(json["data"].is_null());
+    assert_eq!(json["error"]["code"], "BAD_REQUEST");
+    assert!(json["meta"]["timestamp"].as_str().is_some());
 }
 
 #[tokio::test]
@@ -802,7 +913,8 @@ async fn suggest_no_matches_returns_empty() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
-    assert!(json.as_array().unwrap().is_empty());
+    assert_success_envelope(&json);
+    assert!(json["data"].as_array().unwrap().is_empty());
 }
 
 #[tokio::test]
@@ -822,5 +934,6 @@ async fn suggest_max_five_results() {
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
-    assert!(json.as_array().unwrap().len() <= 5);
+    assert_success_envelope(&json);
+    assert!(json["data"].as_array().unwrap().len() <= 5);
 }

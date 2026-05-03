@@ -1,4 +1,4 @@
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 use sha2::{Digest, Sha256};
 use std::{collections::HashMap, path::Path};
 use walkdir::WalkDir;
@@ -11,9 +11,17 @@ pub struct AppState {
 }
 
 pub fn load_state(data_dir: &Path) -> Result<AppState> {
-    let providers = load_yaml_dir(&data_dir.join("providers"))?;
-    let models = load_yaml_recursive(&data_dir.join("models"))?;
-    let aliases = load_aliases(&data_dir.join("aliases.yaml"))?;
+    let providers_dir = data_dir.join("providers");
+    let models_dir = data_dir.join("models");
+    let aliases_path = data_dir.join("aliases.yaml");
+
+    ensure_dir(&providers_dir)?;
+    ensure_dir(&models_dir)?;
+    ensure_file(&aliases_path)?;
+
+    let providers = load_yaml_dir(&providers_dir)?;
+    let models = load_yaml_recursive(&models_dir)?;
+    let aliases = load_aliases(&aliases_path)?;
 
     let mut hasher = Sha256::new();
     hasher.update(serde_json::to_string(&providers)?.as_bytes());
@@ -26,6 +34,32 @@ pub fn load_state(data_dir: &Path) -> Result<AppState> {
         aliases,
         etag,
     })
+}
+
+fn ensure_dir(path: &Path) -> Result<()> {
+    if !path.exists() {
+        bail!(
+            "required catalog directory '{}' does not exist",
+            path.display()
+        );
+    }
+    if !path.is_dir() {
+        bail!(
+            "required catalog path '{}' is not a directory",
+            path.display()
+        );
+    }
+    Ok(())
+}
+
+fn ensure_file(path: &Path) -> Result<()> {
+    if !path.exists() {
+        bail!("required catalog file '{}' does not exist", path.display());
+    }
+    if !path.is_file() {
+        bail!("required catalog path '{}' is not a file", path.display());
+    }
+    Ok(())
 }
 
 fn load_yaml_dir(dir: &Path) -> Result<Vec<serde_json::Value>> {
@@ -86,4 +120,30 @@ fn load_aliases(path: &Path) -> Result<HashMap<String, String>> {
         }
     }
     Ok(aliases)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    #[test]
+    fn load_state_fails_when_required_catalog_paths_are_missing() {
+        let data_dir = std::env::temp_dir().join(format!(
+            "almanac-missing-catalog-{}",
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        std::fs::create_dir(&data_dir).unwrap();
+
+        let err = match load_state(&data_dir) {
+            Ok(_) => panic!("load_state should fail for missing catalog paths"),
+            Err(error) => error,
+        };
+
+        assert!(err.to_string().contains("required catalog directory"));
+        std::fs::remove_dir(&data_dir).unwrap();
+    }
 }

@@ -32,7 +32,13 @@ async fn main() -> Result<()> {
         let data_dir_reload = config.data_dir.clone();
         tokio::spawn(async move {
             use tokio::signal::unix::{SignalKind, signal};
-            let mut stream = signal(SignalKind::hangup()).expect("SIGHUP handler failed");
+            let mut stream = match signal(SignalKind::hangup()) {
+                Ok(stream) => stream,
+                Err(error) => {
+                    tracing::error!(%error, "failed to install SIGHUP reload handler");
+                    return;
+                }
+            };
             loop {
                 stream.recv().await;
                 tracing::info!(

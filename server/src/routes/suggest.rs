@@ -1,6 +1,6 @@
-use crate::{fuzzy, state::AppState};
+use crate::{error::ApiError, fuzzy, response::ApiResponse, state::AppState};
 use axum::{
-    extract::{Query, State},
+    extract::{Query, State, rejection::QueryRejection},
     response::Json,
 };
 use serde::{Deserialize, Serialize};
@@ -23,12 +23,18 @@ pub struct SuggestResult {
     get,
     path = "/v1/suggest",
     params(SuggestQuery),
-    responses((status = 200, description = "Ranked suggestions", body = [SuggestResult]))
+    responses(
+        (status = 200, description = "Ranked suggestions", body = ApiResponse<Vec<SuggestResult>>),
+        (status = 400, description = "Invalid query parameters", body = ApiResponse<crate::response::EmptyData>)
+    )
 )]
 pub async fn suggest(
     State(state): State<Arc<RwLock<AppState>>>,
-    Query(params): Query<SuggestQuery>,
-) -> Json<Vec<SuggestResult>> {
+    query: Result<Query<SuggestQuery>, QueryRejection>,
+) -> Result<Json<ApiResponse<Vec<SuggestResult>>>, ApiError> {
+    let Query(params) = query.map_err(|error| ApiError::BadRequest {
+        message: error.body_text(),
+    })?;
     let state = state.read().await;
 
     let results: Vec<SuggestResult> = fuzzy::top_matches(&state, &params.q, 5, 0.7)
@@ -52,5 +58,5 @@ pub async fn suggest(
         })
         .collect();
 
-    Json(results)
+    Ok(Json(ApiResponse::ok(results)))
 }

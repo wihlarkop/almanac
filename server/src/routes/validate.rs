@@ -1,5 +1,8 @@
-use crate::{fuzzy, state::AppState};
-use axum::{extract::State, response::Json};
+use crate::{error::ApiError, fuzzy, response::ApiResponse, state::AppState};
+use axum::{
+    extract::{State, rejection::JsonRejection},
+    response::Json,
+};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, sync::Arc};
 use tokio::sync::RwLock;
@@ -44,12 +47,18 @@ pub struct ValidationIssue {
     post,
     path = "/v1/validate",
     request_body = ValidateRequest,
-    responses((status = 200, description = "Validation result", body = ValidateResponse))
+    responses(
+        (status = 200, description = "Validation result", body = ApiResponse<ValidateResponse>),
+        (status = 400, description = "Invalid JSON body", body = ApiResponse<crate::response::EmptyData>)
+    )
 )]
 pub async fn validate(
     State(state): State<Arc<RwLock<AppState>>>,
-    Json(req): Json<ValidateRequest>,
-) -> Json<ValidateResponse> {
+    payload: Result<Json<ValidateRequest>, JsonRejection>,
+) -> Result<Json<ApiResponse<ValidateResponse>>, ApiError> {
+    let Json(req) = payload.map_err(|error| ApiError::BadRequest {
+        message: error.body_text(),
+    })?;
     let state = state.read().await;
 
     let model = state
@@ -151,12 +160,12 @@ pub async fn validate(
         }
     };
 
-    Json(ValidateResponse {
+    Ok(Json(ApiResponse::ok(ValidateResponse {
         valid: errors.is_empty(),
         canonical_id,
         errors,
         warnings,
-    })
+    })))
 }
 
 fn string_set(model: &serde_json::Value, path: &[&str]) -> Vec<String> {

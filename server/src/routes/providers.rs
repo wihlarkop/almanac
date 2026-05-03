@@ -1,7 +1,10 @@
-use crate::state::AppState;
+use crate::{
+    response::{ApiResponse, catalog_headers},
+    state::AppState,
+};
 use axum::{
     extract::State,
-    http::{HeaderMap, HeaderValue, StatusCode},
+    http::{HeaderMap, StatusCode},
     response::{IntoResponse, Json},
 };
 use std::sync::Arc;
@@ -27,12 +30,9 @@ pub async fn list_providers(
         }
     }
 
-    let mut resp_headers = HeaderMap::new();
-    resp_headers.insert(
-        "cache-control",
-        HeaderValue::from_static("public, max-age=300"),
-    );
-    resp_headers.insert("etag", HeaderValue::from_str(&state.etag).unwrap());
-
-    (resp_headers, Json(state.providers.clone())).into_response()
+    (
+        catalog_headers(&state.etag),
+        Json(ApiResponse::ok(state.providers.clone())),
+    )
+        .into_response()
 }
