@@ -259,6 +259,21 @@ async fn openapi_json_returns_spec() {
     assert!(json["paths"]["/api/v1/validate"].is_object());
     assert!(json["paths"]["/api/v1/catalog/health"].is_object());
     assert!(json["paths"]["/v1/models"].is_null());
+    assert!(
+        json["paths"]["/api/v1/health"]["get"]["responses"]["200"]["content"]
+            ["application/json"]["examples"]
+            .is_object()
+    );
+    assert!(
+        json["paths"]["/api/v1/validate"]["post"]["responses"]["200"]["content"]
+            ["application/json"]["examples"]
+            .is_object()
+    );
+    assert!(
+        json["paths"]["/api/v1/suggest"]["get"]["responses"]["200"]["content"]["application/json"]
+            ["examples"]
+            .is_object()
+    );
     assert!(json["components"]["schemas"]["Model"].is_object());
     assert!(json["components"]["schemas"]["Provider"].is_object());
     assert!(json["components"]["schemas"]["ApiResponse_Model"].is_object());

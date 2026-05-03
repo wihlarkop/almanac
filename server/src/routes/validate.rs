@@ -56,7 +56,28 @@ pub struct ValidationIssue {
     path = "/api/v1/validate",
     request_body = ValidateRequest,
     responses(
-        (status = 200, description = "Validation result", body = ApiResponse<ValidateResponse>),
+        (
+            status = 200,
+            description = "Validation result",
+            body = ApiResponse<ValidateResponse>,
+            examples(
+                ("valid" = (
+                    summary = "Known model",
+                    value = json!({
+                        "success": true,
+                        "message": "OK",
+                        "data": {
+                            "valid": true,
+                            "canonical_id": "gpt-4o",
+                            "errors": [],
+                            "warnings": []
+                        },
+                        "meta": { "timestamp": "2026-05-03T00:00:00Z" },
+                        "error": null
+                    })
+                ))
+            )
+        ),
         (status = 400, description = "Invalid JSON body", body = ApiResponse<crate::response::EmptyData>)
     )
 )]

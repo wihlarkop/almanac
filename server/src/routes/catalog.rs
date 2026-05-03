@@ -33,7 +33,33 @@ pub struct CatalogHealth {
     get,
     path = "/api/v1/catalog/health",
     responses(
-        (status = 200, description = "Catalog health summary", body = ApiResponse<CatalogHealth>),
+        (
+            status = 200,
+            description = "Catalog health summary",
+            body = ApiResponse<CatalogHealth>,
+            examples(
+                ("summary" = (
+                    summary = "Catalog health",
+                    value = json!({
+                        "success": true,
+                        "message": "OK",
+                        "data": {
+                            "total_models": 42,
+                            "total_providers": 5,
+                            "total_aliases": 12,
+                            "status_counts": { "active": 35, "deprecated": 7 },
+                            "missing_pricing_count": 1,
+                            "stale_verification_count": 3,
+                            "oldest_last_verified": "2026-02-01",
+                            "newest_last_verified": "2026-05-02",
+                            "etag": "\"catalog-example\""
+                        },
+                        "meta": { "timestamp": "2026-05-03T00:00:00Z" },
+                        "error": null
+                    })
+                ))
+            )
+        ),
         (status = 304, description = "Catalog not modified")
     )
 )]

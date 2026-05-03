@@ -17,7 +17,30 @@ use tokio::sync::RwLock;
     get,
     path = "/api/v1/providers",
     responses(
-        (status = 200, description = "Provider list", body = ApiResponse<Vec<Provider>>),
+        (
+            status = 200,
+            description = "Provider list",
+            body = ApiResponse<Vec<Provider>>,
+            examples(
+                ("providers" = (
+                    summary = "Provider list",
+                    value = json!({
+                        "success": true,
+                        "message": "OK",
+                        "data": [
+                            {
+                                "id": "openai",
+                                "display_name": "OpenAI",
+                                "website": "https://openai.com",
+                                "api_docs": "https://platform.openai.com/docs"
+                            }
+                        ],
+                        "meta": { "timestamp": "2026-05-03T00:00:00Z" },
+                        "error": null
+                    })
+                ))
+            )
+        ),
         (status = 304, description = "Catalog not modified")
     )
 )]

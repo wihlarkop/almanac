@@ -31,7 +31,31 @@ pub struct SuggestResult {
     path = "/api/v1/suggest",
     params(SuggestQuery),
     responses(
-        (status = 200, description = "Ranked suggestions", body = ApiResponse<Vec<SuggestResult>>),
+        (
+            status = 200,
+            description = "Ranked suggestions",
+            body = ApiResponse<Vec<SuggestResult>>,
+            examples(
+                ("alias" = (
+                    summary = "Alias match",
+                    value = json!({
+                        "success": true,
+                        "message": "OK",
+                        "data": [
+                            {
+                                "id": "claude-opus-4-7",
+                                "provider": "anthropic",
+                                "score": 1.0,
+                                "matched": "claude-opus-4",
+                                "match_type": "alias"
+                            }
+                        ],
+                        "meta": { "timestamp": "2026-05-03T00:00:00Z" },
+                        "error": null
+                    })
+                ))
+            )
+        ),
         (status = 400, description = "Invalid query parameters", body = ApiResponse<crate::response::EmptyData>)
     )
 )]

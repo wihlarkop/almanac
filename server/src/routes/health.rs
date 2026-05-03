@@ -12,7 +12,23 @@ pub struct HealthData {
 #[utoipa::path(
     get,
     path = "/api/v1/health",
-    responses((status = 200, description = "Server health status", body = ApiResponse<HealthData>))
+    responses((
+        status = 200,
+        description = "Server health status",
+        body = ApiResponse<HealthData>,
+        examples(
+            ("ok" = (
+                summary = "Healthy server",
+                value = json!({
+                    "success": true,
+                    "message": "OK",
+                    "data": { "status": "ok", "version": "0.1.0" },
+                    "meta": { "timestamp": "2026-05-03T00:00:00Z" },
+                    "error": null
+                })
+            ))
+        )
+    ))
 )]
 pub async fn health(
     Extension(context): Extension<RequestContext>,

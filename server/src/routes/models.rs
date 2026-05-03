@@ -71,7 +71,45 @@ impl ModelFilter {
     path = "/api/v1/models",
     params(ModelFilter),
     responses(
-        (status = 200, description = "Paginated model list", body = ApiResponse<Vec<Model>>),
+        (
+            status = 200,
+            description = "Paginated model list",
+            body = ApiResponse<Vec<Model>>,
+            examples(
+                ("models" = (
+                    summary = "Model page",
+                    value = json!({
+                        "success": true,
+                        "message": "OK",
+                        "data": [
+                            {
+                                "id": "gpt-4o",
+                                "provider": "openai",
+                                "display_name": "GPT-4o",
+                                "status": "active",
+                                "context_window": 128000,
+                                "max_output_tokens": 16384,
+                                "modalities": { "input": ["text", "image"], "output": ["text"] },
+                                "capabilities": { "tools": true, "vision": true },
+                                "parameters": { "supported": ["temperature"], "rejected": [], "deprecated_for_this_model": [] },
+                                "pricing": { "currency": "USD", "input": 2.5, "output": 10.0 },
+                                "last_verified": "2026-05-02",
+                                "confidence": "official",
+                                "endpoint_family": "responses",
+                                "sources": []
+                            }
+                        ],
+                        "meta": {
+                            "limit": 20,
+                            "offset": 0,
+                            "total_data": 1,
+                            "timestamp": "2026-05-03T00:00:00Z"
+                        },
+                        "error": null
+                    })
+                ))
+            )
+        ),
         (status = 400, description = "Invalid query parameters", body = ApiResponse<crate::response::EmptyData>),
         (status = 304, description = "Catalog not modified")
     )
@@ -190,7 +228,38 @@ pub async fn list_models(
         ("id" = String, Path, description = "Model id")
     ),
     responses(
-        (status = 200, description = "Model metadata", body = ApiResponse<Model>),
+        (
+            status = 200,
+            description = "Model metadata",
+            body = ApiResponse<Model>,
+            examples(
+                ("model" = (
+                    summary = "Single model",
+                    value = json!({
+                        "success": true,
+                        "message": "OK",
+                        "data": {
+                            "id": "gpt-4o",
+                            "provider": "openai",
+                            "display_name": "GPT-4o",
+                            "status": "active",
+                            "context_window": 128000,
+                            "max_output_tokens": 16384,
+                            "modalities": { "input": ["text", "image"], "output": ["text"] },
+                            "capabilities": { "tools": true, "vision": true },
+                            "parameters": { "supported": ["temperature"], "rejected": [], "deprecated_for_this_model": [] },
+                            "pricing": { "currency": "USD", "input": 2.5, "output": 10.0 },
+                            "last_verified": "2026-05-02",
+                            "confidence": "official",
+                            "endpoint_family": "responses",
+                            "sources": []
+                        },
+                        "meta": { "timestamp": "2026-05-03T00:00:00Z" },
+                        "error": null
+                    })
+                ))
+            )
+        ),
         (status = 304, description = "Catalog not modified"),
         (status = 404, description = "Model not found", body = ApiResponse<crate::response::EmptyData>)
     )
