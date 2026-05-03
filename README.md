@@ -20,6 +20,28 @@ It answers practical questions:
 - `validator/` - Rust CLI that validates the catalog.
 - `server/` - Rust HTTP API for querying and validating model metadata.
 
+## Local CI Checks
+
+Run the same core checks before pushing:
+
+```powershell
+cargo fmt --check
+cargo clippy --workspace --all-targets -- -D warnings
+cargo run -p almanac-validator
+cargo test
+cargo build -p almanac-server
+```
+
+Dependency audit is enforced in GitHub Actions:
+
+```powershell
+cargo install cargo-audit --version 0.22.1 --locked
+cargo audit
+```
+
+The repository pins Rust with `rust-toolchain.toml`. If Rustup prompts to install the pinned
+toolchain, accept it before running the checks.
+
 ## Validate Locally
 
 ```bash
@@ -27,12 +49,6 @@ cargo run -p almanac-validator
 ```
 
 The validator checks schema validity, filename/id consistency, provider references, aliases, lifecycle dates, replacements, and parameter conflicts.
-
-## Run Tests
-
-```bash
-cargo test
-```
 
 ## Run the API Server
 
