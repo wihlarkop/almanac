@@ -234,13 +234,13 @@ fn validate_date_order(
     right_name: &str,
     right: &Option<String>,
 ) {
-    if let (Some(left), Some(right)) = (left, right) {
-        if left > right {
-            report_error(
-                errors,
-                format!("{rel}: {left_name} '{left}' must be on or before {right_name} '{right}'"),
-            );
-        }
+    if let (Some(left), Some(right)) = (left, right)
+        && left > right
+    {
+        report_error(
+            errors,
+            format!("{rel}: {left_name} '{left}' must be on or before {right_name} '{right}'"),
+        );
     }
 }
 

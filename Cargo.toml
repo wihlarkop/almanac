@@ -5,7 +5,7 @@ resolver = "3"
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.85"
+rust-version = "1.88"
 
 [workspace.dependencies]
 anyhow = "1.0.102"
@@ -18,7 +18,7 @@ serde_yaml = "0.9.34"
 sha2 = "0.11.0"
 strsim = "0.11.1"
 thiserror = "2.0.17"
-time = { version = "0.3.44", features = ["formatting"] }
+time = { version = "0.3.47", features = ["formatting"] }
 tokio = { version = "1.52.1", features = ["full"] }
 tower = { version = "0.5.3", features = ["util"] }
 tower-http = { version = "0.6.8", features = ["cors", "limit", "trace"] }

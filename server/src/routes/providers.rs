@@ -28,10 +28,10 @@ pub async fn list_providers(
 ) -> impl IntoResponse {
     let state = state.read().await;
 
-    if let Some(inm) = headers.get("if-none-match") {
-        if inm.as_bytes() == state.etag.as_bytes() {
-            return StatusCode::NOT_MODIFIED.into_response();
-        }
+    if let Some(inm) = headers.get("if-none-match")
+        && inm.as_bytes() == state.etag.as_bytes()
+    {
+        return StatusCode::NOT_MODIFIED.into_response();
     }
 
     (

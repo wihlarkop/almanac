@@ -145,20 +145,20 @@ pub async fn validate(
                 ModelStatus::Active => {}
             }
 
-            if let Some(ref req_provider) = req.provider {
-                if m.provider != req_provider.as_str() {
-                    errors.push(ValidationIssue {
-                        code: "PROVIDER_MISMATCH".to_string(),
-                        message: format!(
-                            "'{}' belongs to provider '{}', not '{}'",
-                            id, m.provider, req_provider
-                        ),
-                        suggestions: vec![],
-                        parameter: None,
-                        modality: None,
-                        direction: None,
-                    });
-                }
+            if let Some(ref req_provider) = req.provider
+                && m.provider != req_provider.as_str()
+            {
+                errors.push(ValidationIssue {
+                    code: "PROVIDER_MISMATCH".to_string(),
+                    message: format!(
+                        "'{}' belongs to provider '{}', not '{}'",
+                        id, m.provider, req_provider
+                    ),
+                    suggestions: vec![],
+                    parameter: None,
+                    modality: None,
+                    direction: None,
+                });
             }
 
             validate_parameters(m, &req, &mut errors, &mut warnings);

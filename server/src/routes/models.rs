@@ -93,25 +93,25 @@ pub async fn list_models(
     };
     let state = state.read().await;
 
-    if let Some(inm) = headers.get("if-none-match") {
-        if inm.as_bytes() == state.etag.as_bytes() {
-            return StatusCode::NOT_MODIFIED.into_response();
-        }
+    if let Some(inm) = headers.get("if-none-match")
+        && inm.as_bytes() == state.etag.as_bytes()
+    {
+        return StatusCode::NOT_MODIFIED.into_response();
     }
 
     let mut models: Vec<Model> = state
         .models
         .iter()
         .filter(|m| {
-            if let Some(provider) = filter.provider() {
-                if m.provider != provider {
-                    return false;
-                }
+            if let Some(provider) = filter.provider()
+                && m.provider != provider
+            {
+                return false;
             }
-            if let Some(status) = filter.status() {
-                if m.status.as_str() != status {
-                    return false;
-                }
+            if let Some(status) = filter.status()
+                && m.status.as_str() != status
+            {
+                return false;
             }
             if let Some(caps) = filter.capability() {
                 for cap in caps.split(',') {
@@ -144,20 +144,19 @@ pub async fn list_models(
                     }
                 }
             }
-            if let Some(min_context) = filter.min_context {
-                if m.context_window < min_context {
-                    return false;
-                }
+            if let Some(min_context) = filter.min_context
+                && m.context_window < min_context
+            {
+                return false;
             }
-            if let Some(max_input_price) = filter.max_input_price {
-                if m.pricing
+            if let Some(max_input_price) = filter.max_input_price
+                && m.pricing
                     .as_ref()
                     .map(|pricing| pricing.input)
                     .unwrap_or(f64::MAX)
                     > max_input_price
-                {
-                    return false;
-                }
+            {
+                return false;
             }
             true
         })
@@ -212,10 +211,10 @@ pub async fn get_model(
     match model {
         None => ApiError::ModelNotFound { provider, id }.into_response(),
         Some(m) => {
-            if let Some(inm) = headers.get("if-none-match") {
-                if inm.as_bytes() == state.etag.as_bytes() {
-                    return StatusCode::NOT_MODIFIED.into_response();
-                }
+            if let Some(inm) = headers.get("if-none-match")
+                && inm.as_bytes() == state.etag.as_bytes()
+            {
+                return StatusCode::NOT_MODIFIED.into_response();
             }
             (
                 catalog_headers(&state.etag),
