@@ -178,6 +178,19 @@ async fn catalog_health_returns_catalog_summary() {
 }
 
 #[tokio::test]
+async fn catalog_issues_returns_issue_groups() {
+    let json = get_json("/api/v1/catalog/issues").await;
+    assert_success_envelope(&json);
+
+    let data = &json["data"];
+    assert!(data["stale_models"].as_array().is_some());
+    assert!(data["missing_pricing_models"].as_array().is_some());
+    assert!(data["deprecated_models"].as_array().is_some());
+    assert!(data["retired_models"].as_array().is_some());
+    assert!(data["replacement_gaps"].as_array().is_some());
+}
+
+#[tokio::test]
 async fn providers_returns_array_with_cache_headers() {
     let response = app()
         .await
@@ -336,6 +349,7 @@ async fn openapi_json_returns_spec() {
     assert!(json["paths"]["/api/v1/providers/{id}"].is_object());
     assert!(json["paths"]["/api/v1/validate"].is_object());
     assert!(json["paths"]["/api/v1/catalog/health"].is_object());
+    assert!(json["paths"]["/api/v1/catalog/issues"].is_object());
     assert!(json["paths"]["/api/v1/compare"].is_object());
     assert!(json["paths"]["/api/v1/search"].is_object());
     assert!(json["paths"]["/api/v1/aliases"].is_object());

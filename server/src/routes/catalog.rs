@@ -1,4 +1,5 @@
 use crate::{
+    catalog::Model,
     request::RequestContext,
     response::{ApiResponse, catalog_headers},
     state::AppState,
@@ -27,6 +28,25 @@ pub struct CatalogHealth {
     pub oldest_last_verified: Option<String>,
     pub newest_last_verified: Option<String>,
     pub etag: String,
+}
+
+#[derive(Serialize, utoipa::ToSchema)]
+pub struct CatalogIssues {
+    stale_models: Vec<ModelIssue>,
+    missing_pricing_models: Vec<ModelIssue>,
+    deprecated_models: Vec<ModelIssue>,
+    retired_models: Vec<ModelIssue>,
+    replacement_gaps: Vec<ModelIssue>,
+}
+
+#[derive(Clone, Serialize, utoipa::ToSchema)]
+pub struct ModelIssue {
+    provider: String,
+    id: String,
+    display_name: String,
+    status: String,
+    last_verified: String,
+    replacement: Option<String>,
 }
 
 #[utoipa::path(
@@ -128,6 +148,107 @@ pub async fn health(
         )),
     )
         .into_response()
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/catalog/issues",
+    responses(
+        (
+            status = 200,
+            description = "Catalog issue details",
+            body = ApiResponse<CatalogIssues>,
+            examples(
+                ("issues" = (
+                    summary = "Catalog issues",
+                    value = json!({
+                        "success": true,
+                        "message": "OK",
+                        "data": {
+                            "stale_models": [],
+                            "missing_pricing_models": [],
+                            "deprecated_models": [],
+                            "retired_models": [],
+                            "replacement_gaps": []
+                        },
+                        "meta": { "timestamp": "2026-05-04T00:00:00Z" },
+                        "error": null
+                    })
+                ))
+            )
+        ),
+        (status = 304, description = "Catalog not modified")
+    )
+)]
+pub async fn issues(
+    State(state): State<Arc<RwLock<AppState>>>,
+    Extension(context): Extension<RequestContext>,
+    headers: HeaderMap,
+) -> impl IntoResponse {
+    let state = state.read().await;
+    if let Some(inm) = headers.get("if-none-match")
+        && inm.as_bytes() == state.etag.as_bytes()
+    {
+        return StatusCode::NOT_MODIFIED.into_response();
+    }
+
+    let today = OffsetDateTime::now_utc().date();
+    let stale_before = today - time::Duration::days(STALE_AFTER_DAYS);
+
+    let mut stale_models = Vec::new();
+    let mut missing_pricing_models = Vec::new();
+    let mut deprecated_models = Vec::new();
+    let mut retired_models = Vec::new();
+    let mut replacement_gaps = Vec::new();
+
+    for model in &state.models {
+        let issue = model_issue(model);
+
+        if parse_catalog_date(&model.last_verified)
+            .map(|last_verified| last_verified < stale_before)
+            .unwrap_or(true)
+        {
+            stale_models.push(issue.clone());
+        }
+        if model.pricing.is_none() {
+            missing_pricing_models.push(issue.clone());
+        }
+        if model.status.as_str() == "deprecated" {
+            deprecated_models.push(issue.clone());
+        }
+        if model.status.as_str() == "retired" {
+            retired_models.push(issue.clone());
+        }
+        if matches!(model.status.as_str(), "deprecated" | "retired") && model.replacement.is_none()
+        {
+            replacement_gaps.push(issue);
+        }
+    }
+
+    let data = CatalogIssues {
+        stale_models,
+        missing_pricing_models,
+        deprecated_models,
+        retired_models,
+        replacement_gaps,
+    };
+
+    (
+        catalog_headers(&state.etag),
+        Json(ApiResponse::ok_with_context(data, &context)),
+    )
+        .into_response()
+}
+
+fn model_issue(model: &Model) -> ModelIssue {
+    ModelIssue {
+        provider: model.provider.clone(),
+        id: model.id.clone(),
+        display_name: model.display_name.clone(),
+        status: model.status.as_str().to_string(),
+        last_verified: model.last_verified.clone(),
+        replacement: model.replacement.clone(),
+    }
 }
 
 fn parse_catalog_date(value: &str) -> Option<Date> {

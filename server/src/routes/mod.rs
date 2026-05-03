@@ -83,6 +83,7 @@ pub fn api_router() -> OpenApiRouter<Arc<RwLock<AppState>>> {
         .routes(routes!(aliases::list_aliases))
         .routes(routes!(aliases::get_alias))
         .routes(routes!(catalog::health))
+        .routes(routes!(catalog::issues))
         .routes(routes!(compare::compare))
         .routes(routes!(providers::list_providers))
         .routes(routes!(providers::get_provider))
