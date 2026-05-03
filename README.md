@@ -125,6 +125,12 @@ List providers:
 curl http://localhost:8080/api/v1/providers
 ```
 
+Catalog health:
+
+```bash
+curl http://localhost:8080/api/v1/catalog/health
+```
+
 List all models:
 
 ```bash

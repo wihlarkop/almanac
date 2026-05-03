@@ -161,6 +161,23 @@ async fn old_v1_prefix_returns_not_found() {
 }
 
 #[tokio::test]
+async fn catalog_health_returns_catalog_summary() {
+    let json = get_json("/api/v1/catalog/health").await;
+    assert_success_envelope(&json);
+
+    let data = &json["data"];
+    assert!(data["total_models"].as_u64().unwrap() > 0);
+    assert!(data["total_providers"].as_u64().unwrap() > 0);
+    assert!(data["total_aliases"].as_u64().unwrap() > 0);
+    assert!(data["status_counts"].is_object());
+    assert!(data["missing_pricing_count"].as_u64().is_some());
+    assert!(data["stale_verification_count"].as_u64().is_some());
+    assert!(data["oldest_last_verified"].as_str().is_some());
+    assert!(data["newest_last_verified"].as_str().is_some());
+    assert!(data["etag"].as_str().is_some());
+}
+
+#[tokio::test]
 async fn providers_returns_array_with_cache_headers() {
     let response = app()
         .await
@@ -240,6 +257,7 @@ async fn openapi_json_returns_spec() {
     assert_eq!(json["info"]["title"], "Almanac API");
     assert!(json["paths"]["/api/v1/models"].is_object());
     assert!(json["paths"]["/api/v1/validate"].is_object());
+    assert!(json["paths"]["/api/v1/catalog/health"].is_object());
     assert!(json["paths"]["/v1/models"].is_null());
     assert!(json["components"]["schemas"]["Model"].is_object());
     assert!(json["components"]["schemas"]["Provider"].is_object());
