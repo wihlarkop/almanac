@@ -53,7 +53,7 @@ pub struct ValidationIssue {
 
 #[utoipa::path(
     post,
-    path = "/v1/validate",
+    path = "/api/v1/validate",
     request_body = ValidateRequest,
     responses(
         (status = 200, description = "Validation result", body = ApiResponse<ValidateResponse>),

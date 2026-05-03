@@ -116,31 +116,31 @@ The GitHub Actions validation workflow runs:
 Health:
 
 ```bash
-curl http://localhost:8080/v1/health
+curl http://localhost:8080/api/v1/health
 ```
 
 List providers:
 
 ```bash
-curl http://localhost:8080/v1/providers
+curl http://localhost:8080/api/v1/providers
 ```
 
 List all models:
 
 ```bash
-curl http://localhost:8080/v1/models
+curl http://localhost:8080/api/v1/models
 ```
 
 Filter models:
 
 ```bash
-curl "http://localhost:8080/v1/models?provider=openai&status=active&capability=vision"
+curl "http://localhost:8080/api/v1/models?provider=openai&status=active&capability=vision"
 ```
 
 Paginate, sort, and filter models:
 
 ```bash
-curl "http://localhost:8080/v1/models?limit=20&offset=0&sort=context_window&order=desc&modality_input=image&min_context=100000"
+curl "http://localhost:8080/api/v1/models?limit=20&offset=0&sort=context_window&order=desc&modality_input=image&min_context=100000"
 ```
 
 Model list pagination defaults to `limit=20` and `offset=0`.
@@ -148,13 +148,13 @@ Model list pagination defaults to `limit=20` and `offset=0`.
 Get one model:
 
 ```bash
-curl http://localhost:8080/v1/models/openai/gpt-4o
+curl http://localhost:8080/api/v1/models/openai/gpt-4o
 ```
 
 Validate a model string:
 
 ```bash
-curl -X POST http://localhost:8080/v1/validate \
+curl -X POST http://localhost:8080/api/v1/validate \
   -H "content-type: application/json" \
   -d '{"model":"gpt-4o","provider":"openai"}'
 ```
@@ -162,7 +162,7 @@ curl -X POST http://localhost:8080/v1/validate \
 Validate request compatibility:
 
 ```bash
-curl -X POST http://localhost:8080/v1/validate \
+curl -X POST http://localhost:8080/api/v1/validate \
   -H "content-type: application/json" \
   -d '{
     "model":"grok-4.20-reasoning",
@@ -175,7 +175,7 @@ curl -X POST http://localhost:8080/v1/validate \
 Suggest likely model IDs:
 
 ```bash
-curl "http://localhost:8080/v1/suggest?q=claude-opus-4.7"
+curl "http://localhost:8080/api/v1/suggest?q=claude-opus-4.7"
 ```
 
 API documentation:

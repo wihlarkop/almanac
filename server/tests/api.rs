@@ -63,7 +63,7 @@ async fn health_returns_ok() {
         .await
         .oneshot(
             Request::builder()
-                .uri("/v1/health")
+                .uri("/api/v1/health")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -95,7 +95,7 @@ async fn cors_preflight_allows_api_headers() {
         .oneshot(
             Request::builder()
                 .method("OPTIONS")
-                .uri("/v1/models")
+                .uri("/api/v1/models")
                 .header("origin", "https://example.com")
                 .header("access-control-request-method", "GET")
                 .header(
@@ -143,12 +143,30 @@ async fn missing_route_returns_error_envelope() {
 }
 
 #[tokio::test]
+async fn old_v1_prefix_returns_not_found() {
+    for uri in ["/v1/health", "/v1/models"] {
+        let response = app()
+            .await
+            .oneshot(Request::builder().uri(uri).body(Body::empty()).unwrap())
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::NOT_FOUND);
+        let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+            .await
+            .unwrap();
+        let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+        assert_error_envelope(&json, "NOT_FOUND");
+    }
+}
+
+#[tokio::test]
 async fn providers_returns_array_with_cache_headers() {
     let response = app()
         .await
         .oneshot(
             Request::builder()
-                .uri("/v1/providers")
+                .uri("/api/v1/providers")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -178,7 +196,7 @@ async fn providers_etag_returns_304() {
         .clone()
         .oneshot(
             Request::builder()
-                .uri("/v1/providers")
+                .uri("/api/v1/providers")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -189,7 +207,7 @@ async fn providers_etag_returns_304() {
     let response = app
         .oneshot(
             Request::builder()
-                .uri("/v1/providers")
+                .uri("/api/v1/providers")
                 .header("if-none-match", etag)
                 .body(Body::empty())
                 .unwrap(),
@@ -220,8 +238,9 @@ async fn openapi_json_returns_spec() {
     let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
     assert_eq!(json["openapi"], "3.1.0");
     assert_eq!(json["info"]["title"], "Almanac API");
-    assert!(json["paths"]["/v1/models"].is_object());
-    assert!(json["paths"]["/v1/validate"].is_object());
+    assert!(json["paths"]["/api/v1/models"].is_object());
+    assert!(json["paths"]["/api/v1/validate"].is_object());
+    assert!(json["paths"]["/v1/models"].is_null());
     assert!(json["components"]["schemas"]["Model"].is_object());
     assert!(json["components"]["schemas"]["Provider"].is_object());
     assert!(json["components"]["schemas"]["ApiResponse_Model"].is_object());
@@ -280,7 +299,7 @@ async fn models_returns_all_with_cache_headers() {
         .await
         .oneshot(
             Request::builder()
-                .uri("/v1/models")
+                .uri("/api/v1/models")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -313,7 +332,7 @@ async fn models_ignores_blank_query_filters_and_zero_limit() {
         .await
         .oneshot(
             Request::builder()
-                .uri("/v1/models?provider=&status=&capability=&limit=0&offset=0&sort=&order=&modality_input=&modality_output=")
+                .uri("/api/v1/models?provider=&status=&capability=&limit=0&offset=0&sort=&order=&modality_input=&modality_output=")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -339,7 +358,7 @@ async fn models_invalid_query_returns_error_envelope() {
         .await
         .oneshot(
             Request::builder()
-                .uri("/v1/models?limit=not-a-number")
+                .uri("/api/v1/models?limit=not-a-number")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -370,7 +389,7 @@ async fn models_invalid_numeric_query_values_return_error_envelope() {
             .await
             .oneshot(
                 Request::builder()
-                    .uri(format!("/v1/models?{query}"))
+                    .uri(format!("/api/v1/models?{query}"))
                     .body(Body::empty())
                     .unwrap(),
             )
@@ -392,7 +411,7 @@ async fn models_filter_by_provider() {
         .await
         .oneshot(
             Request::builder()
-                .uri("/v1/models?provider=anthropic")
+                .uri("/api/v1/models?provider=anthropic")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -420,7 +439,7 @@ async fn models_filter_by_status() {
         .await
         .oneshot(
             Request::builder()
-                .uri("/v1/models?status=active")
+                .uri("/api/v1/models?status=active")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -448,7 +467,7 @@ async fn models_filter_by_capability() {
         .await
         .oneshot(
             Request::builder()
-                .uri("/v1/models?capability=vision")
+                .uri("/api/v1/models?capability=vision")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -476,7 +495,7 @@ async fn models_support_limit_offset_and_sorting() {
         .await
         .oneshot(
             Request::builder()
-                .uri("/v1/models?limit=3&offset=2&sort=id&order=desc")
+                .uri("/api/v1/models?limit=3&offset=2&sort=id&order=desc")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -506,7 +525,7 @@ async fn models_support_limit_offset_and_sorting() {
 
 #[tokio::test]
 async fn models_offset_past_total_returns_empty_page_with_clamped_offset() {
-    let json = get_json("/v1/models?provider=openai&limit=10&offset=10000").await;
+    let json = get_json("/api/v1/models?provider=openai&limit=10&offset=10000").await;
 
     assert_success_envelope(&json);
     let total = json["meta"]["total_data"].as_u64().unwrap();
@@ -518,13 +537,13 @@ async fn models_offset_past_total_returns_empty_page_with_clamped_offset() {
 
 #[tokio::test]
 async fn models_large_limit_reports_actual_remaining_window() {
-    let all = get_json("/v1/models?provider=openai&limit=1000").await;
+    let all = get_json("/api/v1/models?provider=openai&limit=1000").await;
     let total = all["meta"]["total_data"].as_u64().unwrap();
     assert!(total > 2);
 
     let offset = total - 2;
     let json = get_json(&format!(
-        "/v1/models?provider=openai&limit=1000&offset={offset}"
+        "/api/v1/models?provider=openai&limit=1000&offset={offset}"
     ))
     .await;
 
@@ -537,11 +556,11 @@ async fn models_large_limit_reports_actual_remaining_window() {
 
 #[tokio::test]
 async fn models_filtered_total_data_counts_matches_before_pagination() {
-    let all_openai = get_json("/v1/models?provider=openai&limit=1000").await;
+    let all_openai = get_json("/api/v1/models?provider=openai&limit=1000").await;
     let total = all_openai["data"].as_array().unwrap().len() as u64;
     assert!(total > 3);
 
-    let page = get_json("/v1/models?provider=openai&limit=3&offset=1").await;
+    let page = get_json("/api/v1/models?provider=openai&limit=3&offset=1").await;
 
     assert_success_envelope(&page);
     assert_eq!(page["data"].as_array().unwrap().len(), 3);
@@ -552,7 +571,7 @@ async fn models_filtered_total_data_counts_matches_before_pagination() {
 
 #[tokio::test]
 async fn models_unknown_sort_falls_back_to_provider_then_id() {
-    let json = get_json("/v1/models?limit=10&sort=unknown").await;
+    let json = get_json("/api/v1/models?limit=10&sort=unknown").await;
 
     assert_success_envelope(&json);
     let pairs: Vec<_> = json["data"]
@@ -573,7 +592,7 @@ async fn models_unknown_sort_falls_back_to_provider_then_id() {
 
 #[tokio::test]
 async fn models_unknown_order_behaves_as_ascending() {
-    let json = get_json("/v1/models?limit=10&sort=id&order=sideways").await;
+    let json = get_json("/api/v1/models?limit=10&sort=id&order=sideways").await;
 
     assert_success_envelope(&json);
     let ids = model_ids(&json);
@@ -588,7 +607,7 @@ async fn models_filter_by_modality_context_and_price() {
         .await
         .oneshot(
             Request::builder()
-                .uri("/v1/models?modality_input=image&modality_output=text&min_context=100000&max_input_price=1")
+                .uri("/api/v1/models?modality_input=image&modality_output=text&min_context=100000&max_input_price=1")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -625,7 +644,7 @@ async fn get_model_found() {
         .await
         .oneshot(
             Request::builder()
-                .uri("/v1/models/anthropic/claude-opus-4-7")
+                .uri("/api/v1/models/anthropic/claude-opus-4-7")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -653,7 +672,7 @@ async fn get_model_not_found() {
         .await
         .oneshot(
             Request::builder()
-                .uri("/v1/models/openai/does-not-exist")
+                .uri("/api/v1/models/openai/does-not-exist")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -682,7 +701,7 @@ async fn get_model_etag_304() {
         .clone()
         .oneshot(
             Request::builder()
-                .uri("/v1/models/openai/gpt-4o")
+                .uri("/api/v1/models/openai/gpt-4o")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -693,7 +712,7 @@ async fn get_model_etag_304() {
     let response = app
         .oneshot(
             Request::builder()
-                .uri("/v1/models/openai/gpt-4o")
+                .uri("/api/v1/models/openai/gpt-4o")
                 .header("if-none-match", etag)
                 .body(Body::empty())
                 .unwrap(),
@@ -714,7 +733,7 @@ async fn validate_known_active_model() {
         .oneshot(
             Request::builder()
                 .method("POST")
-                .uri("/v1/validate")
+                .uri("/api/v1/validate")
                 .header("content-type", "application/json")
                 .header("content-length", body.to_string().len().to_string())
                 .body(Body::from(body.to_string()))
@@ -741,7 +760,7 @@ async fn validate_invalid_json_returns_error_envelope() {
         .oneshot(
             Request::builder()
                 .method("POST")
-                .uri("/v1/validate")
+                .uri("/api/v1/validate")
                 .header("content-type", "application/json")
                 .body(Body::from("{"))
                 .unwrap(),
@@ -776,7 +795,7 @@ async fn validate_oversized_body_is_rejected() {
         .oneshot(
             Request::builder()
                 .method("POST")
-                .uri("/v1/validate")
+                .uri("/api/v1/validate")
                 .header("content-type", "application/json")
                 .header("content-length", body.len().to_string())
                 .body(Body::from(body))
@@ -796,7 +815,7 @@ async fn validate_alias_resolves_to_canonical() {
         .oneshot(
             Request::builder()
                 .method("POST")
-                .uri("/v1/validate")
+                .uri("/api/v1/validate")
                 .header("content-type", "application/json")
                 .body(Body::from(body.to_string()))
                 .unwrap(),
@@ -821,7 +840,7 @@ async fn validate_unknown_model_returns_not_found_with_suggestions() {
         .oneshot(
             Request::builder()
                 .method("POST")
-                .uri("/v1/validate")
+                .uri("/api/v1/validate")
                 .header("content-type", "application/json")
                 .body(Body::from(body.to_string()))
                 .unwrap(),
@@ -854,7 +873,7 @@ async fn validate_retired_model_returns_error() {
         .oneshot(
             Request::builder()
                 .method("POST")
-                .uri("/v1/validate")
+                .uri("/api/v1/validate")
                 .header("content-type", "application/json")
                 .body(Body::from(body.to_string()))
                 .unwrap(),
@@ -879,7 +898,7 @@ async fn validate_deprecated_model_returns_warning() {
         .oneshot(
             Request::builder()
                 .method("POST")
-                .uri("/v1/validate")
+                .uri("/api/v1/validate")
                 .header("content-type", "application/json")
                 .body(Body::from(body.to_string()))
                 .unwrap(),
@@ -905,7 +924,7 @@ async fn validate_provider_mismatch_returns_error() {
         .oneshot(
             Request::builder()
                 .method("POST")
-                .uri("/v1/validate")
+                .uri("/api/v1/validate")
                 .header("content-type", "application/json")
                 .body(Body::from(body.to_string()))
                 .unwrap(),
@@ -935,7 +954,7 @@ async fn validate_rejected_parameter_returns_error() {
         .oneshot(
             Request::builder()
                 .method("POST")
-                .uri("/v1/validate")
+                .uri("/api/v1/validate")
                 .header("content-type", "application/json")
                 .body(Body::from(body.to_string()))
                 .unwrap(),
@@ -971,7 +990,7 @@ async fn validate_unsupported_parameter_returns_warning() {
         .oneshot(
             Request::builder()
                 .method("POST")
-                .uri("/v1/validate")
+                .uri("/api/v1/validate")
                 .header("content-type", "application/json")
                 .body(Body::from(body.to_string()))
                 .unwrap(),
@@ -1008,7 +1027,7 @@ async fn validate_modality_mismatch_returns_error() {
         .oneshot(
             Request::builder()
                 .method("POST")
-                .uri("/v1/validate")
+                .uri("/api/v1/validate")
                 .header("content-type", "application/json")
                 .body(Body::from(body.to_string()))
                 .unwrap(),
@@ -1050,7 +1069,7 @@ async fn validate_supported_request_shape_stays_valid() {
         .oneshot(
             Request::builder()
                 .method("POST")
-                .uri("/v1/validate")
+                .uri("/api/v1/validate")
                 .header("content-type", "application/json")
                 .body(Body::from(body.to_string()))
                 .unwrap(),
@@ -1076,7 +1095,7 @@ async fn suggest_returns_ranked_matches() {
         .await
         .oneshot(
             Request::builder()
-                .uri("/v1/suggest?q=claude-opus-4.7")
+                .uri("/api/v1/suggest?q=claude-opus-4.7")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -1096,9 +1115,55 @@ async fn suggest_returns_ranked_matches() {
             .iter()
             .any(|r| r["id"].as_str() == Some("claude-opus-4-7"))
     );
+    assert!(results.iter().all(|result| {
+        result["provider"].as_str().is_some()
+            && result["matched"].as_str().is_some()
+            && result["match_type"].as_str().is_some()
+            && result["score"].as_f64().is_some()
+    }));
     if results.len() > 1 {
         assert!(results[0]["score"].as_f64() >= results[1]["score"].as_f64());
     }
+}
+
+#[tokio::test]
+async fn suggest_exact_alias_returns_canonical_match_metadata() {
+    let json = get_json("/api/v1/suggest?q=claude-opus-4").await;
+    assert_success_envelope(&json);
+
+    let result = &json["data"].as_array().unwrap()[0];
+    assert_eq!(result["id"], "claude-opus-4-7");
+    assert_eq!(result["provider"], "anthropic");
+    assert_eq!(result["matched"], "claude-opus-4");
+    assert_eq!(result["match_type"], "alias");
+    assert_eq!(result["score"], 1.0);
+}
+
+#[tokio::test]
+async fn suggest_provider_filter_limits_results_to_provider() {
+    let json = get_json("/api/v1/suggest?q=claude-sonnet&provider=anthropic&limit=10").await;
+    assert_success_envelope(&json);
+
+    let results = json["data"].as_array().unwrap();
+    assert!(!results.is_empty());
+    assert!(
+        results
+            .iter()
+            .all(|result| result["provider"].as_str() == Some("anthropic"))
+    );
+}
+
+#[tokio::test]
+async fn suggest_can_match_display_name() {
+    let json = get_json("/api/v1/suggest?q=Claude%20Opus%204.7").await;
+    assert_success_envelope(&json);
+
+    let results = json["data"].as_array().unwrap();
+    assert!(results.iter().any(|result| {
+        result["id"].as_str() == Some("claude-opus-4-7")
+            && result["matched"].as_str() == Some("Claude Opus 4.7")
+            && result["match_type"].as_str() == Some("display_name")
+    }));
 }
 
 #[tokio::test]
@@ -1107,7 +1172,7 @@ async fn suggest_missing_query_returns_error_envelope() {
         .await
         .oneshot(
             Request::builder()
-                .uri("/v1/suggest")
+                .uri("/api/v1/suggest")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -1132,7 +1197,7 @@ async fn suggest_no_matches_returns_empty() {
         .await
         .oneshot(
             Request::builder()
-                .uri("/v1/suggest?q=zzzzzzzzz")
+                .uri("/api/v1/suggest?q=zzzzzzzzz")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -1154,7 +1219,7 @@ async fn suggest_max_five_results() {
         .await
         .oneshot(
             Request::builder()
-                .uri("/v1/suggest?q=gpt")
+                .uri("/api/v1/suggest?q=gpt")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -1167,4 +1232,40 @@ async fn suggest_max_five_results() {
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
     assert_success_envelope(&json);
     assert!(json["data"].as_array().unwrap().len() <= 5);
+}
+
+#[tokio::test]
+async fn suggest_limit_can_return_more_than_default() {
+    let default = get_json("/api/v1/suggest?q=gpt").await;
+    let expanded = get_json("/api/v1/suggest?q=gpt&limit=10").await;
+
+    assert_success_envelope(&default);
+    assert_success_envelope(&expanded);
+
+    let default_len = default["data"].as_array().unwrap().len();
+    let expanded_len = expanded["data"].as_array().unwrap().len();
+    assert!(default_len <= 5);
+    assert!(expanded_len > default_len);
+    assert!(expanded_len <= 10);
+}
+
+#[tokio::test]
+async fn suggest_invalid_limit_returns_error_envelope() {
+    let response = app()
+        .await
+        .oneshot(
+            Request::builder()
+                .uri("/api/v1/suggest?q=gpt&limit=bad")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert_error_envelope(&json, "BAD_REQUEST");
 }

@@ -11,7 +11,7 @@ pub struct HealthData {
 
 #[utoipa::path(
     get,
-    path = "/v1/health",
+    path = "/api/v1/health",
     responses((status = 200, description = "Server health status", body = ApiResponse<HealthData>))
 )]
 pub async fn health(

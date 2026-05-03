@@ -15,7 +15,7 @@ use tokio::sync::RwLock;
 
 #[utoipa::path(
     get,
-    path = "/v1/providers",
+    path = "/api/v1/providers",
     responses(
         (status = 200, description = "Provider list", body = ApiResponse<Vec<Provider>>),
         (status = 304, description = "Catalog not modified")

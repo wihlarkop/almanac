@@ -68,7 +68,7 @@ impl ModelFilter {
 
 #[utoipa::path(
     get,
-    path = "/v1/models",
+    path = "/api/v1/models",
     params(ModelFilter),
     responses(
         (status = 200, description = "Paginated model list", body = ApiResponse<Vec<Model>>),
@@ -184,7 +184,7 @@ pub async fn list_models(
 
 #[utoipa::path(
     get,
-    path = "/v1/models/{provider}/{id}",
+    path = "/api/v1/models/{provider}/{id}",
     params(
         ("provider" = String, Path, description = "Provider id"),
         ("id" = String, Path, description = "Model id")

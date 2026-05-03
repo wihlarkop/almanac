@@ -13,6 +13,8 @@ use tokio::sync::RwLock;
 #[derive(Deserialize, utoipa::IntoParams)]
 pub struct SuggestQuery {
     pub q: String,
+    pub provider: Option<String>,
+    pub limit: Option<usize>,
 }
 
 #[derive(Serialize, utoipa::ToSchema)]
@@ -20,11 +22,13 @@ pub struct SuggestResult {
     pub id: String,
     pub provider: String,
     pub score: f64,
+    pub matched: String,
+    pub match_type: String,
 }
 
 #[utoipa::path(
     get,
-    path = "/v1/suggest",
+    path = "/api/v1/suggest",
     params(SuggestQuery),
     responses(
         (status = 200, description = "Ranked suggestions", body = ApiResponse<Vec<SuggestResult>>),
@@ -41,25 +45,38 @@ pub async fn suggest(
     })?;
     let state = state.read().await;
 
-    let results: Vec<SuggestResult> = fuzzy::top_matches(&state, &params.q, 5, 0.7)
-        .into_iter()
-        .filter_map(|(id, score)| {
-            let canonical = state
-                .aliases
-                .get(&id)
-                .cloned()
-                .unwrap_or_else(|| id.clone());
-            let model = state
-                .models_by_id
-                .get(&canonical)
-                .and_then(|index| state.models.get(*index))?;
-            Some(SuggestResult {
-                id: canonical,
-                provider: model.provider.clone(),
-                score: (score * 1000.0).round() / 1000.0,
+    let provider = params
+        .provider
+        .as_deref()
+        .map(str::trim)
+        .filter(|provider| !provider.is_empty());
+    let limit = params.limit.filter(|limit| *limit > 0).unwrap_or(5).min(20);
+
+    let results: Vec<SuggestResult> =
+        fuzzy::top_suggestions(&state, &params.q, provider, limit, 0.7)
+            .into_iter()
+            .filter_map(|candidate| {
+                let model = state
+                    .models_by_id
+                    .get(&candidate.canonical_id)
+                    .and_then(|index| state.models.get(*index))?;
+                Some(SuggestResult {
+                    id: candidate.canonical_id,
+                    provider: model.provider.clone(),
+                    score: (candidate.score * 1000.0).round() / 1000.0,
+                    matched: candidate.matched,
+                    match_type: match_type_name(candidate.match_type).to_string(),
+                })
             })
-        })
-        .collect();
+            .collect();
 
     Ok(Json(ApiResponse::ok_with_context(results, &context)))
+}
+
+fn match_type_name(match_type: fuzzy::MatchType) -> &'static str {
+    match match_type {
+        fuzzy::MatchType::Id => "id",
+        fuzzy::MatchType::Alias => "alias",
+        fuzzy::MatchType::DisplayName => "display_name",
+    }
 }
