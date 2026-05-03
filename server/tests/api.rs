@@ -27,6 +27,36 @@ fn assert_success_envelope(json: &serde_json::Value) {
     assert!(json["meta"]["timestamp"].as_str().is_some());
 }
 
+fn assert_error_envelope(json: &serde_json::Value, code: &str) {
+    assert_eq!(json["success"], false);
+    assert!(json["data"].is_null());
+    assert_eq!(json["error"]["code"], code);
+    assert!(json["meta"]["timestamp"].as_str().is_some());
+}
+
+async fn get_json(uri: &str) -> serde_json::Value {
+    let response = app()
+        .await
+        .oneshot(Request::builder().uri(uri).body(Body::empty()).unwrap())
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+    let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    serde_json::from_slice(&body).unwrap()
+}
+
+fn model_ids(json: &serde_json::Value) -> Vec<String> {
+    json["data"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|model| model["id"].as_str().unwrap().to_string())
+        .collect()
+}
+
 #[tokio::test]
 async fn health_returns_ok() {
     let response = app()
@@ -269,6 +299,8 @@ async fn models_returns_all_with_cache_headers() {
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
     assert_success_envelope(&json);
+    assert!(json["meta"]["request_id"].as_str().is_some());
+    assert!(json["meta"]["execution_time_seconds"].as_f64().is_some());
     assert_eq!(json["data"].as_array().unwrap().len(), 20);
     assert!(json["meta"]["total_data"].as_u64().unwrap() >= 30);
     assert_eq!(json["meta"]["limit"], 20);
@@ -324,6 +356,34 @@ async fn models_invalid_query_returns_error_envelope() {
     assert!(json["data"].is_null());
     assert_eq!(json["error"]["code"], "BAD_REQUEST");
     assert!(json["meta"]["timestamp"].as_str().is_some());
+}
+
+#[tokio::test]
+async fn models_invalid_numeric_query_values_return_error_envelope() {
+    for query in [
+        "limit=not-a-number",
+        "offset=not-a-number",
+        "min_context=not-a-number",
+        "max_input_price=not-a-number",
+    ] {
+        let response = app()
+            .await
+            .oneshot(
+                Request::builder()
+                    .uri(format!("/v1/models?{query}"))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+        let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+            .await
+            .unwrap();
+        let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+        assert_error_envelope(&json, "BAD_REQUEST");
+    }
 }
 
 #[tokio::test]
@@ -441,6 +501,84 @@ async fn models_support_limit_offset_and_sorting() {
         .collect();
     let mut sorted = ids.clone();
     sorted.sort_by(|a, b| b.cmp(a));
+    assert_eq!(ids, sorted);
+}
+
+#[tokio::test]
+async fn models_offset_past_total_returns_empty_page_with_clamped_offset() {
+    let json = get_json("/v1/models?provider=openai&limit=10&offset=10000").await;
+
+    assert_success_envelope(&json);
+    let total = json["meta"]["total_data"].as_u64().unwrap();
+    assert!(total > 0);
+    assert_eq!(json["data"].as_array().unwrap().len(), 0);
+    assert_eq!(json["meta"]["offset"].as_u64().unwrap(), total);
+    assert_eq!(json["meta"]["limit"], 0);
+}
+
+#[tokio::test]
+async fn models_large_limit_reports_actual_remaining_window() {
+    let all = get_json("/v1/models?provider=openai&limit=1000").await;
+    let total = all["meta"]["total_data"].as_u64().unwrap();
+    assert!(total > 2);
+
+    let offset = total - 2;
+    let json = get_json(&format!(
+        "/v1/models?provider=openai&limit=1000&offset={offset}"
+    ))
+    .await;
+
+    assert_success_envelope(&json);
+    assert_eq!(json["data"].as_array().unwrap().len(), 2);
+    assert_eq!(json["meta"]["total_data"].as_u64().unwrap(), total);
+    assert_eq!(json["meta"]["offset"].as_u64().unwrap(), offset);
+    assert_eq!(json["meta"]["limit"], 2);
+}
+
+#[tokio::test]
+async fn models_filtered_total_data_counts_matches_before_pagination() {
+    let all_openai = get_json("/v1/models?provider=openai&limit=1000").await;
+    let total = all_openai["data"].as_array().unwrap().len() as u64;
+    assert!(total > 3);
+
+    let page = get_json("/v1/models?provider=openai&limit=3&offset=1").await;
+
+    assert_success_envelope(&page);
+    assert_eq!(page["data"].as_array().unwrap().len(), 3);
+    assert_eq!(page["meta"]["total_data"].as_u64().unwrap(), total);
+    assert_eq!(page["meta"]["limit"], 3);
+    assert_eq!(page["meta"]["offset"], 1);
+}
+
+#[tokio::test]
+async fn models_unknown_sort_falls_back_to_provider_then_id() {
+    let json = get_json("/v1/models?limit=10&sort=unknown").await;
+
+    assert_success_envelope(&json);
+    let pairs: Vec<_> = json["data"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|model| {
+            (
+                model["provider"].as_str().unwrap().to_string(),
+                model["id"].as_str().unwrap().to_string(),
+            )
+        })
+        .collect();
+    let mut sorted = pairs.clone();
+    sorted.sort();
+    assert_eq!(pairs, sorted);
+}
+
+#[tokio::test]
+async fn models_unknown_order_behaves_as_ascending() {
+    let json = get_json("/v1/models?limit=10&sort=id&order=sideways").await;
+
+    assert_success_envelope(&json);
+    let ids = model_ids(&json);
+    let mut sorted = ids.clone();
+    sorted.sort();
     assert_eq!(ids, sorted);
 }
 
