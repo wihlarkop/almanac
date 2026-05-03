@@ -11,6 +11,8 @@ pub enum ApiError {
     ModelNotFound { provider: String, id: String },
     #[error("provider not found")]
     ProviderNotFound { provider: String },
+    #[error("alias not found")]
+    AliasNotFound { alias: String },
     #[error("{message}")]
     BadRequest { message: String },
     #[error("{message}")]
@@ -24,6 +26,7 @@ impl ApiError {
         match self {
             Self::ModelNotFound { .. } => StatusCode::NOT_FOUND,
             Self::ProviderNotFound { .. } => StatusCode::NOT_FOUND,
+            Self::AliasNotFound { .. } => StatusCode::NOT_FOUND,
             Self::BadRequest { .. } => StatusCode::BAD_REQUEST,
             Self::NotFound { .. } => StatusCode::NOT_FOUND,
             Self::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
@@ -34,6 +37,7 @@ impl ApiError {
         match self {
             Self::ModelNotFound { .. } => "MODEL_NOT_FOUND",
             Self::ProviderNotFound { .. } => "PROVIDER_NOT_FOUND",
+            Self::AliasNotFound { .. } => "ALIAS_NOT_FOUND",
             Self::BadRequest { .. } => "BAD_REQUEST",
             Self::NotFound { .. } => "NOT_FOUND",
             Self::Internal(_) => "INTERNAL_SERVER_ERROR",
@@ -48,6 +52,9 @@ impl ApiError {
             })),
             Self::ProviderNotFound { provider } => Some(serde_json::json!({
                 "provider": provider
+            })),
+            Self::AliasNotFound { alias } => Some(serde_json::json!({
+                "alias": alias
             })),
             Self::BadRequest { .. } | Self::NotFound { .. } | Self::Internal(_) => None,
         }

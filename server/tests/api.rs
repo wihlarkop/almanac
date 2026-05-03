@@ -266,6 +266,53 @@ async fn provider_detail_unknown_returns_not_found() {
 }
 
 #[tokio::test]
+async fn aliases_returns_sorted_aliases() {
+    let json = get_json("/api/v1/aliases").await;
+    assert_success_envelope(&json);
+    let aliases = json["data"].as_array().unwrap();
+    assert!(!aliases.is_empty());
+    assert!(
+        aliases.windows(2).all(|pair| {
+            pair[0]["alias"].as_str().unwrap() <= pair[1]["alias"].as_str().unwrap()
+        })
+    );
+    assert!(aliases.iter().any(|alias| {
+        alias["alias"].as_str() == Some("claude-opus-4")
+            && alias["canonical_id"].as_str() == Some("claude-opus-4-7")
+    }));
+}
+
+#[tokio::test]
+async fn alias_detail_resolves_alias() {
+    let json = get_json("/api/v1/aliases/claude-opus-4").await;
+    assert_success_envelope(&json);
+    assert_eq!(json["data"]["alias"], "claude-opus-4");
+    assert_eq!(json["data"]["canonical_id"], "claude-opus-4-7");
+    assert_eq!(json["data"]["provider"], "anthropic");
+}
+
+#[tokio::test]
+async fn alias_detail_unknown_returns_not_found() {
+    let response = app()
+        .await
+        .oneshot(
+            Request::builder()
+                .uri("/api/v1/aliases/does-not-exist")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::NOT_FOUND);
+    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert_error_envelope(&json, "ALIAS_NOT_FOUND");
+}
+
+#[tokio::test]
 async fn openapi_json_returns_spec() {
     let response = app()
         .await
@@ -291,6 +338,8 @@ async fn openapi_json_returns_spec() {
     assert!(json["paths"]["/api/v1/catalog/health"].is_object());
     assert!(json["paths"]["/api/v1/compare"].is_object());
     assert!(json["paths"]["/api/v1/search"].is_object());
+    assert!(json["paths"]["/api/v1/aliases"].is_object());
+    assert!(json["paths"]["/api/v1/aliases/{alias}"].is_object());
     assert!(json["paths"]["/v1/models"].is_null());
     assert!(
         json["paths"]["/api/v1/health"]["get"]["responses"]["200"]["content"]

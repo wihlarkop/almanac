@@ -25,6 +25,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 use utoipa_scalar::{Scalar, Servable};
 use utoipa_swagger_ui::SwaggerUi;
 
+mod aliases;
 mod catalog;
 mod compare;
 mod health;
@@ -79,6 +80,8 @@ async fn not_found() -> impl IntoResponse {
 pub fn api_router() -> OpenApiRouter<Arc<RwLock<AppState>>> {
     OpenApiRouter::with_openapi(ApiDoc::openapi())
         .routes(routes!(health::health))
+        .routes(routes!(aliases::list_aliases))
+        .routes(routes!(aliases::get_alias))
         .routes(routes!(catalog::health))
         .routes(routes!(compare::compare))
         .routes(routes!(providers::list_providers))
