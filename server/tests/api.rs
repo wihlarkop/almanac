@@ -276,6 +276,26 @@ async fn openapi_json_returns_spec() {
             ["examples"]
             .is_object()
     );
+    let search_params = json["paths"]["/api/v1/search"]["get"]["parameters"]
+        .as_array()
+        .unwrap();
+    assert!(
+        search_params
+            .iter()
+            .any(|param| param["name"] == "q" && param["example"] == "gpt")
+    );
+    assert!(
+        search_params
+            .iter()
+            .any(|param| param["name"] == "provider" && param["example"] == "openai")
+    );
+
+    let compare_params = json["paths"]["/api/v1/compare"]["get"]["parameters"]
+        .as_array()
+        .unwrap();
+    assert!(compare_params.iter().any(|param| {
+        param["name"] == "models" && param["example"] == "openai/gpt-4o,anthropic/claude-opus-4-7"
+    }));
     assert!(json["components"]["schemas"]["Model"].is_object());
     assert!(json["components"]["schemas"]["Provider"].is_object());
     assert!(json["components"]["schemas"]["ApiResponse_Model"].is_object());

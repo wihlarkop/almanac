@@ -12,8 +12,11 @@ use tokio::sync::RwLock;
 
 #[derive(Deserialize, utoipa::IntoParams)]
 pub struct SuggestQuery {
+    #[param(example = "claude-opus-4")]
     pub q: String,
+    #[param(example = "anthropic")]
     pub provider: Option<String>,
+    #[param(example = 5)]
     pub limit: Option<usize>,
 }
 

@@ -17,17 +17,29 @@ const DEFAULT_LIMIT: usize = 20;
 
 #[derive(Deserialize, utoipa::IntoParams)]
 pub struct SearchQuery {
+    #[param(example = "gpt")]
     q: Option<String>,
+    #[param(example = "openai")]
     provider: Option<String>,
+    #[param(example = "active")]
     status: Option<String>,
+    #[param(example = "vision")]
     capability: Option<String>,
+    #[param(example = 5)]
     limit: Option<usize>,
+    #[param(example = 0)]
     offset: Option<usize>,
+    #[param(example = "context_window")]
     sort: Option<String>,
+    #[param(example = "desc")]
     order: Option<String>,
+    #[param(example = "image")]
     modality_input: Option<String>,
+    #[param(example = "text")]
     modality_output: Option<String>,
+    #[param(example = 100000)]
     min_context: Option<u64>,
+    #[param(example = 1.0)]
     max_input_price: Option<f64>,
 }
 

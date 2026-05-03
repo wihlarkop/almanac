@@ -19,16 +19,27 @@ const DEFAULT_LIMIT: usize = 20;
 
 #[derive(Deserialize, utoipa::IntoParams)]
 pub struct ModelFilter {
+    #[param(example = "openai")]
     pub(crate) provider: Option<String>,
+    #[param(example = "active")]
     pub(crate) status: Option<String>,
+    #[param(example = "vision")]
     pub(crate) capability: Option<String>,
+    #[param(example = 20)]
     pub(crate) limit: Option<usize>,
+    #[param(example = 0)]
     pub(crate) offset: Option<usize>,
+    #[param(example = "context_window")]
     pub(crate) sort: Option<String>,
+    #[param(example = "desc")]
     pub(crate) order: Option<String>,
+    #[param(example = "image")]
     pub(crate) modality_input: Option<String>,
+    #[param(example = "text")]
     pub(crate) modality_output: Option<String>,
+    #[param(example = 100000)]
     pub(crate) min_context: Option<u64>,
+    #[param(example = 1.0)]
     pub(crate) max_input_price: Option<f64>,
 }
 

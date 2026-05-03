@@ -16,6 +16,7 @@ use tokio::sync::RwLock;
 
 #[derive(Deserialize, utoipa::IntoParams)]
 pub struct CompareQuery {
+    #[param(example = "openai/gpt-4o,anthropic/claude-opus-4-7")]
     models: String,
 }
 
