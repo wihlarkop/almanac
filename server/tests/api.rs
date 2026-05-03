@@ -258,6 +258,7 @@ async fn openapi_json_returns_spec() {
     assert!(json["paths"]["/api/v1/models"].is_object());
     assert!(json["paths"]["/api/v1/validate"].is_object());
     assert!(json["paths"]["/api/v1/catalog/health"].is_object());
+    assert!(json["paths"]["/api/v1/compare"].is_object());
     assert!(json["paths"]["/v1/models"].is_null());
     assert!(
         json["paths"]["/api/v1/health"]["get"]["responses"]["200"]["content"]
@@ -757,6 +758,92 @@ async fn get_model_etag_304() {
 }
 
 // ── validate ──────────────────────────────────────────────────────────────────
+
+#[tokio::test]
+async fn compare_returns_models_in_requested_order() {
+    let json = get_json("/api/v1/compare?models=openai/gpt-4o,anthropic/claude-opus-4-7").await;
+    assert_success_envelope(&json);
+
+    let models = json["data"]["models"].as_array().unwrap();
+    assert_eq!(models.len(), 2);
+    assert_eq!(models[0]["provider"], "openai");
+    assert_eq!(models[0]["id"], "gpt-4o");
+    assert_eq!(models[1]["provider"], "anthropic");
+    assert_eq!(models[1]["id"], "claude-opus-4-7");
+    assert!(
+        json["data"]["summary"]["max_context_window"]
+            .as_u64()
+            .is_some()
+    );
+    assert!(
+        json["data"]["summary"]["max_output_tokens"]
+            .as_u64()
+            .is_some()
+    );
+}
+
+#[tokio::test]
+async fn compare_requires_two_unique_models() {
+    for uri in [
+        "/api/v1/compare",
+        "/api/v1/compare?models=openai/gpt-4o",
+        "/api/v1/compare?models=openai/gpt-4o,openai/gpt-4o",
+    ] {
+        let response = app()
+            .await
+            .oneshot(Request::builder().uri(uri).body(Body::empty()).unwrap())
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+        let bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+            .await
+            .unwrap();
+        let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+        assert_error_envelope(&json, "BAD_REQUEST");
+    }
+}
+
+#[tokio::test]
+async fn compare_rejects_more_than_five_models() {
+    let response = app()
+        .await
+        .oneshot(
+            Request::builder()
+                .uri("/api/v1/compare?models=openai/gpt-4o,openai/gpt-4.1,openai/gpt-4.1-mini,openai/gpt-4.1-nano,anthropic/claude-opus-4-7,anthropic/claude-sonnet-4-6")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert_error_envelope(&json, "BAD_REQUEST");
+}
+
+#[tokio::test]
+async fn compare_unknown_model_returns_not_found() {
+    let response = app()
+        .await
+        .oneshot(
+            Request::builder()
+                .uri("/api/v1/compare?models=openai/gpt-4o,openai/does-not-exist")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::NOT_FOUND);
+    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert_error_envelope(&json, "MODEL_NOT_FOUND");
+}
 
 #[tokio::test]
 async fn validate_known_active_model() {

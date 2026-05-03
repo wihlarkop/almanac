@@ -26,6 +26,7 @@ use utoipa_scalar::{Scalar, Servable};
 use utoipa_swagger_ui::SwaggerUi;
 
 mod catalog;
+mod compare;
 mod health;
 mod models;
 mod providers;
@@ -78,6 +79,7 @@ pub fn api_router() -> OpenApiRouter<Arc<RwLock<AppState>>> {
     OpenApiRouter::with_openapi(ApiDoc::openapi())
         .routes(routes!(health::health))
         .routes(routes!(catalog::health))
+        .routes(routes!(compare::compare))
         .routes(routes!(providers::list_providers))
         .routes(routes!(models::list_models))
         .routes(routes!(models::get_model))

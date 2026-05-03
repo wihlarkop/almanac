@@ -157,6 +157,12 @@ Get one model:
 curl http://localhost:8080/api/v1/models/openai/gpt-4o
 ```
 
+Compare models:
+
+```bash
+curl "http://localhost:8080/api/v1/compare?models=openai/gpt-4o,anthropic/claude-opus-4-7"
+```
+
 Validate a model string:
 
 ```bash
