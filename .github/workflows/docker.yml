@@ -41,13 +41,23 @@ jobs:
           for attempt in $(seq 1 30); do
             if curl -fsS http://127.0.0.1:8080/api/v1/health -o health.json; then
               python3 -c "import json; data=json.load(open('health.json')); assert data['success'] is True; assert data['data']['status'] == 'ok'"
-              exit 0
+              break
+            fi
+            if [ "$attempt" = "30" ]; then
+              echo "Health check did not pass within 30 seconds"
+              exit 1
             fi
             sleep 1
           done
 
-          echo "Health check did not pass within 30 seconds"
-          exit 1
+          curl -fsS http://127.0.0.1:8080/openapi.json -o openapi.json
+          python3 -c "import json; data=json.load(open('openapi.json')); assert data['openapi'].startswith('3.'); assert '/api/v1/models' in data['paths']"
+
+          curl -fsS http://127.0.0.1:8080/api/v1/catalog/health -o catalog-health.json
+          python3 -c "import json; data=json.load(open('catalog-health.json')); assert data['success'] is True; assert data['data']['total_models'] > 0"
+
+          curl -fsS http://127.0.0.1:8080/api/v1/models/openai/gpt-4o -o model.json
+          python3 -c "import json; data=json.load(open('model.json')); assert data['success'] is True; assert data['data']['id'] == 'gpt-4o'"
 
   docker:
     needs: smoke
