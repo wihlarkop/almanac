@@ -1,4 +1,11 @@
-use crate::{error::ApiError, request::attach_request_context, state::AppState};
+use crate::{
+    error::ApiError,
+    request::{
+        MAX_REQUEST_BODY_BYTES, attach_request_context, enforce_request_timeout,
+        reject_oversized_payload,
+    },
+    state::AppState,
+};
 use axum::{
     Router,
     http::{Method, header},
@@ -7,8 +14,11 @@ use axum::{
 };
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
+use tower_http::{
+    cors::{Any, CorsLayer},
+    limit::RequestBodyLimitLayer,
+};
 use tracing::Level;
 use utoipa::{OpenApi as DeriveOpenApi, openapi::OpenApi};
 use utoipa_axum::{router::OpenApiRouter, routes};
@@ -39,6 +49,8 @@ pub fn router(state: Arc<RwLock<AppState>>) -> Router {
         .fallback(not_found)
         .with_state(state)
         .layer(middleware::from_fn(attach_request_context))
+        .layer(middleware::from_fn(enforce_request_timeout))
+        .layer(RequestBodyLimitLayer::new(MAX_REQUEST_BODY_BYTES as usize))
         .layer(
             CorsLayer::new()
                 .allow_origin(Any)
@@ -51,6 +63,7 @@ pub fn router(state: Arc<RwLock<AppState>>) -> Router {
                 .on_request(DefaultOnRequest::new().level(Level::INFO))
                 .on_response(DefaultOnResponse::new().level(Level::INFO)),
         )
+        .layer(middleware::from_fn(reject_oversized_payload))
 }
 
 async fn not_found() -> impl IntoResponse {

@@ -59,6 +59,36 @@ async fn health_returns_ok() {
 }
 
 #[tokio::test]
+async fn cors_preflight_allows_api_headers() {
+    let response = app()
+        .await
+        .oneshot(
+            Request::builder()
+                .method("OPTIONS")
+                .uri("/v1/models")
+                .header("origin", "https://example.com")
+                .header("access-control-request-method", "GET")
+                .header(
+                    "access-control-request-headers",
+                    "content-type,if-none-match",
+                )
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+    assert_eq!(
+        response
+            .headers()
+            .get("access-control-allow-origin")
+            .unwrap(),
+        "*"
+    );
+}
+
+#[tokio::test]
 async fn missing_route_returns_error_envelope() {
     let response = app()
         .await
@@ -162,6 +192,10 @@ async fn openapi_json_returns_spec() {
     assert_eq!(json["info"]["title"], "Almanac API");
     assert!(json["paths"]["/v1/models"].is_object());
     assert!(json["paths"]["/v1/validate"].is_object());
+    assert!(json["components"]["schemas"]["Model"].is_object());
+    assert!(json["components"]["schemas"]["Provider"].is_object());
+    assert!(json["components"]["schemas"]["ApiResponse_Model"].is_object());
+    assert!(json["components"]["schemas"]["ApiResponse_ValidateResponse"].is_object());
 }
 
 #[tokio::test]
@@ -544,6 +578,7 @@ async fn validate_known_active_model() {
                 .method("POST")
                 .uri("/v1/validate")
                 .header("content-type", "application/json")
+                .header("content-length", body.to_string().len().to_string())
                 .body(Body::from(body.to_string()))
                 .unwrap(),
         )
@@ -586,6 +621,33 @@ async fn validate_invalid_json_returns_error_envelope() {
     assert!(json["data"].is_null());
     assert_eq!(json["error"]["code"], "BAD_REQUEST");
     assert!(json["meta"]["timestamp"].as_str().is_some());
+}
+
+#[tokio::test]
+async fn validate_oversized_body_is_rejected() {
+    let oversized = "x".repeat(70 * 1024);
+    let body = serde_json::json!({
+        "model": "gpt-4o",
+        "parameters": {
+            "payload": oversized
+        }
+    });
+    let body = body.to_string();
+    let response = app()
+        .await
+        .oneshot(
+            Request::builder()
+                .method("POST")
+                .uri("/v1/validate")
+                .header("content-type", "application/json")
+                .header("content-length", body.len().to_string())
+                .body(Body::from(body))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::PAYLOAD_TOO_LARGE);
 }
 
 #[tokio::test]

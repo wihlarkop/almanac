@@ -172,6 +172,12 @@ impl Meta {
     }
 }
 
+impl Default for Meta {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 fn timestamp() -> String {
     OffsetDateTime::now_utc()
         .format(&Rfc3339)

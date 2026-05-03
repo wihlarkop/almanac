@@ -42,6 +42,16 @@ cargo run -p almanac-server
 
 The server listens on `0.0.0.0:8080` by default.
 
+## Run with Docker
+
+```bash
+docker build -t almanac-server:local .
+docker run --rm -p 8080:8080 almanac-server:local
+```
+
+The production image includes the public catalog under `/data` and runs the server as a non-root
+user. The Docker build context intentionally excludes `docs/`.
+
 Optional environment variables:
 
 - `PORT` - server port.
@@ -71,6 +81,19 @@ same envelope with `success=false`, `data=null`, and an `error.code` value.
 Every API response includes an `x-request-id` header. Successful JSON responses also include the
 same request id and request execution time in `meta`. Browser access is enabled with explicit CORS
 for GET and POST API calls, and basic security headers are set on responses.
+
+Requests are limited to 64 KiB bodies and a 10 second server-side timeout.
+
+## CI Checks
+
+The GitHub Actions validation workflow runs:
+
+- `cargo fmt --check`
+- `cargo clippy --workspace --all-targets -- -D warnings`
+- `cargo run -p almanac-validator`
+- `cargo test`
+- `cargo build -p almanac-server`
+- RustSec dependency audit
 
 ## API Examples
 

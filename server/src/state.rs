@@ -8,6 +8,9 @@ pub struct AppState {
     pub providers: Vec<Provider>,
     pub models: Vec<Model>,
     pub aliases: HashMap<String, String>,
+    pub providers_by_id: HashMap<String, usize>,
+    pub models_by_id: HashMap<String, usize>,
+    pub models_by_provider_id: HashMap<(String, String), usize>,
     pub etag: String,
 }
 
@@ -20,19 +23,37 @@ pub fn load_state(data_dir: &Path) -> Result<AppState> {
     ensure_dir(&models_dir)?;
     ensure_file(&aliases_path)?;
 
-    let providers = load_yaml_dir(&providers_dir)?;
-    let models = load_yaml_recursive(&models_dir)?;
+    let providers: Vec<Provider> = load_yaml_dir(&providers_dir)?;
+    let models: Vec<Model> = load_yaml_recursive(&models_dir)?;
     let aliases = load_aliases(&aliases_path)?;
 
     let mut hasher = Sha256::new();
     hasher.update(serde_json::to_string(&providers)?.as_bytes());
     hasher.update(serde_json::to_string(&models)?.as_bytes());
     let etag = format!("\"{}\"", hex::encode(hasher.finalize()));
+    let providers_by_id = providers
+        .iter()
+        .enumerate()
+        .map(|(index, provider)| (provider.id.clone(), index))
+        .collect();
+    let models_by_id = models
+        .iter()
+        .enumerate()
+        .map(|(index, model)| (model.id.clone(), index))
+        .collect();
+    let models_by_provider_id = models
+        .iter()
+        .enumerate()
+        .map(|(index, model)| ((model.provider.clone(), model.id.clone()), index))
+        .collect();
 
     Ok(AppState {
         providers,
         models,
         aliases,
+        providers_by_id,
+        models_by_id,
+        models_by_provider_id,
         etag,
     })
 }

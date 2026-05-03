@@ -205,9 +205,9 @@ pub async fn get_model(
     let state = state.read().await;
 
     let model = state
-        .models
-        .iter()
-        .find(|m| m.provider == provider && m.id == id);
+        .models_by_provider_id
+        .get(&(provider.clone(), id.clone()))
+        .and_then(|index| state.models.get(*index));
 
     match model {
         None => ApiError::ModelNotFound { provider, id }.into_response(),

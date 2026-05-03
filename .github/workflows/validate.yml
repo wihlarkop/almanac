@@ -1,4 +1,4 @@
-name: Validate Schema
+name: Validate
 
 on:
   pull_request:
@@ -12,8 +12,16 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
 
       - uses: Swatinem/rust-cache@v2
+
+      - name: Check formatting
+        run: cargo fmt --check
+
+      - name: Run clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
 
       - name: Validate all YAML files
         run: cargo run -p almanac-validator
@@ -23,3 +31,11 @@ jobs:
 
       - name: Build server
         run: cargo build -p almanac-server
+
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Audit dependencies
+        uses: rustsec/audit-check@v2

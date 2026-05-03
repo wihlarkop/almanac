@@ -1,0 +1,13 @@
+.git
+.github
+.claude
+docs
+target
+*.pdf
+*.log
+.env
+.env.*
+Dockerfile
+.dockerignore
+README.md
+TODO.md

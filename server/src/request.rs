@@ -1,13 +1,16 @@
+use crate::response::ApiResponse;
 use axum::{
     extract::Request,
-    http::{HeaderName, HeaderValue},
+    http::{HeaderName, HeaderValue, StatusCode, header},
     middleware::Next,
-    response::Response,
+    response::{IntoResponse, Json, Response},
 };
 use std::{
     sync::atomic::{AtomicU64, Ordering},
-    time::{Instant, SystemTime, UNIX_EPOCH},
+    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
+
+pub const MAX_REQUEST_BODY_BYTES: u64 = 64 * 1024;
 
 static NEXT_REQUEST_ID: AtomicU64 = AtomicU64::new(1);
 
@@ -37,6 +40,38 @@ pub async fn attach_request_context(mut request: Request, next: Next) -> Respons
     }
     set_security_headers(response.headers_mut());
     response
+}
+
+pub async fn enforce_request_timeout(request: Request, next: Next) -> Response {
+    match tokio::time::timeout(Duration::from_secs(10), next.run(request)).await {
+        Ok(response) => response,
+        Err(_) => (
+            StatusCode::REQUEST_TIMEOUT,
+            Json(ApiResponse::error("request timed out", "REQUEST_TIMEOUT")),
+        )
+            .into_response(),
+    }
+}
+
+pub async fn reject_oversized_payload(request: Request, next: Next) -> Response {
+    if request
+        .headers()
+        .get(header::CONTENT_LENGTH)
+        .and_then(|value| value.to_str().ok())
+        .and_then(|value| value.parse::<u64>().ok())
+        .is_some_and(|length| length > MAX_REQUEST_BODY_BYTES)
+    {
+        return (
+            StatusCode::PAYLOAD_TOO_LARGE,
+            Json(ApiResponse::error(
+                "request body too large",
+                "PAYLOAD_TOO_LARGE",
+            )),
+        )
+            .into_response();
+    }
+
+    next.run(request).await
 }
 
 fn new_request_id() -> String {

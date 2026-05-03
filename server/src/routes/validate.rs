@@ -71,15 +71,15 @@ pub async fn validate(
     let state = state.read().await;
 
     let model = state
-        .models
-        .iter()
-        .find(|model| model.id == req.model)
+        .models_by_id
+        .get(&req.model)
+        .and_then(|index| state.models.get(*index))
         .or_else(|| {
             state.aliases.get(&req.model).and_then(|canonical| {
                 state
-                    .models
-                    .iter()
-                    .find(|model| model.id == canonical.as_str())
+                    .models_by_id
+                    .get(canonical)
+                    .and_then(|index| state.models.get(*index))
             })
         });
 

@@ -49,7 +49,10 @@ pub async fn suggest(
                 .get(&id)
                 .cloned()
                 .unwrap_or_else(|| id.clone());
-            let model = state.models.iter().find(|model| model.id == canonical)?;
+            let model = state
+                .models_by_id
+                .get(&canonical)
+                .and_then(|index| state.models.get(*index))?;
             Some(SuggestResult {
                 id: canonical,
                 provider: model.provider.clone(),
