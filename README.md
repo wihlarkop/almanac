@@ -111,36 +111,36 @@ The GitHub Actions validation workflow runs:
 - `cargo build -p almanac-server`
 - RustSec dependency audit
 
-## API Examples
+## API Reference
 
-Health:
+Full interactive docs are available after starting the server:
 
-```bash
-curl http://localhost:8080/api/v1/health
-```
+- `http://localhost:8080/swagger-ui/`
+- `http://localhost:8080/scalar`
+- `http://localhost:8080/openapi.json`
 
-List providers:
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/v1/health` | Server health |
+| `GET` | `/api/v1/providers` | List providers |
+| `GET` | `/api/v1/providers/{id}` | Get provider details |
+| `GET` | `/api/v1/aliases` | List aliases |
+| `GET` | `/api/v1/aliases/{alias}` | Resolve one alias |
+| `GET` | `/api/v1/catalog/health` | Catalog health summary |
+| `GET` | `/api/v1/catalog/issues` | Catalog quality issue details |
+| `GET` | `/api/v1/models` | List and filter models |
+| `GET` | `/api/v1/models/{provider}/{id}` | Get one model |
+| `GET` | `/api/v1/search` | Search models |
+| `GET` | `/api/v1/compare` | Compare models |
+| `POST` | `/api/v1/validate` | Validate model usage |
+| `GET` | `/api/v1/suggest` | Suggest model IDs |
 
-```bash
-curl http://localhost:8080/api/v1/providers
-```
-
-Catalog health:
-
-```bash
-curl http://localhost:8080/api/v1/catalog/health
-```
-
-List all models:
-
-```bash
-curl http://localhost:8080/api/v1/models
-```
-
-Filter models:
+Validate a model:
 
 ```bash
-curl "http://localhost:8080/api/v1/models?provider=openai&status=active&capability=vision"
+curl -X POST http://localhost:8080/api/v1/validate \
+  -H "content-type: application/json" \
+  -d '{"model":"gpt-4o","provider":"openai"}'
 ```
 
 Search models:
@@ -149,63 +149,11 @@ Search models:
 curl "http://localhost:8080/api/v1/search?q=gpt&provider=openai&limit=5"
 ```
 
-Paginate, sort, and filter models:
-
-```bash
-curl "http://localhost:8080/api/v1/models?limit=20&offset=0&sort=context_window&order=desc&modality_input=image&min_context=100000"
-```
-
-Model list pagination defaults to `limit=20` and `offset=0`.
-
-Get one model:
-
-```bash
-curl http://localhost:8080/api/v1/models/openai/gpt-4o
-```
-
 Compare models:
 
 ```bash
 curl "http://localhost:8080/api/v1/compare?models=openai/gpt-4o,anthropic/claude-opus-4-7"
 ```
-
-Validate a model string:
-
-```bash
-curl -X POST http://localhost:8080/api/v1/validate \
-  -H "content-type: application/json" \
-  -d '{"model":"gpt-4o","provider":"openai"}'
-```
-
-Validate request compatibility:
-
-```bash
-curl -X POST http://localhost:8080/api/v1/validate \
-  -H "content-type: application/json" \
-  -d '{
-    "model":"grok-4.20-reasoning",
-    "provider":"xai",
-    "parameters":{"temperature":0.7,"stream":true},
-    "modalities":{"input":["text","image"],"output":["text"]}
-  }'
-```
-
-Suggest likely model IDs:
-
-```bash
-curl "http://localhost:8080/api/v1/suggest?q=claude-opus-4.7"
-```
-
-API documentation:
-
-```bash
-curl http://localhost:8080/openapi.json
-```
-
-Interactive docs are available at:
-
-- `http://localhost:8080/swagger-ui/`
-- `http://localhost:8080/scalar`
 
 ## Model File Format
 
