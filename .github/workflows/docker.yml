@@ -1,6 +1,7 @@
 name: Build and Push Docker Image
 
 on:
+  pull_request:
   push:
     branches: [main]
 
@@ -9,7 +10,48 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build smoke image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: false
+          load: true
+          tags: almanac-server:smoke
+
+      - name: Run smoke test
+        run: |
+          set -euo pipefail
+
+          docker run --rm -d --name almanac-smoke -p 8080:8080 almanac-server:smoke
+
+          cleanup() {
+            docker logs almanac-smoke || true
+            docker rm -f almanac-smoke >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8080/v1/health -o health.json; then
+              python3 -c "import json; data=json.load(open('health.json')); assert data['success'] is True; assert data['data']['status'] == 'ok'"
+              exit 0
+            fi
+            sleep 1
+          done
+
+          echo "Health check did not pass within 30 seconds"
+          exit 1
+
   docker:
+    needs: smoke
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: read
