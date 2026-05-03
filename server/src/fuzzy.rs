@@ -12,11 +12,7 @@ pub fn top_matches(
     let mut candidates: Vec<(String, f64)> = state
         .models
         .iter()
-        .filter_map(|m| {
-            m["id"]
-                .as_str()
-                .map(|id| (id.to_string(), jaro_winkler(query, id)))
-        })
+        .map(|model| (model.id.clone(), jaro_winkler(query, model.id.as_str())))
         .chain(
             state
                 .aliases

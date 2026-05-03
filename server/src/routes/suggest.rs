@@ -1,5 +1,8 @@
-use crate::{error::ApiError, fuzzy, response::ApiResponse, state::AppState};
+use crate::{
+    error::ApiError, fuzzy, request::RequestContext, response::ApiResponse, state::AppState,
+};
 use axum::{
+    Extension,
     extract::{Query, State, rejection::QueryRejection},
     response::Json,
 };
@@ -30,6 +33,7 @@ pub struct SuggestResult {
 )]
 pub async fn suggest(
     State(state): State<Arc<RwLock<AppState>>>,
+    Extension(context): Extension<RequestContext>,
     query: Result<Query<SuggestQuery>, QueryRejection>,
 ) -> Result<Json<ApiResponse<Vec<SuggestResult>>>, ApiError> {
     let Query(params) = query.map_err(|error| ApiError::BadRequest {
@@ -45,18 +49,14 @@ pub async fn suggest(
                 .get(&id)
                 .cloned()
                 .unwrap_or_else(|| id.clone());
-            let model = state
-                .models
-                .iter()
-                .find(|m| m["id"].as_str() == Some(canonical.as_str()))?;
-            let provider = model["provider"].as_str().unwrap_or("").to_string();
+            let model = state.models.iter().find(|model| model.id == canonical)?;
             Some(SuggestResult {
                 id: canonical,
-                provider,
+                provider: model.provider.clone(),
                 score: (score * 1000.0).round() / 1000.0,
             })
         })
         .collect();
 
-    Ok(Json(ApiResponse::ok(results)))
+    Ok(Json(ApiResponse::ok_with_context(results, &context)))
 }

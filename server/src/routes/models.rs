@@ -1,9 +1,12 @@
 use crate::{
+    catalog::Model,
     error::ApiError,
+    request::RequestContext,
     response::{ApiResponse, catalog_headers},
     state::AppState,
 };
 use axum::{
+    Extension,
     extract::{Path, Query, State, rejection::QueryRejection},
     http::{HeaderMap, StatusCode},
     response::{IntoResponse, Json},
@@ -68,13 +71,14 @@ impl ModelFilter {
     path = "/v1/models",
     params(ModelFilter),
     responses(
-        (status = 200, description = "Paginated model list"),
+        (status = 200, description = "Paginated model list", body = ApiResponse<Vec<Model>>),
         (status = 400, description = "Invalid query parameters", body = ApiResponse<crate::response::EmptyData>),
         (status = 304, description = "Catalog not modified")
     )
 )]
 pub async fn list_models(
     State(state): State<Arc<RwLock<AppState>>>,
+    Extension(context): Extension<RequestContext>,
     query: Result<Query<ModelFilter>, QueryRejection>,
     headers: HeaderMap,
 ) -> impl IntoResponse {
@@ -95,48 +99,63 @@ pub async fn list_models(
         }
     }
 
-    let mut models: Vec<serde_json::Value> = state
+    let mut models: Vec<Model> = state
         .models
         .iter()
         .filter(|m| {
             if let Some(provider) = filter.provider() {
-                if m["provider"].as_str() != Some(provider) {
+                if m.provider != provider {
                     return false;
                 }
             }
             if let Some(status) = filter.status() {
-                if m["status"].as_str() != Some(status) {
+                if m.status.as_str() != status {
                     return false;
                 }
             }
             if let Some(caps) = filter.capability() {
                 for cap in caps.split(',') {
-                    if m["capabilities"][cap.trim()].as_bool() != Some(true) {
+                    if m.capabilities.get(cap.trim()) != Some(&true) {
                         return false;
                     }
                 }
             }
             if let Some(modalities) = filter.modality_input() {
                 for modality in modalities.split(',') {
-                    if !array_contains(&m["modalities"]["input"], modality.trim()) {
+                    if !m
+                        .modalities
+                        .input
+                        .iter()
+                        .any(|supported| supported == modality.trim())
+                    {
                         return false;
                     }
                 }
             }
             if let Some(modalities) = filter.modality_output() {
                 for modality in modalities.split(',') {
-                    if !array_contains(&m["modalities"]["output"], modality.trim()) {
+                    if !m
+                        .modalities
+                        .output
+                        .iter()
+                        .any(|supported| supported == modality.trim())
+                    {
                         return false;
                     }
                 }
             }
             if let Some(min_context) = filter.min_context {
-                if m["context_window"].as_u64().unwrap_or(0) < min_context {
+                if m.context_window < min_context {
                     return false;
                 }
             }
             if let Some(max_input_price) = filter.max_input_price {
-                if m["pricing"]["input"].as_f64().unwrap_or(f64::MAX) > max_input_price {
+                if m.pricing
+                    .as_ref()
+                    .map(|pricing| pricing.input)
+                    .unwrap_or(f64::MAX)
+                    > max_input_price
+                {
                     return false;
                 }
             }
@@ -157,7 +176,9 @@ pub async fn list_models(
 
     (
         catalog_headers(&state.etag),
-        Json(ApiResponse::paginated(data, limit, offset, total)),
+        Json(ApiResponse::paginated_with_context(
+            data, limit, offset, total, &context,
+        )),
     )
         .into_response()
 }
@@ -170,21 +191,23 @@ pub async fn list_models(
         ("id" = String, Path, description = "Model id")
     ),
     responses(
-        (status = 200, description = "Model metadata"),
+        (status = 200, description = "Model metadata", body = ApiResponse<Model>),
         (status = 304, description = "Catalog not modified"),
         (status = 404, description = "Model not found", body = ApiResponse<crate::response::EmptyData>)
     )
 )]
 pub async fn get_model(
     State(state): State<Arc<RwLock<AppState>>>,
+    Extension(context): Extension<RequestContext>,
     Path((provider, id)): Path<(String, String)>,
     headers: HeaderMap,
 ) -> impl IntoResponse {
     let state = state.read().await;
 
-    let model = state.models.iter().find(|m| {
-        m["provider"].as_str() == Some(provider.as_str()) && m["id"].as_str() == Some(id.as_str())
-    });
+    let model = state
+        .models
+        .iter()
+        .find(|m| m.provider == provider && m.id == id);
 
     match model {
         None => ApiError::ModelNotFound { provider, id }.into_response(),
@@ -196,18 +219,11 @@ pub async fn get_model(
             }
             (
                 catalog_headers(&state.etag),
-                Json(ApiResponse::ok(m.clone())),
+                Json(ApiResponse::ok_with_context(m.clone(), &context)),
             )
                 .into_response()
         }
     }
-}
-
-fn array_contains(value: &serde_json::Value, expected: &str) -> bool {
-    value
-        .as_array()
-        .map(|items| items.iter().any(|item| item.as_str() == Some(expected)))
-        .unwrap_or(false)
 }
 
 fn non_empty(value: Option<&str>) -> Option<&str> {
@@ -217,30 +233,18 @@ fn non_empty(value: Option<&str>) -> Option<&str> {
     })
 }
 
-fn sort_models(models: &mut [serde_json::Value], sort: Option<&str>, order: Option<&str>) {
+fn sort_models(models: &mut [Model], sort: Option<&str>, order: Option<&str>) {
     let sort = sort.unwrap_or("provider");
     let descending = order == Some("desc");
 
     models.sort_by(|a, b| {
         let ordering = match sort {
-            "context_window" | "max_output_tokens" => a[sort]
-                .as_u64()
-                .unwrap_or(0)
-                .cmp(&b[sort].as_u64().unwrap_or(0)),
-            "status" | "id" | "provider" => a[sort]
-                .as_str()
-                .unwrap_or_default()
-                .cmp(b[sort].as_str().unwrap_or_default()),
-            _ => a["provider"]
-                .as_str()
-                .unwrap_or_default()
-                .cmp(b["provider"].as_str().unwrap_or_default())
-                .then(
-                    a["id"]
-                        .as_str()
-                        .unwrap_or_default()
-                        .cmp(b["id"].as_str().unwrap_or_default()),
-                ),
+            "context_window" => a.context_window.cmp(&b.context_window),
+            "max_output_tokens" => a.max_output_tokens.cmp(&b.max_output_tokens),
+            "status" => a.status.as_str().cmp(b.status.as_str()),
+            "id" => a.id.cmp(&b.id),
+            "provider" => a.provider.cmp(&b.provider),
+            _ => a.provider.cmp(&b.provider).then(a.id.cmp(&b.id)),
         };
 
         if descending {

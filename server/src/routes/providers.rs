@@ -1,8 +1,11 @@
 use crate::{
+    catalog::Provider,
+    request::RequestContext,
     response::{ApiResponse, catalog_headers},
     state::AppState,
 };
 use axum::{
+    Extension,
     extract::State,
     http::{HeaderMap, StatusCode},
     response::{IntoResponse, Json},
@@ -14,12 +17,13 @@ use tokio::sync::RwLock;
     get,
     path = "/v1/providers",
     responses(
-        (status = 200, description = "Provider list"),
+        (status = 200, description = "Provider list", body = ApiResponse<Vec<Provider>>),
         (status = 304, description = "Catalog not modified")
     )
 )]
 pub async fn list_providers(
     State(state): State<Arc<RwLock<AppState>>>,
+    Extension(context): Extension<RequestContext>,
     headers: HeaderMap,
 ) -> impl IntoResponse {
     let state = state.read().await;
@@ -32,7 +36,10 @@ pub async fn list_providers(
 
     (
         catalog_headers(&state.etag),
-        Json(ApiResponse::ok(state.providers.clone())),
+        Json(ApiResponse::ok_with_context(
+            state.providers.clone(),
+            &context,
+        )),
     )
         .into_response()
 }

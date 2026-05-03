@@ -1,7 +1,7 @@
+use crate::request::RequestContext;
+use axum::http::{HeaderMap, HeaderValue};
 use serde::Serialize;
 use time::{OffsetDateTime, format_description::well_known::Rfc3339};
-
-use axum::http::{HeaderMap, HeaderValue};
 
 pub fn catalog_headers(etag: &str) -> HeaderMap {
     let mut headers = HeaderMap::new();
@@ -37,6 +37,8 @@ pub struct Meta {
     pub total_data: Option<usize>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub execution_time_seconds: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub request_id: Option<String>,
     pub timestamp: String,
 }
 
@@ -59,12 +61,38 @@ impl<T> ApiResponse<T> {
         }
     }
 
+    pub fn ok_with_context(data: T, context: &RequestContext) -> Self {
+        Self {
+            success: true,
+            message: "OK".to_string(),
+            data: Some(data),
+            meta: Meta::from_context(context),
+            error: None,
+        }
+    }
+
     pub fn paginated(data: T, limit: usize, offset: usize, total_data: usize) -> Self {
         Self {
             success: true,
             message: "OK".to_string(),
             data: Some(data),
             meta: Meta::paginated(limit, offset, total_data),
+            error: None,
+        }
+    }
+
+    pub fn paginated_with_context(
+        data: T,
+        limit: usize,
+        offset: usize,
+        total_data: usize,
+        context: &RequestContext,
+    ) -> Self {
+        Self {
+            success: true,
+            message: "OK".to_string(),
+            data: Some(data),
+            meta: Meta::paginated_from_context(limit, offset, total_data, context),
             error: None,
         }
     }
@@ -100,6 +128,18 @@ impl Meta {
             offset: None,
             total_data: None,
             execution_time_seconds: None,
+            request_id: None,
+            timestamp: timestamp(),
+        }
+    }
+
+    pub fn from_context(context: &RequestContext) -> Self {
+        Self {
+            limit: None,
+            offset: None,
+            total_data: None,
+            execution_time_seconds: Some(context.started_at.elapsed().as_secs_f64()),
+            request_id: Some(context.request_id.clone()),
             timestamp: timestamp(),
         }
     }
@@ -110,6 +150,23 @@ impl Meta {
             offset: Some(offset),
             total_data: Some(total_data),
             execution_time_seconds: None,
+            request_id: None,
+            timestamp: timestamp(),
+        }
+    }
+
+    pub fn paginated_from_context(
+        limit: usize,
+        offset: usize,
+        total_data: usize,
+        context: &RequestContext,
+    ) -> Self {
+        Self {
+            limit: Some(limit),
+            offset: Some(offset),
+            total_data: Some(total_data),
+            execution_time_seconds: Some(context.started_at.elapsed().as_secs_f64()),
+            request_id: Some(context.request_id.clone()),
             timestamp: timestamp(),
         }
     }

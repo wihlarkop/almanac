@@ -11,6 +11,8 @@ pub enum ApiError {
     ModelNotFound { provider: String, id: String },
     #[error("{message}")]
     BadRequest { message: String },
+    #[error("{message}")]
+    NotFound { message: String },
     #[error("internal server error")]
     Internal(#[from] anyhow::Error),
 }
@@ -20,6 +22,7 @@ impl ApiError {
         match self {
             Self::ModelNotFound { .. } => StatusCode::NOT_FOUND,
             Self::BadRequest { .. } => StatusCode::BAD_REQUEST,
+            Self::NotFound { .. } => StatusCode::NOT_FOUND,
             Self::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
@@ -28,6 +31,7 @@ impl ApiError {
         match self {
             Self::ModelNotFound { .. } => "MODEL_NOT_FOUND",
             Self::BadRequest { .. } => "BAD_REQUEST",
+            Self::NotFound { .. } => "NOT_FOUND",
             Self::Internal(_) => "INTERNAL_SERVER_ERROR",
         }
     }
@@ -38,7 +42,7 @@ impl ApiError {
                 "provider": provider,
                 "id": id
             })),
-            Self::BadRequest { .. } | Self::Internal(_) => None,
+            Self::BadRequest { .. } | Self::NotFound { .. } | Self::Internal(_) => None,
         }
     }
 }

@@ -1,4 +1,5 @@
-use crate::response::ApiResponse;
+use crate::{request::RequestContext, response::ApiResponse};
+use axum::Extension;
 use axum::response::Json;
 use serde::Serialize;
 
@@ -13,9 +14,14 @@ pub struct HealthData {
     path = "/v1/health",
     responses((status = 200, description = "Server health status", body = ApiResponse<HealthData>))
 )]
-pub async fn health() -> Json<ApiResponse<HealthData>> {
-    Json(ApiResponse::ok(HealthData {
-        status: "ok",
-        version: env!("CARGO_PKG_VERSION"),
-    }))
+pub async fn health(
+    Extension(context): Extension<RequestContext>,
+) -> Json<ApiResponse<HealthData>> {
+    Json(ApiResponse::ok_with_context(
+        HealthData {
+            status: "ok",
+            version: env!("CARGO_PKG_VERSION"),
+        },
+        &context,
+    ))
 }

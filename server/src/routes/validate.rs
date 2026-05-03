@@ -1,5 +1,13 @@
-use crate::{error::ApiError, fuzzy, response::ApiResponse, state::AppState};
+use crate::{
+    catalog::{Model, ModelStatus},
+    error::ApiError,
+    fuzzy,
+    request::RequestContext,
+    response::ApiResponse,
+    state::AppState,
+};
 use axum::{
+    Extension,
     extract::{State, rejection::JsonRejection},
     response::Json,
 };
@@ -54,6 +62,7 @@ pub struct ValidationIssue {
 )]
 pub async fn validate(
     State(state): State<Arc<RwLock<AppState>>>,
+    Extension(context): Extension<RequestContext>,
     payload: Result<Json<ValidateRequest>, JsonRejection>,
 ) -> Result<Json<ApiResponse<ValidateResponse>>, ApiError> {
     let Json(req) = payload.map_err(|error| ApiError::BadRequest {
@@ -64,13 +73,13 @@ pub async fn validate(
     let model = state
         .models
         .iter()
-        .find(|m| m["id"].as_str() == Some(req.model.as_str()))
+        .find(|model| model.id == req.model)
         .or_else(|| {
             state.aliases.get(&req.model).and_then(|canonical| {
                 state
                     .models
                     .iter()
-                    .find(|m| m["id"].as_str() == Some(canonical.as_str()))
+                    .find(|model| model.id == canonical.as_str())
             })
         });
 
@@ -94,16 +103,16 @@ pub async fn validate(
             None
         }
         Some(m) => {
-            let id = m["id"].as_str().unwrap_or_default().to_string();
-            let status = m["status"].as_str().unwrap_or_default();
-            let replacement: Vec<String> = m["replacement"]
-                .as_str()
+            let id = m.id.clone();
+            let replacement: Vec<String> = m
+                .replacement
+                .as_deref()
                 .filter(|s| !s.is_empty())
                 .map(|s| vec![s.to_string()])
                 .unwrap_or_default();
 
-            match status {
-                "retired" => {
+            match m.status {
+                ModelStatus::Retired => {
                     errors.push(ValidationIssue {
                         code: "MODEL_RETIRED".to_string(),
                         message: format!("'{}' has been retired and is no longer available", id),
@@ -113,7 +122,7 @@ pub async fn validate(
                         direction: None,
                     });
                 }
-                "deprecated" => {
+                ModelStatus::Deprecated => {
                     warnings.push(ValidationIssue {
                         code: "MODEL_DEPRECATED".to_string(),
                         message: format!("'{}' is deprecated", id),
@@ -123,7 +132,7 @@ pub async fn validate(
                         direction: None,
                     });
                 }
-                "deprecating" => {
+                ModelStatus::Deprecating => {
                     warnings.push(ValidationIssue {
                         code: "MODEL_DEPRECATING".to_string(),
                         message: format!("'{}' is being deprecated soon", id),
@@ -133,17 +142,16 @@ pub async fn validate(
                         direction: None,
                     });
                 }
-                _ => {}
+                ModelStatus::Active => {}
             }
 
             if let Some(ref req_provider) = req.provider {
-                let model_provider = m["provider"].as_str().unwrap_or_default();
-                if model_provider != req_provider.as_str() {
+                if m.provider != req_provider.as_str() {
                     errors.push(ValidationIssue {
                         code: "PROVIDER_MISMATCH".to_string(),
                         message: format!(
                             "'{}' belongs to provider '{}', not '{}'",
-                            id, model_provider, req_provider
+                            id, m.provider, req_provider
                         ),
                         suggestions: vec![],
                         parameter: None,
@@ -160,32 +168,19 @@ pub async fn validate(
         }
     };
 
-    Ok(Json(ApiResponse::ok(ValidateResponse {
-        valid: errors.is_empty(),
-        canonical_id,
-        errors,
-        warnings,
-    })))
-}
-
-fn string_set(model: &serde_json::Value, path: &[&str]) -> Vec<String> {
-    let mut current = model;
-    for key in path {
-        current = &current[*key];
-    }
-    current
-        .as_array()
-        .map(|items| {
-            items
-                .iter()
-                .filter_map(|item| item.as_str().map(str::to_string))
-                .collect()
-        })
-        .unwrap_or_default()
+    Ok(Json(ApiResponse::ok_with_context(
+        ValidateResponse {
+            valid: errors.is_empty(),
+            canonical_id,
+            errors,
+            warnings,
+        },
+        &context,
+    )))
 }
 
 fn validate_parameters(
-    model: &serde_json::Value,
+    model: &Model,
     req: &ValidateRequest,
     errors: &mut Vec<ValidationIssue>,
     warnings: &mut Vec<ValidationIssue>,
@@ -194,12 +189,8 @@ fn validate_parameters(
         return;
     };
 
-    let supported = string_set(model, &["parameters", "supported"]);
-    let rejected = string_set(model, &["parameters", "rejected"]);
-    let deprecated = string_set(model, &["parameters", "deprecated_for_this_model"]);
-
     for parameter in parameters.keys() {
-        if rejected.iter().any(|p| p == parameter) {
+        if model.parameters.rejected.iter().any(|p| p == parameter) {
             errors.push(ValidationIssue {
                 code: "PARAMETER_REJECTED".to_string(),
                 message: format!("parameter '{}' is rejected by this model", parameter),
@@ -208,7 +199,12 @@ fn validate_parameters(
                 modality: None,
                 direction: None,
             });
-        } else if deprecated.iter().any(|p| p == parameter) {
+        } else if model
+            .parameters
+            .deprecated_for_this_model
+            .iter()
+            .any(|p| p == parameter)
+        {
             warnings.push(ValidationIssue {
                 code: "PARAMETER_DEPRECATED".to_string(),
                 message: format!("parameter '{}' is deprecated for this model", parameter),
@@ -217,7 +213,7 @@ fn validate_parameters(
                 modality: None,
                 direction: None,
             });
-        } else if !supported.iter().any(|p| p == parameter) {
+        } else if !model.parameters.supported.iter().any(|p| p == parameter) {
             warnings.push(ValidationIssue {
                 code: "PARAMETER_UNSUPPORTED".to_string(),
                 message: format!(
@@ -233,26 +229,21 @@ fn validate_parameters(
     }
 }
 
-fn validate_modalities(
-    model: &serde_json::Value,
-    req: &ValidateRequest,
-    errors: &mut Vec<ValidationIssue>,
-) {
+fn validate_modalities(model: &Model, req: &ValidateRequest, errors: &mut Vec<ValidationIssue>) {
     let Some(modalities) = &req.modalities else {
         return;
     };
 
     if let Some(requested) = &modalities.input {
-        let supported = string_set(model, &["modalities", "input"]);
         for modality in requested {
-            if !supported.iter().any(|m| m == modality) {
+            if !model.modalities.input.iter().any(|m| m == modality) {
                 errors.push(ValidationIssue {
                     code: "MODALITY_UNSUPPORTED".to_string(),
                     message: format!(
                         "input modality '{}' is not supported by this model",
                         modality
                     ),
-                    suggestions: supported.clone(),
+                    suggestions: model.modalities.input.clone(),
                     parameter: None,
                     modality: Some(modality.clone()),
                     direction: Some("input".to_string()),
@@ -262,16 +253,15 @@ fn validate_modalities(
     }
 
     if let Some(requested) = &modalities.output {
-        let supported = string_set(model, &["modalities", "output"]);
         for modality in requested {
-            if !supported.iter().any(|m| m == modality) {
+            if !model.modalities.output.iter().any(|m| m == modality) {
                 errors.push(ValidationIssue {
                     code: "MODALITY_UNSUPPORTED".to_string(),
                     message: format!(
                         "output modality '{}' is not supported by this model",
                         modality
                     ),
-                    suggestions: supported.clone(),
+                    suggestions: model.modalities.output.clone(),
                     parameter: None,
                     modality: Some(modality.clone()),
                     direction: Some("output".to_string()),

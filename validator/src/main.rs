@@ -119,6 +119,113 @@ fn report_error(errors: &mut Vec<String>, message: String) {
     errors.push(message);
 }
 
+fn is_http_url(value: &str) -> bool {
+    let Some(rest) = value
+        .strip_prefix("https://")
+        .or_else(|| value.strip_prefix("http://"))
+    else {
+        return false;
+    };
+
+    rest.contains('.') && !rest.contains(char::is_whitespace)
+}
+
+fn validate_url(errors: &mut Vec<String>, rel: &str, field: &str, value: Option<&str>) {
+    let Some(value) = value else {
+        return;
+    };
+
+    if !is_http_url(value) {
+        report_error(
+            errors,
+            format!("{rel}: {field} '{value}' must be an http(s) URL"),
+        );
+    }
+}
+
+fn validate_sources(errors: &mut Vec<String>, rel: &str, data: &serde_json::Value) {
+    let Some(sources) = data["sources"].as_array() else {
+        return;
+    };
+
+    for (index, source) in sources.iter().enumerate() {
+        validate_url(
+            errors,
+            rel,
+            &format!("sources[{index}].url"),
+            source["url"].as_str(),
+        );
+    }
+}
+
+fn validate_lifecycle_replacement(
+    errors: &mut Vec<String>,
+    rel: &str,
+    meta: &ModelMeta,
+    model_ids: &HashMap<String, String>,
+) {
+    if let Some(replacement) = &meta.replacement {
+        if !model_ids.contains_key(replacement) {
+            report_error(
+                errors,
+                format!("{rel}: replacement '{replacement}' does not match any model id"),
+            );
+        }
+        return;
+    }
+
+    if matches!(
+        meta.status.as_str(),
+        "deprecating" | "deprecated" | "retired"
+    ) {
+        report_error(
+            errors,
+            format!(
+                "{rel}: {} model must define replacement model id",
+                meta.status
+            ),
+        );
+    }
+}
+
+fn duplicate_alias_keys(raw: &str) -> Vec<String> {
+    let mut in_aliases = false;
+    let mut seen = HashSet::new();
+    let mut duplicates = Vec::new();
+
+    for line in raw.lines() {
+        let trimmed = line.trim();
+        if trimmed.is_empty() || trimmed.starts_with('#') {
+            continue;
+        }
+
+        if trimmed == "aliases:" {
+            in_aliases = true;
+            continue;
+        }
+
+        if in_aliases && !line.starts_with(' ') && !line.starts_with('\t') {
+            break;
+        }
+
+        if !in_aliases {
+            continue;
+        }
+
+        let Some((key, _)) = trimmed.split_once(':') else {
+            continue;
+        };
+        let key = key.trim().trim_matches('"').trim_matches('\'').to_string();
+        if !seen.insert(key.clone()) {
+            duplicates.push(key);
+        }
+    }
+
+    duplicates.sort();
+    duplicates.dedup();
+    duplicates
+}
+
 fn validate_date_order(
     errors: &mut Vec<String>,
     rel: &str,
@@ -268,6 +375,8 @@ fn main() -> Result<()> {
                         println!("  \u{2717} {msg}");
                         errors.push(msg);
                     } else {
+                        validate_url(&mut errors, &rel, "website", data["website"].as_str());
+                        validate_url(&mut errors, &rel, "api_docs", data["api_docs"].as_str());
                         provider_ids.insert(actual.to_string());
                         println!("  \u{2713} {rel}");
                     }
@@ -338,6 +447,7 @@ fn main() -> Result<()> {
                             }
 
                             model_ids.insert(actual.to_string(), rel.clone());
+                            validate_sources(&mut errors, &rel, &data);
                             model_meta.insert(
                                 actual.to_string(),
                                 ModelMeta {
@@ -374,14 +484,7 @@ fn main() -> Result<()> {
     for meta in model_meta.values() {
         let rel = rel_path(&root, &meta.path);
 
-        if let Some(replacement) = &meta.replacement {
-            if !model_meta.contains_key(replacement) {
-                report_error(
-                    &mut errors,
-                    format!("{rel}: replacement '{replacement}' does not match any model id"),
-                );
-            }
-        }
+        validate_lifecycle_replacement(&mut errors, &rel, meta, &model_ids);
 
         validate_date_order(
             &mut errors,
@@ -414,6 +517,15 @@ fn main() -> Result<()> {
     let aliases_path = root.join("aliases.yaml");
     if aliases_path.exists() {
         let known_ids: HashSet<String> = model_meta.keys().cloned().collect();
+        let raw_aliases = std::fs::read_to_string(&aliases_path)
+            .with_context(|| format!("reading {}", aliases_path.display()))?;
+
+        for alias in duplicate_alias_keys(&raw_aliases) {
+            report_error(
+                &mut errors,
+                format!("aliases.yaml: duplicate alias '{alias}'"),
+            );
+        }
 
         match load_yaml(&aliases_path) {
             Err(e) => {
@@ -424,8 +536,24 @@ fn main() -> Result<()> {
                 if let Some(aliases) = data["aliases"].as_object() {
                     let mut entries: Vec<_> = aliases.iter().collect();
                     entries.sort_by_key(|(k, _)| k.as_str());
+                    let alias_keys: HashSet<_> = aliases.keys().map(|key| key.as_str()).collect();
                     for (alias, target) in entries {
                         let t = target.as_str().unwrap_or_default();
+                        if known_ids.contains(alias.as_str()) {
+                            let msg =
+                                format!("aliases.yaml: alias '{alias}' must not shadow a model id");
+                            println!("  \u{2717} {msg}");
+                            errors.push(msg);
+                            continue;
+                        }
+                        if alias_keys.contains(t) {
+                            let msg = format!(
+                                "aliases.yaml: '{alias}' \u{2192} '{t}' creates an alias chain"
+                            );
+                            println!("  \u{2717} {msg}");
+                            errors.push(msg);
+                            continue;
+                        }
                         if !known_ids.contains(t) {
                             let msg = format!(
                                 "aliases.yaml: '{alias}' \u{2192} '{t}' does not match any model id"
@@ -571,6 +699,57 @@ mod tests {
                 .iter()
                 .any(|e| e.contains("top_p") && e.contains("supported and deprecated"))
         );
+    }
+
+    #[test]
+    fn url_validation_requires_http_url() {
+        let mut errors = Vec::new();
+
+        validate_url(
+            &mut errors,
+            "providers/test.yaml",
+            "website",
+            Some("example.com"),
+        );
+        validate_url(
+            &mut errors,
+            "providers/test.yaml",
+            "api_docs",
+            Some("https://example.com/docs"),
+        );
+
+        assert_eq!(errors.len(), 1);
+        assert!(errors[0].contains("must be an http(s) URL"));
+    }
+
+    #[test]
+    fn duplicate_alias_keys_detects_duplicate_yaml_entries() {
+        let raw = r#"
+aliases:
+  gpt-latest: gpt-4o
+  claude-latest: claude-sonnet-4-6
+  gpt-latest: gpt-5
+"#;
+
+        assert_eq!(duplicate_alias_keys(raw), vec!["gpt-latest".to_string()]);
+    }
+
+    #[test]
+    fn lifecycle_replacement_validation_requires_successor_for_inactive_models() {
+        let mut errors = Vec::new();
+        let model_ids = HashMap::new();
+        let mut meta = meta_with_parameters(vec![], vec![], vec![]);
+        meta.status = "deprecated".to_string();
+
+        validate_lifecycle_replacement(
+            &mut errors,
+            "models/test/test-model.yaml",
+            &meta,
+            &model_ids,
+        );
+
+        assert_eq!(errors.len(), 1);
+        assert!(errors[0].contains("deprecated model must define replacement"));
     }
 
     #[test]

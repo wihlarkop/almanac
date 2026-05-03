@@ -68,6 +68,10 @@ Successful JSON responses use this envelope:
 Paginated responses add `limit`, `offset`, and `total_data` to `meta`. Error responses use the
 same envelope with `success=false`, `data=null`, and an `error.code` value.
 
+Every API response includes an `x-request-id` header. Successful JSON responses also include the
+same request id and request execution time in `meta`. Browser access is enabled with explicit CORS
+for GET and POST API calls, and basic security headers are set on responses.
+
 ## API Examples
 
 Health:

@@ -41,14 +41,45 @@ async fn health_returns_ok() {
         .unwrap();
 
     assert_eq!(response.status(), StatusCode::OK);
+    assert!(response.headers().contains_key("x-request-id"));
+    assert_eq!(
+        response.headers().get("x-content-type-options").unwrap(),
+        "nosniff"
+    );
 
     let body = axum::body::to_bytes(response.into_body(), usize::MAX)
         .await
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
     assert_success_envelope(&json);
+    assert!(json["meta"]["request_id"].as_str().is_some());
+    assert!(json["meta"]["execution_time_seconds"].as_f64().is_some());
     assert_eq!(json["data"]["status"], "ok");
     assert_eq!(json["data"]["version"], "0.1.0");
+}
+
+#[tokio::test]
+async fn missing_route_returns_error_envelope() {
+    let response = app()
+        .await
+        .oneshot(
+            Request::builder()
+                .uri("/does-not-exist")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::NOT_FOUND);
+    assert!(response.headers().contains_key("x-request-id"));
+
+    let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+    assert_eq!(json["success"], false);
+    assert_eq!(json["error"]["code"], "NOT_FOUND");
 }
 
 #[tokio::test]

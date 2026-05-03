@@ -1,11 +1,12 @@
+use crate::catalog::{Model, Provider};
 use anyhow::{Context, Result, bail};
 use sha2::{Digest, Sha256};
 use std::{collections::HashMap, path::Path};
 use walkdir::WalkDir;
 
 pub struct AppState {
-    pub providers: Vec<serde_json::Value>,
-    pub models: Vec<serde_json::Value>,
+    pub providers: Vec<Provider>,
+    pub models: Vec<Model>,
     pub aliases: HashMap<String, String>,
     pub etag: String,
 }
@@ -62,7 +63,10 @@ fn ensure_file(path: &Path) -> Result<()> {
     Ok(())
 }
 
-fn load_yaml_dir(dir: &Path) -> Result<Vec<serde_json::Value>> {
+fn load_yaml_dir<T>(dir: &Path) -> Result<Vec<T>>
+where
+    T: serde::de::DeserializeOwned,
+{
     if !dir.exists() {
         return Ok(vec![]);
     }
@@ -82,7 +86,10 @@ fn load_yaml_dir(dir: &Path) -> Result<Vec<serde_json::Value>> {
         .collect()
 }
 
-fn load_yaml_recursive(dir: &Path) -> Result<Vec<serde_json::Value>> {
+fn load_yaml_recursive<T>(dir: &Path) -> Result<Vec<T>>
+where
+    T: serde::de::DeserializeOwned,
+{
     if !dir.exists() {
         return Ok(vec![]);
     }

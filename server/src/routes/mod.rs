@@ -1,7 +1,13 @@
-use crate::state::AppState;
-use axum::Router;
+use crate::{error::ApiError, request::attach_request_context, state::AppState};
+use axum::{
+    Router,
+    http::{Method, header},
+    middleware,
+    response::IntoResponse,
+};
 use std::sync::Arc;
 use tokio::sync::RwLock;
+use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
 use tracing::Level;
 use utoipa::{OpenApi as DeriveOpenApi, openapi::OpenApi};
@@ -30,13 +36,28 @@ pub fn router(state: Arc<RwLock<AppState>>) -> Router {
 
     api_router
         .merge(docs_router(openapi))
+        .fallback(not_found)
         .with_state(state)
+        .layer(middleware::from_fn(attach_request_context))
+        .layer(
+            CorsLayer::new()
+                .allow_origin(Any)
+                .allow_methods([Method::GET, Method::POST])
+                .allow_headers([header::CONTENT_TYPE, header::IF_NONE_MATCH]),
+        )
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
                 .on_request(DefaultOnRequest::new().level(Level::INFO))
                 .on_response(DefaultOnResponse::new().level(Level::INFO)),
         )
+}
+
+async fn not_found() -> impl IntoResponse {
+    ApiError::NotFound {
+        message: "route not found".to_string(),
+    }
+    .into_response()
 }
 
 pub fn api_router() -> OpenApiRouter<Arc<RwLock<AppState>>> {
