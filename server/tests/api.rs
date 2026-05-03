@@ -236,6 +236,36 @@ async fn providers_etag_returns_304() {
 }
 
 #[tokio::test]
+async fn provider_detail_returns_provider() {
+    let json = get_json("/api/v1/providers/openai").await;
+    assert_success_envelope(&json);
+    assert_eq!(json["data"]["id"], "openai");
+    assert!(json["data"]["display_name"].as_str().is_some());
+}
+
+#[tokio::test]
+async fn provider_detail_unknown_returns_not_found() {
+    let response = app()
+        .await
+        .oneshot(
+            Request::builder()
+                .uri("/api/v1/providers/does-not-exist")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::NOT_FOUND);
+    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert_error_envelope(&json, "PROVIDER_NOT_FOUND");
+    assert_eq!(json["error"]["details"]["provider"], "does-not-exist");
+}
+
+#[tokio::test]
 async fn openapi_json_returns_spec() {
     let response = app()
         .await
@@ -256,6 +286,7 @@ async fn openapi_json_returns_spec() {
     assert_eq!(json["openapi"], "3.1.0");
     assert_eq!(json["info"]["title"], "Almanac API");
     assert!(json["paths"]["/api/v1/models"].is_object());
+    assert!(json["paths"]["/api/v1/providers/{id}"].is_object());
     assert!(json["paths"]["/api/v1/validate"].is_object());
     assert!(json["paths"]["/api/v1/catalog/health"].is_object());
     assert!(json["paths"]["/api/v1/compare"].is_object());

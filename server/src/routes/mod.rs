@@ -82,6 +82,7 @@ pub fn api_router() -> OpenApiRouter<Arc<RwLock<AppState>>> {
         .routes(routes!(catalog::health))
         .routes(routes!(compare::compare))
         .routes(routes!(providers::list_providers))
+        .routes(routes!(providers::get_provider))
         .routes(routes!(models::list_models))
         .routes(routes!(models::get_model))
         .routes(routes!(validate::validate))

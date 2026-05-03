@@ -9,6 +9,8 @@ use axum::{
 pub enum ApiError {
     #[error("model not found")]
     ModelNotFound { provider: String, id: String },
+    #[error("provider not found")]
+    ProviderNotFound { provider: String },
     #[error("{message}")]
     BadRequest { message: String },
     #[error("{message}")]
@@ -21,6 +23,7 @@ impl ApiError {
     fn status_code(&self) -> StatusCode {
         match self {
             Self::ModelNotFound { .. } => StatusCode::NOT_FOUND,
+            Self::ProviderNotFound { .. } => StatusCode::NOT_FOUND,
             Self::BadRequest { .. } => StatusCode::BAD_REQUEST,
             Self::NotFound { .. } => StatusCode::NOT_FOUND,
             Self::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
@@ -30,6 +33,7 @@ impl ApiError {
     fn error_code(&self) -> &'static str {
         match self {
             Self::ModelNotFound { .. } => "MODEL_NOT_FOUND",
+            Self::ProviderNotFound { .. } => "PROVIDER_NOT_FOUND",
             Self::BadRequest { .. } => "BAD_REQUEST",
             Self::NotFound { .. } => "NOT_FOUND",
             Self::Internal(_) => "INTERNAL_SERVER_ERROR",
@@ -41,6 +45,9 @@ impl ApiError {
             Self::ModelNotFound { provider, id } => Some(serde_json::json!({
                 "provider": provider,
                 "id": id
+            })),
+            Self::ProviderNotFound { provider } => Some(serde_json::json!({
+                "provider": provider
             })),
             Self::BadRequest { .. } | Self::NotFound { .. } | Self::Internal(_) => None,
         }
