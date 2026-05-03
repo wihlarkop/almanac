@@ -143,6 +143,12 @@ Filter models:
 curl "http://localhost:8080/api/v1/models?provider=openai&status=active&capability=vision"
 ```
 
+Search models:
+
+```bash
+curl "http://localhost:8080/api/v1/search?q=gpt&provider=openai&limit=5"
+```
+
 Paginate, sort, and filter models:
 
 ```bash

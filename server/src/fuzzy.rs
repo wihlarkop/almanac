@@ -105,6 +105,58 @@ pub fn top_matches(
         .collect()
 }
 
+pub fn best_model_suggestion(
+    state: &AppState,
+    model: &Model,
+    query: &str,
+    threshold: f64,
+) -> Option<SuggestionMatch> {
+    let query = query.trim();
+    if query.is_empty() {
+        return None;
+    }
+
+    let query_normalized = query.to_ascii_lowercase();
+    let mut best_by_id: HashMap<String, Candidate> = HashMap::new();
+
+    add_candidate(
+        &mut best_by_id,
+        model,
+        model.id.as_str(),
+        MatchType::Id,
+        query,
+        &query_normalized,
+        threshold,
+    );
+    add_candidate(
+        &mut best_by_id,
+        model,
+        model.display_name.as_str(),
+        MatchType::DisplayName,
+        query,
+        &query_normalized,
+        threshold,
+    );
+
+    for (alias, canonical_id) in &state.aliases {
+        if canonical_id == &model.id {
+            add_candidate(
+                &mut best_by_id,
+                model,
+                alias.as_str(),
+                MatchType::Alias,
+                query,
+                &query_normalized,
+                threshold,
+            );
+        }
+    }
+
+    best_by_id
+        .remove(model.id.as_str())
+        .map(|candidate| candidate.suggestion)
+}
+
 fn add_candidate(
     best_by_id: &mut HashMap<String, Candidate>,
     model: &Model,

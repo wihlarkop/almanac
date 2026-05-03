@@ -259,6 +259,7 @@ async fn openapi_json_returns_spec() {
     assert!(json["paths"]["/api/v1/validate"].is_object());
     assert!(json["paths"]["/api/v1/catalog/health"].is_object());
     assert!(json["paths"]["/api/v1/compare"].is_object());
+    assert!(json["paths"]["/api/v1/search"].is_object());
     assert!(json["paths"]["/v1/models"].is_null());
     assert!(
         json["paths"]["/api/v1/health"]["get"]["responses"]["200"]["content"]
@@ -1388,4 +1389,46 @@ async fn suggest_invalid_limit_returns_error_envelope() {
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
     assert_error_envelope(&json, "BAD_REQUEST");
+}
+
+#[tokio::test]
+async fn search_matches_alias_with_metadata() {
+    let json = get_json("/api/v1/search?q=claude-opus-4").await;
+    assert_success_envelope(&json);
+
+    let result = &json["data"].as_array().unwrap()[0];
+    assert_eq!(result["model"]["id"], "claude-opus-4-7");
+    assert_eq!(result["model"]["provider"], "anthropic");
+    assert_eq!(result["matched"], "claude-opus-4");
+    assert_eq!(result["match_type"], "alias");
+    assert_eq!(result["score"], 1.0);
+}
+
+#[tokio::test]
+async fn search_without_query_behaves_like_filtered_models() {
+    let json = get_json("/api/v1/search?provider=openai&limit=3").await;
+    assert_success_envelope(&json);
+
+    let results = json["data"].as_array().unwrap();
+    assert_eq!(results.len(), 3);
+    assert!(results.iter().all(|result| {
+        result["model"]["provider"].as_str() == Some("openai")
+            && result["score"].is_null()
+            && result["matched"].is_null()
+            && result["match_type"].is_null()
+    }));
+}
+
+#[tokio::test]
+async fn search_supports_pagination_and_provider_filter() {
+    let json = get_json("/api/v1/search?q=gpt&provider=openai&limit=2&offset=1").await;
+    assert_success_envelope(&json);
+
+    let results = json["data"].as_array().unwrap();
+    assert_eq!(results.len(), 2);
+    assert!(results.iter().all(|result| {
+        result["model"]["provider"].as_str() == Some("openai") && result["score"].as_f64().is_some()
+    }));
+    assert_eq!(json["meta"]["limit"], 2);
+    assert_eq!(json["meta"]["offset"], 1);
 }

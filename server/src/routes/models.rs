@@ -19,50 +19,54 @@ const DEFAULT_LIMIT: usize = 20;
 
 #[derive(Deserialize, utoipa::IntoParams)]
 pub struct ModelFilter {
-    provider: Option<String>,
-    status: Option<String>,
-    capability: Option<String>,
-    limit: Option<usize>,
-    offset: Option<usize>,
-    sort: Option<String>,
-    order: Option<String>,
-    modality_input: Option<String>,
-    modality_output: Option<String>,
-    min_context: Option<u64>,
-    max_input_price: Option<f64>,
+    pub(crate) provider: Option<String>,
+    pub(crate) status: Option<String>,
+    pub(crate) capability: Option<String>,
+    pub(crate) limit: Option<usize>,
+    pub(crate) offset: Option<usize>,
+    pub(crate) sort: Option<String>,
+    pub(crate) order: Option<String>,
+    pub(crate) modality_input: Option<String>,
+    pub(crate) modality_output: Option<String>,
+    pub(crate) min_context: Option<u64>,
+    pub(crate) max_input_price: Option<f64>,
 }
 
 impl ModelFilter {
-    fn provider(&self) -> Option<&str> {
+    pub(crate) fn provider(&self) -> Option<&str> {
         non_empty(self.provider.as_deref())
     }
 
-    fn status(&self) -> Option<&str> {
+    pub(crate) fn status(&self) -> Option<&str> {
         non_empty(self.status.as_deref())
     }
 
-    fn capability(&self) -> Option<&str> {
+    pub(crate) fn capability(&self) -> Option<&str> {
         non_empty(self.capability.as_deref())
     }
 
-    fn modality_input(&self) -> Option<&str> {
+    pub(crate) fn modality_input(&self) -> Option<&str> {
         non_empty(self.modality_input.as_deref())
     }
 
-    fn modality_output(&self) -> Option<&str> {
+    pub(crate) fn modality_output(&self) -> Option<&str> {
         non_empty(self.modality_output.as_deref())
     }
 
-    fn sort(&self) -> Option<&str> {
+    pub(crate) fn sort(&self) -> Option<&str> {
         non_empty(self.sort.as_deref())
     }
 
-    fn order(&self) -> Option<&str> {
+    pub(crate) fn order(&self) -> Option<&str> {
         non_empty(self.order.as_deref())
     }
 
-    fn limit(&self) -> Option<usize> {
+    pub(crate) fn limit(&self) -> Option<usize> {
         self.limit.filter(|limit| *limit > 0)
+    }
+
+    pub(crate) fn offset(&self) -> Option<usize> {
+        self.offset
     }
 }
 
@@ -140,71 +144,14 @@ pub async fn list_models(
     let mut models: Vec<Model> = state
         .models
         .iter()
-        .filter(|m| {
-            if let Some(provider) = filter.provider()
-                && m.provider != provider
-            {
-                return false;
-            }
-            if let Some(status) = filter.status()
-                && m.status.as_str() != status
-            {
-                return false;
-            }
-            if let Some(caps) = filter.capability() {
-                for cap in caps.split(',') {
-                    if m.capabilities.get(cap.trim()) != Some(&true) {
-                        return false;
-                    }
-                }
-            }
-            if let Some(modalities) = filter.modality_input() {
-                for modality in modalities.split(',') {
-                    if !m
-                        .modalities
-                        .input
-                        .iter()
-                        .any(|supported| supported == modality.trim())
-                    {
-                        return false;
-                    }
-                }
-            }
-            if let Some(modalities) = filter.modality_output() {
-                for modality in modalities.split(',') {
-                    if !m
-                        .modalities
-                        .output
-                        .iter()
-                        .any(|supported| supported == modality.trim())
-                    {
-                        return false;
-                    }
-                }
-            }
-            if let Some(min_context) = filter.min_context
-                && m.context_window < min_context
-            {
-                return false;
-            }
-            if let Some(max_input_price) = filter.max_input_price
-                && m.pricing
-                    .as_ref()
-                    .map(|pricing| pricing.input)
-                    .unwrap_or(f64::MAX)
-                    > max_input_price
-            {
-                return false;
-            }
-            true
-        })
+        .filter(|model| model_matches_filter(model, &filter))
         .cloned()
         .collect();
 
     sort_models(&mut models, filter.sort(), filter.order());
 
     let total = models.len();
-    let offset = filter.offset.unwrap_or(0).min(total);
+    let offset = filter.offset().unwrap_or(0).min(total);
     let limit = filter
         .limit()
         .unwrap_or(DEFAULT_LIMIT)
@@ -301,7 +248,67 @@ fn non_empty(value: Option<&str>) -> Option<&str> {
     })
 }
 
-fn sort_models(models: &mut [Model], sort: Option<&str>, order: Option<&str>) {
+pub(crate) fn model_matches_filter(model: &Model, filter: &ModelFilter) -> bool {
+    if let Some(provider) = filter.provider()
+        && model.provider != provider
+    {
+        return false;
+    }
+    if let Some(status) = filter.status()
+        && model.status.as_str() != status
+    {
+        return false;
+    }
+    if let Some(caps) = filter.capability() {
+        for cap in caps.split(',') {
+            if model.capabilities.get(cap.trim()) != Some(&true) {
+                return false;
+            }
+        }
+    }
+    if let Some(modalities) = filter.modality_input() {
+        for modality in modalities.split(',') {
+            if !model
+                .modalities
+                .input
+                .iter()
+                .any(|supported| supported == modality.trim())
+            {
+                return false;
+            }
+        }
+    }
+    if let Some(modalities) = filter.modality_output() {
+        for modality in modalities.split(',') {
+            if !model
+                .modalities
+                .output
+                .iter()
+                .any(|supported| supported == modality.trim())
+            {
+                return false;
+            }
+        }
+    }
+    if let Some(min_context) = filter.min_context
+        && model.context_window < min_context
+    {
+        return false;
+    }
+    if let Some(max_input_price) = filter.max_input_price
+        && model
+            .pricing
+            .as_ref()
+            .map(|pricing| pricing.input)
+            .unwrap_or(f64::MAX)
+            > max_input_price
+    {
+        return false;
+    }
+    true
+}
+
+pub(crate) fn sort_models(models: &mut [Model], sort: Option<&str>, order: Option<&str>) {
     let sort = sort.unwrap_or("provider");
     let descending = order == Some("desc");
 

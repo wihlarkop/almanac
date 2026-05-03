@@ -30,6 +30,7 @@ mod compare;
 mod health;
 mod models;
 mod providers;
+mod search;
 mod suggest;
 mod validate;
 
@@ -84,6 +85,7 @@ pub fn api_router() -> OpenApiRouter<Arc<RwLock<AppState>>> {
         .routes(routes!(models::list_models))
         .routes(routes!(models::get_model))
         .routes(routes!(validate::validate))
+        .routes(routes!(search::search))
         .routes(routes!(suggest::suggest))
 }
 
