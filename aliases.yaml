@@ -102,6 +102,17 @@ aliases:
   sonar-reasoning-latest: sonar-reasoning-pro
   sonar-research-latest: sonar-deep-research
 
+  # Baidu ERNIE shorthand aliases
+  ernie-latest: ernie-4.5-21b
+  ernie-4.5-latest: ernie-4.5-21b
+  ernie-x1-latest: ernie-x1
+
+  # Tencent Hunyuan shorthand aliases
+  hunyuan-latest: hunyuan-a13b-instruct
+  hunyuan-turbo-latest: hunyuan-turbo
+  hunyuan-pro-latest: hunyuan-pro
+  hunyuan-lite-latest: hunyuan-lite
+
   # Microsoft Phi shorthand aliases
   phi-latest: phi-4
   phi-4-latest: phi-4
