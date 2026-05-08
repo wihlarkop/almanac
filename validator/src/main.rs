@@ -793,7 +793,10 @@ fn main() -> Result<()> {
         println!("All {file_total} file(s) valid");
         Ok(())
     } else {
-        println!("Found {} error(s) across {file_total} file(s)", errors.len());
+        println!(
+            "Found {} error(s) across {file_total} file(s)",
+            errors.len()
+        );
         std::process::exit(1);
     }
 }
