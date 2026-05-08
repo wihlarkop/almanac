@@ -8,6 +8,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- `GET /metrics` Prometheus endpoint (optional `metrics` cargo feature): `http_requests_total`, `http_request_duration_seconds`, `catalog_models_total`, `catalog_providers_total`, `catalog_aliases_total`. Path labels use matched route templates to avoid cardinality explosion.
+- xAI Grok 4.3 model entry; `grok-code-fast-1` marked deprecated with replacement.
+
 ---
 
 ## [0.1.0] - 2026-05-09

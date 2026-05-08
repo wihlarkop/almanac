@@ -151,5 +151,22 @@ Pass `X-Request-Id` with any request to correlate logs with your own trace IDs. 
 | `GET` | `/api/v1/compare` | Side-by-side comparison of two models |
 | `GET` | `/api/v1/catalog/health` | Catalog freshness and coverage stats |
 | `GET` | `/api/v1/catalog/issues` | Catalog data quality issues |
+| `GET` | `/metrics` | Prometheus metrics (optional `metrics` feature) |
 
 Full request/response schemas for each endpoint are available in the interactive docs at `/swagger-ui` or `/scalar`.
+
+---
+
+## Prometheus Metrics
+
+Available when the server is built with `--features metrics`. Scrape at `GET /metrics` (Prometheus text format 0.0.4).
+
+| Metric | Type | Labels | Description |
+|---|---|---|---|
+| `http_requests_total` | Counter | `method`, `path`, `status` | Total HTTP requests |
+| `http_request_duration_seconds` | Histogram | `method`, `path` | Request duration (buckets: 5ms–2.5s) |
+| `catalog_models_total` | Gauge | — | Total models in the loaded catalog |
+| `catalog_providers_total` | Gauge | — | Total providers in the loaded catalog |
+| `catalog_aliases_total` | Gauge | — | Total aliases in the loaded catalog |
+
+`path` uses the matched route template (e.g. `/api/v1/models/{provider}/{id}`) to avoid label cardinality explosion.

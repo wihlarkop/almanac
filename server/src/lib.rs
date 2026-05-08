@@ -2,6 +2,8 @@ pub mod catalog;
 pub mod config;
 pub mod error;
 pub mod fuzzy;
+#[cfg(feature = "metrics")]
+pub mod metrics;
 pub mod request;
 pub mod response;
 pub mod routes;

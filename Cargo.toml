@@ -30,6 +30,7 @@ utoipa-scalar = { version = "0.3.0", features = ["axum"] }
 utoipa-swagger-ui = { version = "9.0.2", features = ["axum", "vendored"] }
 walkdir = "2.5.0"
 ureq = { version = "2", features = ["tls"] }
+prometheus = { version = "0.13", features = ["process"] }
 
 [profile.release]
 opt-level = "z"

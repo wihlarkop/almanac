@@ -29,6 +29,8 @@ mod aliases;
 mod catalog;
 mod compare;
 mod health;
+#[cfg(feature = "metrics")]
+mod metrics_route;
 mod models;
 mod providers;
 mod search;
@@ -48,11 +50,20 @@ struct ApiDoc;
 pub fn router(state: Arc<RwLock<AppState>>) -> Router {
     let (api_router, openapi) = api_router().split_for_parts();
 
-    api_router
+    #[allow(unused_mut)]
+    let mut r = api_router
         .merge(docs_router(openapi))
         .fallback(not_found)
-        .with_state(state)
-        .layer(middleware::from_fn(attach_request_context))
+        .with_state(state);
+
+    #[cfg(feature = "metrics")]
+    {
+        use axum::routing::get;
+        r = r.route("/metrics", get(metrics_route::metrics));
+        r = r.layer(middleware::from_fn(crate::metrics::record_request));
+    }
+
+    r.layer(middleware::from_fn(attach_request_context))
         .layer(middleware::from_fn(enforce_request_timeout))
         .layer(RequestBodyLimitLayer::new(MAX_REQUEST_BODY_BYTES as usize))
         .layer(

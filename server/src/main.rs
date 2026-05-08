@@ -10,6 +10,9 @@ use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitEx
 async fn main() -> Result<()> {
     init_tracing();
 
+    #[cfg(feature = "metrics")]
+    almanac_server::metrics::init();
+
     let config = ServerConfig::from_env()?;
     tracing::info!(
         bind_addr = %config.bind_addr,
@@ -25,6 +28,12 @@ async fn main() -> Result<()> {
         aliases = app_state.aliases.len(),
         etag = %app_state.etag,
         "catalog loaded"
+    );
+    #[cfg(feature = "metrics")]
+    almanac_server::metrics::set_catalog_counts(
+        app_state.models.len(),
+        app_state.providers.len(),
+        app_state.aliases.len(),
     );
     let shared = Arc::new(RwLock::new(app_state));
 
@@ -54,6 +63,8 @@ async fn main() -> Result<()> {
                         let aliases = new_state.aliases.len();
                         let etag = new_state.etag.clone();
                         *shared_reload.write().await = new_state;
+                        #[cfg(feature = "metrics")]
+                        almanac_server::metrics::set_catalog_counts(models, providers, aliases);
                         tracing::info!(
                             providers,
                             models,

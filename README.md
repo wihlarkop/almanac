@@ -65,6 +65,12 @@ Unreachable URLs are reported as warnings and do not fail the build.
 cargo run -p almanac-server
 ```
 
+Enable Prometheus metrics at `GET /metrics`:
+
+```bash
+cargo run -p almanac-server --features metrics
+```
+
 The server listens on `0.0.0.0:8080` by default.
 
 ## Run with Docker
@@ -145,6 +151,7 @@ Full interactive docs are available after starting the server:
 | `GET` | `/api/v1/compare` | Compare models |
 | `POST` | `/api/v1/validate` | Validate model usage |
 | `GET` | `/api/v1/suggest` | Suggest model IDs |
+| `GET` | `/metrics` | Prometheus metrics (requires `--features metrics`) |
 
 Validate a model:
 
