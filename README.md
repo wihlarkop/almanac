@@ -74,6 +74,7 @@ Optional environment variables:
 - `DATA_DIR` - directory containing `providers/`, `models/`, and `aliases.yaml`.
 - `RUST_LOG` - tracing filter, for example `almanac_server=debug,tower_http=info`.
 - `LOG_FORMAT` - set to `json` for structured JSON logs (recommended for production).
+- `RATE_LIMIT_RPS` - maximum requests per second per IP address. Unset or `0` disables rate limiting. When a limit is exceeded the server returns `429` with a `Retry-After` header.
 
 The server logs startup, catalog loading, request traces, and shutdown events. It handles Ctrl+C
 and SIGTERM as graceful shutdown signals.

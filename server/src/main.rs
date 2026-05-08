@@ -1,6 +1,8 @@
 use almanac_server::config::ServerConfig;
+use almanac_server::request::{RateLimiter, enforce_rate_limit};
 use anyhow::{Context, Result};
-use std::sync::Arc;
+use axum::middleware;
+use std::{net::SocketAddr, sync::Arc};
 use tokio::sync::RwLock;
 use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -67,17 +69,41 @@ async fn main() -> Result<()> {
     }
 
     let app = almanac_server::routes::router(Arc::clone(&shared));
+    let app = match rate_limit_rps() {
+        Some(rps) => {
+            tracing::info!(rps, "rate limiting enabled");
+            let limiter = Arc::new(RateLimiter::new(rps));
+            app.layer(middleware::from_fn(move |req, next| {
+                let lim = Arc::clone(&limiter);
+                async move { enforce_rate_limit(lim, req, next).await }
+            }))
+        }
+        None => {
+            tracing::info!("rate limiting disabled");
+            app
+        }
+    };
 
     let listener = tokio::net::TcpListener::bind(config.bind_addr)
         .await
         .with_context(|| format!("binding listener on {}", config.bind_addr))?;
     tracing::info!(bind_addr = %config.bind_addr, "server listening");
-    axum::serve(listener, app)
-        .with_graceful_shutdown(shutdown_signal())
-        .await?;
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .with_graceful_shutdown(shutdown_signal())
+    .await?;
     tracing::info!("server stopped");
 
     Ok(())
+}
+
+fn rate_limit_rps() -> Option<u32> {
+    std::env::var("RATE_LIMIT_RPS")
+        .ok()
+        .and_then(|v| v.parse::<u32>().ok())
+        .filter(|&n| n > 0)
 }
 
 fn init_tracing() {
