@@ -1,0 +1,28 @@
+id: phi-4-multimodal
+provider: microsoft
+display_name: Phi-4 Multimodal
+status: active
+release_date: 2025-02-24
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 131072
+max_output_tokens: 4096
+modalities:
+  input: [text, image]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  streaming: true
+  json_mode: true
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop]
+  rejected: []
+  deprecated_for_this_model: []
+last_verified: 2026-05-09
+confidence: inferred
+endpoint_family: chat_completions
+sources:
+  - url: https://azure.microsoft.com/en-us/products/phi
+    last_verified: 2026-05-09
