@@ -121,18 +121,29 @@ impl RateLimiter {
             map.retain(|_, w| now.duration_since(w.started_at) < window);
         }
 
-        let window = map.entry(ip).or_insert(Window { count: 0, started_at: now });
+        let window = map.entry(ip).or_insert(Window {
+            count: 0,
+            started_at: now,
+        });
 
         if now.duration_since(window.started_at) >= self.window {
             window.count = 1;
             window.started_at = now;
-            RateLimitResult::Allowed { remaining: self.limit - 1 }
+            RateLimitResult::Allowed {
+                remaining: self.limit - 1,
+            }
         } else if window.count < self.limit {
             window.count += 1;
-            RateLimitResult::Allowed { remaining: self.limit - window.count }
+            RateLimitResult::Allowed {
+                remaining: self.limit - window.count,
+            }
         } else {
-            let retry_after = self.window.saturating_sub(now.duration_since(window.started_at));
-            RateLimitResult::Limited { retry_after_secs: retry_after.as_secs().max(1) }
+            let retry_after = self
+                .window
+                .saturating_sub(now.duration_since(window.started_at));
+            RateLimitResult::Limited {
+                retry_after_secs: retry_after.as_secs().max(1),
+            }
         }
     }
 }
@@ -161,7 +172,10 @@ pub async fn enforce_rate_limit(
         RateLimitResult::Limited { retry_after_secs } => {
             let mut response = (
                 StatusCode::TOO_MANY_REQUESTS,
-                Json(ApiResponse::error("rate limit exceeded", "RATE_LIMIT_EXCEEDED")),
+                Json(ApiResponse::error(
+                    "rate limit exceeded",
+                    "RATE_LIMIT_EXCEEDED",
+                )),
             )
                 .into_response();
             if let Ok(value) = HeaderValue::from_str(&retry_after_secs.to_string()) {
