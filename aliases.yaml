@@ -102,6 +102,18 @@ aliases:
   sonar-reasoning-latest: sonar-reasoning-pro
   sonar-research-latest: sonar-deep-research
 
+  # ByteDance Doubao shorthand aliases
+  doubao-latest: doubao-1.5-pro-32k
+  doubao-pro-latest: doubao-1.5-pro-256k
+  doubao-thinking-latest: doubao-1.5-thinking-pro
+  seed-latest: seed-2.0-pro
+
+  # Reka shorthand aliases
+  reka-latest: reka-core
+  reka-core-latest: reka-core
+  reka-flash-latest: reka-flash
+  reka-edge-latest: reka-edge
+
   # Baidu ERNIE shorthand aliases
   ernie-latest: ernie-4.5-21b
   ernie-4.5-latest: ernie-4.5-21b

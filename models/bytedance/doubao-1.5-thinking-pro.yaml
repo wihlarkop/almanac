@@ -1,0 +1,29 @@
+id: doubao-1.5-thinking-pro
+provider: bytedance
+display_name: Doubao 1.5 Thinking Pro
+status: active
+release_date: 2025-01-14
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 131072
+max_output_tokens: 16384
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+  thinking: true
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop]
+  rejected: []
+  deprecated_for_this_model: []
+last_verified: 2026-05-09
+confidence: inferred
+endpoint_family: chat_completions
+sources:
+  - url: https://www.volcengine.com/docs/82379/1174490
+    last_verified: 2026-05-09
