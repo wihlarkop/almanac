@@ -177,3 +177,17 @@ aliases:
   nova-lite-latest: nova-lite-v1
   nova-pro-latest: nova-pro-v1
   nova-premier-latest: nova-premier-v1
+
+  # Inception AI shorthand aliases
+  mercury-latest: mercury-2
+  mercury-2-latest: mercury-2
+  mercury-coder-latest: mercury-coder
+
+  # Writer shorthand aliases
+  palmyra-latest: palmyra-x5
+  palmyra-x5-latest: palmyra-x5
+
+  # 01.AI (Yi) shorthand aliases
+  yi-latest: yi-lightning
+  yi-lightning-latest: yi-lightning
+  yi-large-latest: yi-large

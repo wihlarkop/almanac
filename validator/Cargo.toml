@@ -9,9 +9,18 @@ name = "validate"
 path = "src/main.rs"
 
 [dependencies]
+# Error handling
 anyhow.workspace = true
-jsonschema.workspace = true
+
+# Serialization
 serde_json.workspace = true
 serde_yaml.workspace = true
-ureq.workspace = true
+
+# Validation
+jsonschema.workspace = true
+
+# Filesystem
 walkdir.workspace = true
+
+# HTTP client (URL reachability checks)
+ureq.workspace = true

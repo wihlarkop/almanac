@@ -383,8 +383,8 @@ enum UrlStatus {
 
 fn check_url(agent: &ureq::Agent, url: &str) -> UrlStatus {
     match agent.head(url).call() {
-        Ok(resp) => UrlStatus::Ok(resp.status()),
-        Err(ureq::Error::Status(code, _)) => UrlStatus::HttpError(code),
+        Ok(resp) => UrlStatus::Ok(resp.status().as_u16()),
+        Err(ureq::Error::StatusCode(code)) => UrlStatus::HttpError(code),
         Err(e) => UrlStatus::NetworkError(e.to_string()),
     }
 }
@@ -395,10 +395,11 @@ fn run_url_checks(index: &BTreeMap<String, Vec<String>>) {
         index.len()
     );
 
-    let agent = ureq::AgentBuilder::new()
-        .timeout(Duration::from_secs(10))
-        .user_agent("almanac-validator/0.1 (source-check)")
-        .build();
+    let agent = ureq::Agent::new_with_config(
+        ureq::Agent::config_builder()
+            .timeout_global(Some(Duration::from_secs(10)))
+            .build(),
+    );
 
     let mut ok = 0usize;
     let mut warn = 0usize;

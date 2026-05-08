@@ -8,29 +8,54 @@ edition = "2024"
 rust-version = "1.88"
 
 [workspace.dependencies]
+# Error handling
 anyhow = "1.0.102"
+thiserror = "2.0.18"
+
+# Async runtime
+tokio = { version = "1.52.3", features = ["full"] }
+
+# Web framework
 axum = "0.8.9"
-hex = "0.4.3"
-jsonschema = "0.46.4"
+tower = { version = "0.5.3", features = ["util"] }
+tower-http = { version = "0.6.10", features = ["cors", "limit", "trace"] }
+
+# Serialization
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
 serde_yaml = "0.9.34"
-sha2 = "0.11.0"
-strsim = "0.11.1"
-thiserror = "2.0.18"
-time = { version = "0.3.47", features = ["formatting"] }
-tokio = { version = "1.52.2", features = ["full"] }
-tower = { version = "0.5.3", features = ["util"] }
-tower-http = { version = "0.6.9", features = ["cors", "limit", "trace"] }
-tracing = "0.1.44"
-tracing-subscriber = { version = "0.3.23", features = ["env-filter", "json"] }
+
+# API docs (OpenAPI)
 utoipa = { version = "5.5.0", features = ["macros"] }
 utoipa-axum = "0.2.0"
 utoipa-scalar = { version = "0.3.0", features = ["axum"] }
 utoipa-swagger-ui = { version = "9.0.2", features = ["axum", "vendored"] }
+
+# Logging & tracing
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter", "json"] }
+
+# Metrics (optional feature)
+prometheus = { version = "0.14", default-features = false, features = ["process"] }
+
+# Validation
+jsonschema = "0.46.4"
+
+# Hashing / ETag
+hex = "0.4.3"
+sha2 = "0.11.0"
+
+# Fuzzy search
+strsim = "0.11.1"
+
+# Time
+time = { version = "0.3.47", features = ["formatting"] }
+
+# Filesystem
 walkdir = "2.5.0"
-ureq = { version = "2", features = ["tls"] }
-prometheus = { version = "0.13", default-features = false, features = ["process"] }
+
+# HTTP client (validator URL checks)
+ureq = "3.3.0"
 
 [profile.release]
 opt-level = "z"

@@ -1,0 +1,32 @@
+id: mercury
+provider: inception
+display_name: Mercury
+status: active
+release_date: 2025-03-01
+deprecation_date: null
+sunset_date: null
+replacement: mercury-2
+context_window: 131072
+max_output_tokens: 50000
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+parameters:
+  supported: [temperature, max_tokens, stream]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.25
+  output: 1.00
+last_verified: 2026-05-09
+confidence: official
+endpoint_family: chat_completions
+sources:
+  - url: https://docs.inceptionlabs.ai
+    last_verified: 2026-05-09
