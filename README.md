@@ -50,6 +50,14 @@ cargo run -p almanac-validator
 
 The validator checks schema validity, filename/id consistency, provider references, aliases, lifecycle dates, replacements, and parameter conflicts.
 
+To also verify that every source URL is reachable (requires internet access, runs slowly):
+
+```bash
+cargo run -p almanac-validator -- --check-urls
+```
+
+Unreachable URLs are reported as warnings and do not fail the build.
+
 ## Run the API Server
 
 ```bash

@@ -1,6 +1,7 @@
 use std::{
-    collections::{HashMap, HashSet},
+    collections::{BTreeMap, HashMap, HashSet},
     path::{Path, PathBuf},
+    time::Duration,
 };
 
 use anyhow::{Context, Result};
@@ -336,7 +337,82 @@ fn freshness_stats(
     stats
 }
 
+// --- URL reachability ---
+
+fn collect_sources(data: &serde_json::Value, rel: &str, index: &mut BTreeMap<String, Vec<String>>) {
+    let Some(sources) = data["sources"].as_array() else {
+        return;
+    };
+    for source in sources {
+        if let Some(url) = source["url"].as_str() {
+            index
+                .entry(url.to_string())
+                .or_default()
+                .push(rel.to_string());
+        }
+    }
+}
+
+enum UrlStatus {
+    Ok(u16),
+    HttpError(u16),
+    NetworkError(String),
+}
+
+fn check_url(agent: &ureq::Agent, url: &str) -> UrlStatus {
+    match agent.head(url).call() {
+        Ok(resp) => UrlStatus::Ok(resp.status()),
+        Err(ureq::Error::Status(code, _)) => UrlStatus::HttpError(code),
+        Err(e) => UrlStatus::NetworkError(e.to_string()),
+    }
+}
+
+fn run_url_checks(index: &BTreeMap<String, Vec<String>>) {
+    println!(
+        "\nChecking source URL reachability ({} unique URLs)...",
+        index.len()
+    );
+
+    let agent = ureq::AgentBuilder::new()
+        .timeout(Duration::from_secs(10))
+        .user_agent("almanac-validator/0.1 (source-check)")
+        .build();
+
+    let mut ok = 0usize;
+    let mut warn = 0usize;
+
+    for (url, files) in index {
+        let refs = if files.len() == 1 {
+            files[0].clone()
+        } else {
+            format!("{} and {} more", files[0], files.len() - 1)
+        };
+
+        match check_url(&agent, url) {
+            UrlStatus::Ok(code) => {
+                println!("  \u{2713} {url} ({code})");
+                ok += 1;
+            }
+            UrlStatus::HttpError(code) => {
+                println!("  \u{26a0} {url} — HTTP {code} [{refs}]");
+                warn += 1;
+            }
+            UrlStatus::NetworkError(msg) => {
+                println!("  \u{26a0} {url} — {msg} [{refs}]");
+                warn += 1;
+            }
+        }
+    }
+
+    println!(
+        "\nURL check: {ok}/{} reachable, {warn} unreachable (warnings only, not counted as errors)",
+        index.len()
+    );
+}
+
 fn main() -> Result<()> {
+    let check_urls = std::env::args().any(|a| a == "--check-urls");
+
     let root = repo_root();
     let provider_validator = load_schema(&root.join("schema/provider.schema.json"))?;
     let model_validator = load_schema(&root.join("schema/model.schema.json"))?;
@@ -346,6 +422,7 @@ fn main() -> Result<()> {
     let mut model_ids: HashMap<String, String> = HashMap::new();
     let mut model_meta: HashMap<String, ModelMeta> = HashMap::new();
     let mut model_values: Vec<serde_json::Value> = Vec::new();
+    let mut source_index: BTreeMap<String, Vec<String>> = BTreeMap::new();
 
     // --- Providers ---
     println!("Validating providers...");
@@ -377,6 +454,7 @@ fn main() -> Result<()> {
                     } else {
                         validate_url(&mut errors, &rel, "website", data["website"].as_str());
                         validate_url(&mut errors, &rel, "api_docs", data["api_docs"].as_str());
+                        collect_sources(&data, &rel, &mut source_index);
                         provider_ids.insert(actual.to_string());
                         println!("  \u{2713} {rel}");
                     }
@@ -448,6 +526,7 @@ fn main() -> Result<()> {
 
                             model_ids.insert(actual.to_string(), rel.clone());
                             validate_sources(&mut errors, &rel, &data);
+                            collect_sources(&data, &rel, &mut source_index);
                             model_meta.insert(
                                 actual.to_string(),
                                 ModelMeta {
@@ -577,6 +656,11 @@ fn main() -> Result<()> {
                 }
             }
         }
+    }
+
+    // --- URL reachability (optional) ---
+    if check_urls {
+        run_url_checks(&source_index);
     }
 
     // --- Summary ---
