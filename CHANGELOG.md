@@ -11,6 +11,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 
 - `GET /metrics` Prometheus endpoint (optional `metrics` cargo feature): `http_requests_total`, `http_request_duration_seconds`, `catalog_models_total`, `catalog_providers_total`, `catalog_aliases_total`. Path labels use matched route templates to avoid cardinality explosion.
+- Validator catalog summary report: printed after every validation run — shows provider/model/alias totals, status breakdown, per-provider counts, and coverage stats (pricing, context window, staleness).
 - xAI Grok 4.3 model entry; `grok-code-fast-1` marked deprecated with replacement.
 
 ---

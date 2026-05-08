@@ -77,6 +77,7 @@ struct ModelMeta {
     parameters_deprecated: Vec<String>,
 }
 
+#[cfg(test)]
 #[derive(Debug, PartialEq, Eq)]
 struct FreshnessStats {
     total_models: usize,
@@ -307,6 +308,7 @@ fn days_between(left: &str, right: &str) -> Option<i64> {
     )
 }
 
+#[cfg(test)]
 fn freshness_stats(
     models: &[serde_json::Value],
     today: &str,
@@ -335,6 +337,26 @@ fn freshness_stats(
     }
 
     stats
+}
+
+// --- Date helpers ---
+
+fn today_date_string() -> String {
+    let secs = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs() as i64;
+    let z = secs / 86400 + 719_468;
+    let era = if z >= 0 { z } else { z - 146_096 } / 146_097;
+    let doe = z - era * 146_097;
+    let yoe = (doe - doe / 1460 + doe / 36524 - doe / 146_096) / 365;
+    let y = yoe + era * 400;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+    let mp = (5 * doy + 2) / 153;
+    let d = doy - (153 * mp + 2) / 5 + 1;
+    let m = if mp < 10 { mp + 3 } else { mp - 9 };
+    let y = if m <= 2 { y + 1 } else { y };
+    format!("{y:04}-{m:02}-{d:02}")
 }
 
 // --- URL reachability ---
@@ -410,10 +432,106 @@ fn run_url_checks(index: &BTreeMap<String, Vec<String>>) {
     );
 }
 
+fn print_catalog_summary(
+    models: &[serde_json::Value],
+    provider_count: usize,
+    alias_count: usize,
+    today: &str,
+) {
+    let total = models.len();
+    let sep = "\u{2500}".repeat(48);
+
+    // status counts
+    let mut by_status: BTreeMap<&str, usize> = BTreeMap::new();
+    for m in models {
+        *by_status
+            .entry(m["status"].as_str().unwrap_or("unknown"))
+            .or_default() += 1;
+    }
+
+    // per-provider counts
+    let mut by_provider: BTreeMap<&str, usize> = BTreeMap::new();
+    for m in models {
+        *by_provider
+            .entry(m["provider"].as_str().unwrap_or("unknown"))
+            .or_default() += 1;
+    }
+
+    // coverage
+    let with_pricing = models
+        .iter()
+        .filter(|m| m["pricing"].as_object().is_some())
+        .count();
+    let with_context = models
+        .iter()
+        .filter(|m| m["context_window"].as_u64().is_some())
+        .count();
+    let stale = models
+        .iter()
+        .filter(|m| {
+            m["last_verified"]
+                .as_str()
+                .and_then(|d| days_between(d, today))
+                .unwrap_or(0)
+                > 90
+        })
+        .count();
+    let missing_verified = models
+        .iter()
+        .filter(|m| m["last_verified"].as_str().is_none())
+        .count();
+
+    println!("\n{sep}");
+    println!("Catalog Summary");
+    println!("{sep}");
+    println!("  Providers : {provider_count:>4}");
+    println!("  Models    : {total:>4}");
+    println!("  Aliases   : {alias_count:>4}");
+
+    println!("\n  By status");
+    for (status, count) in &by_status {
+        println!("    {status:<16}: {count:>4}");
+    }
+
+    println!("\n  By provider");
+    for (provider, count) in &by_provider {
+        println!("    {provider:<16}: {count:>4}");
+    }
+
+    let pct = |n: usize| if total > 0 { n * 100 / total } else { 0 };
+    println!("\n  Coverage");
+    println!(
+        "    {:<24}: {:>4} / {total}  ({:>3}%)",
+        "with pricing",
+        with_pricing,
+        pct(with_pricing)
+    );
+    println!(
+        "    {:<24}: {:>4} / {total}  ({:>3}%)",
+        "with context window",
+        with_context,
+        pct(with_context)
+    );
+    println!(
+        "    {:<24}: {:>4} / {total}  ({:>3}%)",
+        "stale > 90 days",
+        stale,
+        pct(stale)
+    );
+    println!(
+        "    {:<24}: {:>4} / {total}  ({:>3}%)",
+        "missing last_verified",
+        missing_verified,
+        pct(missing_verified)
+    );
+    println!("{sep}");
+}
+
 fn main() -> Result<()> {
     let check_urls = std::env::args().any(|a| a == "--check-urls");
 
     let root = repo_root();
+    let today = today_date_string();
     let provider_validator = load_schema(&root.join("schema/provider.schema.json"))?;
     let model_validator = load_schema(&root.join("schema/model.schema.json"))?;
 
@@ -423,6 +541,7 @@ fn main() -> Result<()> {
     let mut model_meta: HashMap<String, ModelMeta> = HashMap::new();
     let mut model_values: Vec<serde_json::Value> = Vec::new();
     let mut source_index: BTreeMap<String, Vec<String>> = BTreeMap::new();
+    let mut alias_count = 0usize;
 
     // --- Providers ---
     println!("Validating providers...");
@@ -613,6 +732,7 @@ fn main() -> Result<()> {
             }
             Ok(data) => {
                 if let Some(aliases) = data["aliases"].as_object() {
+                    alias_count = aliases.len();
                     let mut entries: Vec<_> = aliases.iter().collect();
                     entries.sort_by_key(|(k, _)| k.as_str());
                     let alias_keys: HashSet<_> = aliases.keys().map(|key| key.as_str()).collect();
@@ -664,26 +784,16 @@ fn main() -> Result<()> {
     }
 
     // --- Summary ---
-    let provider_count = yaml_files_in(&root.join("providers")).len();
-    let model_count = yaml_files_recursive(&root.join("models")).len();
-    let alias_count = if aliases_path.exists() { 1 } else { 0 };
-    let total = provider_count + model_count + alias_count;
+    let provider_count = provider_ids.len();
+    let file_total = provider_count + model_values.len() + usize::from(aliases_path.exists());
 
-    println!("\n{}", "\u{2500}".repeat(40));
-    let freshness = freshness_stats(&model_values, "2026-05-03", 90);
-    println!(
-        "Freshness report: {} model(s), {} stale > 90 days, {} missing pricing, {} missing last_verified",
-        freshness.total_models,
-        freshness.stale_models,
-        freshness.missing_pricing,
-        freshness.missing_last_verified
-    );
+    print_catalog_summary(&model_values, provider_count, alias_count, &today);
 
     if errors.is_empty() {
-        println!("All {total} file(s) valid");
+        println!("All {file_total} file(s) valid");
         Ok(())
     } else {
-        println!("Found {} error(s) across {total} file(s)", errors.len());
+        println!("Found {} error(s) across {file_total} file(s)", errors.len());
         std::process::exit(1);
     }
 }
