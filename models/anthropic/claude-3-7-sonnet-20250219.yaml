@@ -22,6 +22,10 @@ parameters:
   supported: [temperature, top_p, max_tokens, stream, stop, tools]
   rejected: []
   deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 3.00
+  output: 15.00
 last_verified: 2026-05-02
 confidence: official
 endpoint_family: custom

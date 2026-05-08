@@ -21,8 +21,12 @@ parameters:
   supported: [temperature, top_p, max_tokens, stream, stop]
   rejected: []
   deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 10.00
+  output: 30.00
 last_verified: 2026-05-02
-confidence: official
+confidence: community
 endpoint_family: chat_completions
 sources:
   - url: https://platform.openai.com/docs/models

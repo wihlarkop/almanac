@@ -1,0 +1,32 @@
+id: grok-4.3
+provider: xai
+display_name: Grok 4.3
+status: active
+release_date: 2026-05-06
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 2000000
+max_output_tokens: 128000
+modalities:
+  input: [text, image]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  streaming: true
+  json_mode: true
+  prompt_caching: true
+  thinking: true
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, tools, response_format, seed]
+  rejected: []
+  deprecated_for_this_model: []
+last_verified: 2026-05-06
+confidence: official
+endpoint_family: chat_completions
+sources:
+  - url: https://docs.x.ai/docs/overview
+    last_verified: 2026-05-06
+  - url: https://docs.x.ai/docs/models
+    last_verified: 2026-05-06

@@ -76,7 +76,8 @@ aliases:
   deepseek-v4-pro-latest: deepseek-v4-pro
 
   # xAI shorthand aliases
-  grok-latest: grok-4.20-reasoning
+  grok-latest: grok-4.3
+  grok-4.3-latest: grok-4.3
   grok-4.20-latest: grok-4.20-reasoning
   grok-4-fast-latest: grok-4-1-fast
   grok-code-latest: grok-code-fast-1
