@@ -498,7 +498,7 @@ fn print_catalog_summary(
         println!("    {provider:<16}: {count:>4}");
     }
 
-    let pct = |n: usize| if total > 0 { n * 100 / total } else { 0 };
+    let pct = |n: usize| (n * 100).checked_div(total).unwrap_or(0);
     println!("\n  Coverage");
     println!(
         "    {:<24}: {:>4} / {total}  ({:>3}%)",
