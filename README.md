@@ -19,6 +19,7 @@ It answers practical questions:
 - `schema/` - JSON Schemas used to validate catalog files.
 - `validator/` - Rust CLI that validates the catalog.
 - `server/` - Rust HTTP API for querying and validating model metadata.
+- `docs/api-contracts.md` - response envelope, error codes, pagination, and caching reference.
 
 ## Local CI Checks
 

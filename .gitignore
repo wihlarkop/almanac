@@ -29,5 +29,6 @@ __pycache__/
 
 # Local docs and specs
 docs/
+!docs/api-contracts.md
 *.pdf
 .claude/

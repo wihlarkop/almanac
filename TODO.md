@@ -6,7 +6,7 @@ These items are intentionally deferred from the first production-readiness batch
 - [ ] Add Prometheus metrics endpoint for request counts, latency, status codes, and catalog counts.
 - [x] Add optional source URL reachability checks for catalog validation.
 - [ ] Add generated catalog summary report.
-- [ ] Add API changelog and response-contract documentation.
+- [x] Add API changelog and response-contract documentation.
 - [ ] Add dependency license policy with `cargo-deny`.
 - [x] Add application-level rate limiting with a cloneable Axum-compatible limiter, or enforce it at the edge/proxy.
 - [ ] Add deployment blueprint for the chosen host.
