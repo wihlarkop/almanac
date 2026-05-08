@@ -101,3 +101,14 @@ aliases:
   sonar-pro-latest: sonar-pro
   sonar-reasoning-latest: sonar-reasoning-pro
   sonar-research-latest: sonar-deep-research
+
+  # Groq shorthand aliases
+  groq-llama-latest: llama-3.3-70b-versatile
+  groq-llama-fast-latest: llama-3.1-8b-instant
+
+  # Amazon Nova shorthand aliases
+  nova-latest: nova-pro-v1
+  nova-micro-latest: nova-micro-v1
+  nova-lite-latest: nova-lite-v1
+  nova-pro-latest: nova-pro-v1
+  nova-premier-latest: nova-premier-v1
