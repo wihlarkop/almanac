@@ -117,6 +117,23 @@ aliases:
   sonar-reasoning-latest: sonar-reasoning-pro
   sonar-research-latest: sonar-deep-research
 
+  # AI21 Labs shorthand aliases
+  jamba-latest: jamba-1.5-large
+  jamba-mini-latest: jamba-1.5-mini
+
+  # NVIDIA Nemotron shorthand aliases
+  nemotron-latest: llama-3.3-nemotron-super-49b-v1
+  nemotron-super-latest: llama-3.3-nemotron-super-49b-v1
+  nemotron-nano-latest: llama-3.3-nemotron-nano-8b-v1
+
+  # Upstage Solar shorthand aliases
+  solar-latest: solar-pro
+  solar-pro-latest: solar-pro
+  solar-mini-latest: solar-mini
+
+  # Inflection shorthand aliases
+  pi-latest: inflection-3-pi
+
   # ByteDance Doubao shorthand aliases
   doubao-latest: doubao-1.5-pro-32k
   doubao-pro-latest: doubao-1.5-pro-256k

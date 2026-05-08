@@ -1,0 +1,32 @@
+id: llama-3.3-nemotron-super-49b-v1
+provider: nvidia
+display_name: Llama 3.3 Nemotron Super 49B
+status: active
+release_date: 2025-02-19
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 131072
+max_output_tokens: 4096
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: true
+  vision: false
+  streaming: true
+  json_mode: true
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop, tools, response_format]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.09
+  output: 0.45
+last_verified: 2026-05-09
+confidence: official
+endpoint_family: chat_completions
+sources:
+  - url: https://build.nvidia.com/nvidia/llama-3_3-nemotron-super-49b-v1
+    last_verified: 2026-05-09

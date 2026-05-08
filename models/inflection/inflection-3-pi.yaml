@@ -1,0 +1,32 @@
+id: inflection-3-pi
+provider: inflection
+display_name: Inflection 3 Pi
+status: active
+release_date: 2024-10-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 8192
+max_output_tokens: 2048
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 2.50
+  output: 10.00
+last_verified: 2026-05-09
+confidence: official
+endpoint_family: custom
+sources:
+  - url: https://developers.inflection.ai/docs/introduction
+    last_verified: 2026-05-09
