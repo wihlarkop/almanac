@@ -2,7 +2,7 @@
 
 These items are intentionally deferred from the first production-readiness batch.
 
-- [ ] Add JSON log mode for production, controlled by an environment variable.
+- [x] Add JSON log mode for production, controlled by an environment variable.
 - [ ] Add Prometheus metrics endpoint for request counts, latency, status codes, and catalog counts.
 - [ ] Add optional source URL reachability checks for catalog validation.
 - [ ] Add generated catalog summary report.
