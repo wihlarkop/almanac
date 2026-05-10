@@ -88,6 +88,16 @@ pub struct Pricing {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reasoning: Option<f64>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub per_image: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub per_second: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub per_minute: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub per_million_chars: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub per_page: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub pricing_notes: Option<String>,
 }
 
@@ -108,6 +118,16 @@ pub enum EndpointFamily {
     Custom,
     Agent,
     Search,
+    Embeddings,
+    Reranking,
+    ImageGeneration,
+    Speech,
+    Transcription,
+    VideoGeneration,
+    Realtime,
+    Ocr,
+    MusicGeneration,
+    MeshGeneration,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, utoipa::ToSchema)]
