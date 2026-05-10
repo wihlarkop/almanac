@@ -1,0 +1,36 @@
+id: dall-e-3
+provider: openai
+display_name: DALL-E 3
+status: active
+release_date: 2023-10-04
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4000
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [image]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [n, size, quality, style, response_format]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_image: 0.04
+  pricing_notes: "$0.04/image (standard 1024x1024), $0.08/image (HD 1024x1024), $0.12/image (HD 1792x1024 or 1024x1792)"
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: image_generation
+sources:
+  - url: https://platform.openai.com/docs/models/dall-e-3
+    last_verified: 2026-05-11
+  - url: https://openai.com/api/pricing
+    last_verified: 2026-05-11

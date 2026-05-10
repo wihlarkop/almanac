@@ -1,0 +1,36 @@
+id: gen-4.5
+provider: runway
+display_name: Gen-4.5
+status: active
+release_date: 2026-01-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4096
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [video]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, image, duration, ratio, seed, motion]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_second: 0.25
+  pricing_notes: "25 credits per second of video at $0.01/credit."
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: video_generation
+sources:
+  - url: https://docs.dev.runwayml.com
+    last_verified: 2026-05-11
+  - url: https://runwayml.com/pricing
+    last_verified: 2026-05-11

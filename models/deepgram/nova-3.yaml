@@ -1,0 +1,36 @@
+id: nova-3
+provider: deepgram
+display_name: Nova-3
+status: active
+release_date: 2025-04-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 1
+max_output_tokens: 1
+modalities:
+  input: [audio]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+parameters:
+  supported: [language, model, tier, punctuate, diarize, smart_format, utterances]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_minute: 0.0077
+  pricing_notes: "$0.0077/min streaming, $0.0043/min pre-recorded. Billed per second."
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: transcription
+sources:
+  - url: https://developers.deepgram.com/docs/models-overview
+    last_verified: 2026-05-11
+  - url: https://deepgram.com/pricing
+    last_verified: 2026-05-11

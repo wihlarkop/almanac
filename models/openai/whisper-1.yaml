@@ -1,0 +1,36 @@
+id: whisper-1
+provider: openai
+display_name: Whisper
+status: active
+release_date: 2022-09-21
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 1
+max_output_tokens: 25000
+modalities:
+  input: [audio]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [language, prompt, response_format, temperature]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_minute: 0.006
+  pricing_notes: "$0.006 per minute of audio transcribed"
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: transcription
+sources:
+  - url: https://platform.openai.com/docs/models/whisper
+    last_verified: 2026-05-11
+  - url: https://openai.com/api/pricing
+    last_verified: 2026-05-11

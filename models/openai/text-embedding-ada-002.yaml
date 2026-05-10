@@ -1,0 +1,32 @@
+id: text-embedding-ada-002
+provider: openai
+display_name: Text Embedding Ada 002
+status: deprecated
+release_date: 2022-12-15
+deprecation_date: null
+sunset_date: null
+replacement: text-embedding-3-small
+context_window: 8191
+max_output_tokens: 1536
+modalities:
+  input: [text]
+  output: [embedding]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [encoding_format, user]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.10
+  output: 0.00
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: embeddings
+sources:
+  - url: https://platform.openai.com/docs/models/text-embedding-ada-002
+    last_verified: 2026-05-11

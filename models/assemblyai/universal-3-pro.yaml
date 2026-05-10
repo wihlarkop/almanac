@@ -1,0 +1,36 @@
+id: universal-3-pro
+provider: assemblyai
+display_name: Universal-3 Pro
+status: active
+release_date: 2025-09-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 1
+max_output_tokens: 1
+modalities:
+  input: [audio]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [language_code, punctuate, format_text, disfluencies, speaker_labels]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_minute: 0.0035
+  pricing_notes: "$0.0035/min (6 languages, domain-optimized). Best accuracy for supported languages."
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: transcription
+sources:
+  - url: https://www.assemblyai.com/docs
+    last_verified: 2026-05-11
+  - url: https://www.assemblyai.com/pricing
+    last_verified: 2026-05-11

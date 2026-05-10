@@ -1,0 +1,36 @@
+id: flux-1.1-pro
+provider: bfl
+display_name: FLUX 1.1 Pro
+status: deprecated
+release_date: 2024-10-01
+deprecation_date: null
+sunset_date: null
+replacement: flux-2-max
+context_window: 4096
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [image]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, width, height, steps, guidance, seed, output_format]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_image: 0.04
+  pricing_notes: "$0.04/image. 4 credits at $0.01/credit."
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: image_generation
+sources:
+  - url: https://docs.bfl.ml
+    last_verified: 2026-05-11
+  - url: https://bfl.ai/pricing
+    last_verified: 2026-05-11

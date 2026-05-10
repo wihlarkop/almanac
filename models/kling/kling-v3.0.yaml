@@ -1,0 +1,36 @@
+id: kling-v3.0
+provider: kling
+display_name: Kling v3.0
+status: active
+release_date: 2026-01-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 2048
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [video]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, image, duration, aspect_ratio, mode, cfg_scale]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_second: 0.07
+  pricing_notes: "Credit-based. Omni One unified architecture. ~35 credits for 5-second pro video."
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: video_generation
+sources:
+  - url: https://klingai.com/global/dev/docs
+    last_verified: 2026-05-11
+  - url: https://klingai.com/global/dev/pricing
+    last_verified: 2026-05-11

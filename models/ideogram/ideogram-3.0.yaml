@@ -1,0 +1,36 @@
+id: ideogram-3.0
+provider: ideogram
+display_name: Ideogram 3.0
+status: active
+release_date: 2025-06-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 2048
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [image]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, negative_prompt, aspect_ratio, seed, style_type, resolution, rendering_speed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_image: 0.03
+  pricing_notes: "$0.03/image via API. Best-in-class text rendering."
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: image_generation
+sources:
+  - url: https://developer.ideogram.ai
+    last_verified: 2026-05-11
+  - url: https://ideogram.ai/features/api-pricing
+    last_verified: 2026-05-11

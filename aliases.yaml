@@ -196,3 +196,68 @@ aliases:
   sambanova-latest: llama-3.3-70b
   sambanova-large-latest: llama-3.1-405b
   sambanova-small-latest: llama-3.1-8b
+
+  # OpenAI embedding aliases
+  text-embedding-latest: text-embedding-3-large
+  text-embedding-small-latest: text-embedding-3-small
+
+  # OpenAI image generation aliases
+  dall-e-latest: dall-e-3
+  gpt-image-latest: gpt-image-1
+
+  # OpenAI audio aliases
+  whisper-latest: whisper-1
+  tts-latest: tts-1-hd
+
+  # Voyage AI aliases
+  voyage-latest: voyage-4
+  voyage-lite-latest: voyage-4-lite
+  voyage-large-latest: voyage-4-large
+
+  # Jina AI aliases
+  jina-embed-latest: jina-embeddings-v4
+  jina-embed-v3-latest: jina-embeddings-v3
+
+  # Cohere embed aliases
+  embed-latest: embed-v4
+
+  # Google embedding aliases
+  text-embedding-google-latest: text-embedding-005
+
+  # Google image gen aliases
+  imagen-latest: imagen-4.0-generate-001
+  imagen-fast-latest: imagen-4.0-fast-generate-001
+
+  # Stability AI aliases
+  sdxl-ultra-latest: stable-image-ultra
+  sdxl-core-latest: stable-image-core
+  sd-3.5-latest: stable-diffusion-3.5-large
+
+  # Black Forest Labs aliases
+  flux-latest: flux-2-max
+  flux-fast-latest: flux-2-klein
+  flux-kontext-latest: flux-kontext
+
+  # Ideogram aliases
+  ideogram-latest: ideogram-3.0
+
+  # ElevenLabs aliases
+  elevenlabs-latest: eleven-v3
+  elevenlabs-turbo-latest: eleven-flash-v2-5
+
+  # Cartesia aliases
+  sonic-latest: sonic-3
+
+  # Deepgram aliases
+  deepgram-latest: nova-3
+  nova-latest-stt: nova-3
+
+  # AssemblyAI aliases
+  assemblyai-latest: universal-3-pro
+  assemblyai-fast-latest: universal-2
+
+  # Runway aliases
+  runway-latest: gen-4.5
+
+  # Kling aliases
+  kling-latest: kling-v3.0

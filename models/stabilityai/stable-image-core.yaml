@@ -1,0 +1,36 @@
+id: stable-image-core
+provider: stabilityai
+display_name: Stable Image Core
+status: active
+release_date: 2024-04-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 10000
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [image]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, negative_prompt, aspect_ratio, seed, output_format, style_preset]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_image: 0.03
+  pricing_notes: "$0.03/image. 3 credits per image at $0.01/credit."
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: image_generation
+sources:
+  - url: https://platform.stability.ai/docs/api-reference
+    last_verified: 2026-05-11
+  - url: https://platform.stability.ai/pricing
+    last_verified: 2026-05-11

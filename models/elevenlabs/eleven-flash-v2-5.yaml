@@ -1,0 +1,34 @@
+id: eleven-flash-v2-5
+provider: elevenlabs
+display_name: Eleven Flash v2.5
+status: active
+release_date: 2024-10-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 5000
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [audio]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+parameters:
+  supported: [voice_id, model_id, voice_settings, language_code]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_million_chars: 60.00
+  pricing_notes: "$60 per 1M characters. Ultra-low latency (~75ms), optimized for real-time agents."
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: speech
+sources:
+  - url: https://elevenlabs.io/docs/api-reference
+    last_verified: 2026-05-11

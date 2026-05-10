@@ -1,0 +1,32 @@
+id: jina-colbert-v2
+provider: jina
+display_name: Jina ColBERT v2
+status: active
+release_date: 2024-08-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 8192
+max_output_tokens: 128
+modalities:
+  input: [text]
+  output: [embedding]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [input_type, embedding_type]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.02
+  output: 0.00
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: embeddings
+sources:
+  - url: https://jina.ai/embeddings
+    last_verified: 2026-05-11

@@ -1,0 +1,32 @@
+id: embed-v3-english
+provider: cohere
+display_name: Embed v3 English
+status: deprecated
+release_date: 2023-11-02
+deprecation_date: null
+sunset_date: null
+replacement: embed-v4
+context_window: 8192
+max_output_tokens: 1024
+modalities:
+  input: [text]
+  output: [embedding]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [input_type, truncate, embedding_types]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.10
+  output: 0.00
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: embeddings
+sources:
+  - url: https://docs.cohere.com/docs/cohere-embed
+    last_verified: 2026-05-11

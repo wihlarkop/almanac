@@ -1,0 +1,32 @@
+id: jina-embeddings-v4
+provider: jina
+display_name: Jina Embeddings v4
+status: active
+release_date: 2025-05-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 32000
+max_output_tokens: 2048
+modalities:
+  input: [text, image]
+  output: [embedding]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [dimensions, task, embedding_type]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.02
+  output: 0.00
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: embeddings
+sources:
+  - url: https://jina.ai/embeddings
+    last_verified: 2026-05-11

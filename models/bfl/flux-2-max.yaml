@@ -1,0 +1,36 @@
+id: flux-2-max
+provider: bfl
+display_name: FLUX.2 Max
+status: active
+release_date: 2026-01-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4096
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [image]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, width, height, steps, guidance, seed, output_format]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_image: 0.06
+  pricing_notes: "Megapixel-based pricing. Highest quality FLUX.2 model."
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: image_generation
+sources:
+  - url: https://docs.bfl.ml
+    last_verified: 2026-05-11
+  - url: https://bfl.ai/pricing
+    last_verified: 2026-05-11

@@ -1,0 +1,35 @@
+id: embed-v4
+provider: cohere
+display_name: Embed v4
+status: active
+release_date: 2025-04-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 8192
+max_output_tokens: 1536
+modalities:
+  input: [text, image]
+  output: [embedding]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [input_type, truncate, embedding_types, images]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.12
+  output: 0.00
+  pricing_notes: "$0.12/1M text tokens. Image inputs: $0.47/1M tokens equivalent."
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: embeddings
+sources:
+  - url: https://docs.cohere.com/docs/cohere-embed
+    last_verified: 2026-05-11
+  - url: https://cohere.com/pricing
+    last_verified: 2026-05-11

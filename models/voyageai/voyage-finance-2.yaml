@@ -1,0 +1,32 @@
+id: voyage-finance-2
+provider: voyageai
+display_name: Voyage Finance 2
+status: active
+release_date: 2024-06-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 32000
+max_output_tokens: 1024
+modalities:
+  input: [text]
+  output: [embedding]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [input_type, truncation, output_dimension]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.12
+  output: 0.00
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: embeddings
+sources:
+  - url: https://docs.voyageai.com/docs/embeddings
+    last_verified: 2026-05-11

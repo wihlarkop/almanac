@@ -1,0 +1,36 @@
+id: imagen-4.0-generate-001
+provider: google
+display_name: Imagen 4.0
+status: active
+release_date: 2026-01-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4096
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [image]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, negative_prompt, number_of_images, aspect_ratio, output_mime_type, seed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_image: 0.06
+  pricing_notes: "Up to $0.06/image. Significantly improved text rendering over Imagen 3."
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: image_generation
+sources:
+  - url: https://ai.google.dev/gemini-api/docs/image-generation
+    last_verified: 2026-05-11
+  - url: https://ai.google.dev/gemini-api/docs/pricing
+    last_verified: 2026-05-11

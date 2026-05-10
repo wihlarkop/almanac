@@ -76,7 +76,7 @@
           "type": "array",
           "items": {
             "type": "string",
-            "enum": ["text", "image", "audio"]
+            "enum": ["text", "image", "audio", "video", "embedding"]
           },
           "minItems": 1,
           "uniqueItems": true
@@ -126,7 +126,7 @@
     },
     "endpoint_family": {
       "type": "string",
-      "enum": ["chat_completions", "responses", "custom", "agent", "search"],
+      "enum": ["chat_completions", "responses", "custom", "agent", "search", "embeddings", "image_generation", "speech", "transcription", "video_generation"],
       "description": "Primary API shape used by this provider/model."
     },
     "pricing": {
@@ -177,6 +177,26 @@
           "type": "number",
           "minimum": 0,
           "description": "Reasoning-token price per 1M tokens, when separate."
+        },
+        "per_image": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Price per image generated (image generation models)."
+        },
+        "per_second": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Price per second of audio output (TTS models)."
+        },
+        "per_minute": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Price per minute of audio input (transcription models)."
+        },
+        "per_million_chars": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Price per 1M characters (TTS models priced by character)."
         },
         "pricing_notes": {
           "type": "string"

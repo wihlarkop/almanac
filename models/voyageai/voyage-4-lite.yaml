@@ -1,0 +1,32 @@
+id: voyage-4-lite
+provider: voyageai
+display_name: Voyage 4 Lite
+status: active
+release_date: 2026-01-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 32000
+max_output_tokens: 512
+modalities:
+  input: [text]
+  output: [embedding]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [input_type, truncation, output_dimension, output_dtype]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.02
+  output: 0.00
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: embeddings
+sources:
+  - url: https://docs.voyageai.com/docs/pricing
+    last_verified: 2026-05-11

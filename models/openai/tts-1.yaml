@@ -1,0 +1,36 @@
+id: tts-1
+provider: openai
+display_name: TTS-1
+status: active
+release_date: 2023-11-06
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4096
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [audio]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+parameters:
+  supported: [voice, response_format, speed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_million_chars: 15.00
+  pricing_notes: "$15.00 per 1M characters of input text"
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: speech
+sources:
+  - url: https://platform.openai.com/docs/models/tts-1
+    last_verified: 2026-05-11
+  - url: https://openai.com/api/pricing
+    last_verified: 2026-05-11

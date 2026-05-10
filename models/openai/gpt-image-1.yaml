@@ -1,0 +1,36 @@
+id: gpt-image-1
+provider: openai
+display_name: GPT Image 1
+status: active
+release_date: 2025-04-23
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 32000
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [image]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [n, size, quality, background, output_format]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 5.00
+  output: 0.00
+  per_image: 0.04
+  pricing_notes: "Input text $5/1M tokens, input image $10/1M tokens; output $0.04–$0.167/image depending on quality and size"
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: image_generation
+sources:
+  - url: https://platform.openai.com/docs/models/gpt-image-1
+    last_verified: 2026-05-11
+  - url: https://openai.com/api/pricing
+    last_verified: 2026-05-11
