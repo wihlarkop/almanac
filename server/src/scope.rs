@@ -1,6 +1,10 @@
+use crate::catalog::{Model, Provider};
 use anyhow::{Context, Result, bail};
 use serde::Deserialize;
-use std::{collections::HashSet, path::Path};
+use std::{
+    collections::{HashMap, HashSet},
+    path::Path,
+};
 
 const ENV_INCLUDE_PROVIDERS: &str = "CATALOG_INCLUDE_PROVIDERS";
 const ENV_EXCLUDE_PROVIDERS: &str = "CATALOG_EXCLUDE_PROVIDERS";
@@ -106,6 +110,117 @@ impl CatalogScope {
             && self.include_models.is_empty()
             && self.exclude_models.is_empty()
     }
+
+    pub fn apply(
+        &self,
+        providers: Vec<Provider>,
+        models: Vec<Model>,
+        aliases: HashMap<String, String>,
+    ) -> Result<ScopedCatalog> {
+        if self.is_disabled() {
+            return Ok(ScopedCatalog {
+                providers,
+                models,
+                aliases,
+            });
+        }
+
+        self.validate_known_entries(&providers, &models)?;
+
+        let visible_models: Vec<Model> = models
+            .into_iter()
+            .filter(|model| self.includes_model(model))
+            .filter(|model| !self.excludes_model(model))
+            .collect();
+
+        if visible_models.is_empty() {
+            bail!("catalog scope produced zero visible models");
+        }
+
+        let visible_model_ids: HashSet<String> =
+            visible_models.iter().map(|model| model.id.clone()).collect();
+        let visible_provider_ids: HashSet<String> = visible_models
+            .iter()
+            .map(|model| model.provider.clone())
+            .collect();
+
+        let visible_providers = providers
+            .into_iter()
+            .filter(|provider| visible_provider_ids.contains(&provider.id))
+            .collect();
+
+        let visible_aliases = aliases
+            .into_iter()
+            .filter(|(_, target)| visible_model_ids.contains(target))
+            .collect();
+
+        Ok(ScopedCatalog {
+            providers: visible_providers,
+            models: visible_models,
+            aliases: visible_aliases,
+        })
+    }
+
+    fn includes_model(&self, model: &Model) -> bool {
+        if self.include_providers.is_empty() && self.include_models.is_empty() {
+            return true;
+        }
+
+        self.include_providers.contains(&model.provider)
+            || self.include_models.contains(&ModelRef {
+                provider: model.provider.clone(),
+                id: model.id.clone(),
+            })
+    }
+
+    fn excludes_model(&self, model: &Model) -> bool {
+        self.exclude_providers.contains(&model.provider)
+            || self.exclude_models.contains(&ModelRef {
+                provider: model.provider.clone(),
+                id: model.id.clone(),
+            })
+    }
+
+    fn validate_known_entries(&self, providers: &[Provider], models: &[Model]) -> Result<()> {
+        let provider_ids: HashSet<&str> =
+            providers.iter().map(|provider| provider.id.as_str()).collect();
+        let model_refs: HashSet<ModelRef> = models
+            .iter()
+            .map(|model| ModelRef {
+                provider: model.provider.clone(),
+                id: model.id.clone(),
+            })
+            .collect();
+
+        for provider in self
+            .include_providers
+            .iter()
+            .chain(self.exclude_providers.iter())
+        {
+            if !provider_ids.contains(provider.as_str()) {
+                bail!("catalog scope references unknown provider '{provider}'");
+            }
+        }
+
+        for model_ref in self.include_models.iter().chain(self.exclude_models.iter()) {
+            if !model_refs.contains(model_ref) {
+                bail!(
+                    "catalog scope references unknown model '{}/{}'",
+                    model_ref.provider,
+                    model_ref.id
+                );
+            }
+        }
+
+        Ok(())
+    }
+}
+
+#[derive(Debug)]
+pub struct ScopedCatalog {
+    pub providers: Vec<Provider>,
+    pub models: Vec<Model>,
+    pub aliases: HashMap<String, String>,
 }
 
 fn has_value(value: &str) -> bool {
@@ -164,6 +279,38 @@ pub(crate) fn parse_model_ref(value: &str) -> Result<ModelRef> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn provider(id: &str) -> Provider {
+        Provider {
+            id: id.to_string(),
+            display_name: id.to_string(),
+            website: format!("https://{id}.example.com"),
+            api_docs: Some(format!("https://{id}.example.com/docs")),
+        }
+    }
+
+    fn model(provider: &str, id: &str) -> Model {
+        serde_json::from_value(serde_json::json!({
+            "id": id,
+            "provider": provider,
+            "display_name": id,
+            "status": "active",
+            "context_window": 128000,
+            "max_output_tokens": 4096,
+            "modalities": {"input": ["text"], "output": ["text"]},
+            "capabilities": {},
+            "parameters": {
+                "supported": [],
+                "rejected": [],
+                "deprecated_for_this_model": []
+            },
+            "last_verified": "2026-05-10",
+            "confidence": "official",
+            "endpoint_family": "chat_completions",
+            "sources": []
+        }))
+        .unwrap()
+    }
 
     #[test]
     fn model_ref_requires_provider_and_model_id() {
@@ -263,5 +410,71 @@ exclude:
         }));
 
         std::fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn apply_scope_includes_providers_and_removes_unusable_aliases() {
+        let scope = CatalogScope {
+            include_providers: HashSet::from(["openai".to_string()]),
+            ..CatalogScope::default()
+        };
+        let providers = vec![provider("openai"), provider("anthropic")];
+        let models = vec![
+            model("openai", "gpt-4o"),
+            model("anthropic", "claude-sonnet"),
+        ];
+        let aliases = HashMap::from([
+            ("gpt-latest".to_string(), "gpt-4o".to_string()),
+            ("claude-latest".to_string(), "claude-sonnet".to_string()),
+        ]);
+
+        let scoped = scope.apply(providers, models, aliases).unwrap();
+
+        assert_eq!(scoped.providers.len(), 1);
+        assert_eq!(scoped.providers[0].id, "openai");
+        assert_eq!(scoped.models.len(), 1);
+        assert_eq!(scoped.models[0].id, "gpt-4o");
+        assert!(scoped.aliases.contains_key("gpt-latest"));
+        assert!(!scoped.aliases.contains_key("claude-latest"));
+    }
+
+    #[test]
+    fn apply_scope_exclude_wins_over_include() {
+        let scope = CatalogScope {
+            include_providers: HashSet::from(["openai".to_string()]),
+            exclude_models: HashSet::from([ModelRef {
+                provider: "openai".to_string(),
+                id: "gpt-4o".to_string(),
+            }]),
+            ..CatalogScope::default()
+        };
+
+        let err = scope
+            .apply(
+                vec![provider("openai")],
+                vec![model("openai", "gpt-4o")],
+                HashMap::new(),
+            )
+            .unwrap_err();
+
+        assert!(err.to_string().contains("zero visible models"));
+    }
+
+    #[test]
+    fn apply_scope_rejects_unknown_entries() {
+        let scope = CatalogScope {
+            include_providers: HashSet::from(["missing".to_string()]),
+            ..CatalogScope::default()
+        };
+
+        let err = scope
+            .apply(
+                vec![provider("openai")],
+                vec![model("openai", "gpt-4o")],
+                HashMap::new(),
+            )
+            .unwrap_err();
+
+        assert!(err.to_string().contains("unknown provider 'missing'"));
     }
 }

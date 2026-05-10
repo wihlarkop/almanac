@@ -1,4 +1,7 @@
-use crate::catalog::{Model, Provider};
+use crate::{
+    catalog::{Model, Provider},
+    scope::CatalogScope,
+};
 use anyhow::{Context, Result, bail};
 use sha2::{Digest, Sha256};
 use std::{collections::HashMap, path::Path};
@@ -15,6 +18,10 @@ pub struct AppState {
 }
 
 pub fn load_state(data_dir: &Path) -> Result<AppState> {
+    load_state_with_scope(data_dir, &CatalogScope::disabled())
+}
+
+pub fn load_state_with_scope(data_dir: &Path, scope: &CatalogScope) -> Result<AppState> {
     let providers_dir = data_dir.join("providers");
     let models_dir = data_dir.join("models");
     let aliases_path = data_dir.join("aliases.yaml");
@@ -26,7 +33,16 @@ pub fn load_state(data_dir: &Path) -> Result<AppState> {
     let providers: Vec<Provider> = load_yaml_dir(&providers_dir)?;
     let models: Vec<Model> = load_yaml_recursive(&models_dir)?;
     let aliases = load_aliases(&aliases_path)?;
+    let scoped = scope.apply(providers, models, aliases)?;
 
+    build_state(scoped.providers, scoped.models, scoped.aliases)
+}
+
+fn build_state(
+    providers: Vec<Provider>,
+    models: Vec<Model>,
+    aliases: HashMap<String, String>,
+) -> Result<AppState> {
     let mut hasher = Sha256::new();
     hasher.update(serde_json::to_string(&providers)?.as_bytes());
     hasher.update(serde_json::to_string(&models)?.as_bytes());
