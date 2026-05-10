@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-
 FROM rust:1.95-slim AS chef
 WORKDIR /build
 RUN apt-get update \
