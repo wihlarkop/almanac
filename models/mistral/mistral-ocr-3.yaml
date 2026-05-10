@@ -1,0 +1,36 @@
+id: mistral-ocr-3
+provider: mistral
+display_name: Mistral OCR 3
+status: active
+release_date: 2025-03-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 16384
+max_output_tokens: 4096
+modalities:
+  input: [image, file]
+  output: [text]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: true
+parameters:
+  supported: [document, include_image_base64, pages]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_page: 0.001
+  pricing_notes: "$0.001/page ($1/1000 pages). Dedicated document OCR model."
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: ocr
+sources:
+  - url: https://docs.mistral.ai/capabilities/document/
+    last_verified: 2026-05-11
+  - url: https://mistral.ai/pricing
+    last_verified: 2026-05-11

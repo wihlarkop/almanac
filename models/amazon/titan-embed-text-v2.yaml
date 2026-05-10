@@ -1,0 +1,33 @@
+id: titan-embed-text-v2
+provider: amazon
+display_name: Titan Embed Text V2
+status: active
+release_date: 2024-04-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 8192
+max_output_tokens: 1024
+modalities:
+  input: [text]
+  output: [embedding]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [inputText, dimensions, normalize]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.02
+  output: 0.00
+  pricing_notes: "$0.02/1M tokens. Available via Amazon Bedrock as amazon.titan-embed-text-v2:0."
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: embeddings
+sources:
+  - url: https://docs.aws.amazon.com/bedrock/latest/userguide/titan-embedding-models.html
+    last_verified: 2026-05-11

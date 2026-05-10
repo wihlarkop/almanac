@@ -1,0 +1,38 @@
+id: scribe-v2
+provider: elevenlabs
+display_name: Scribe V2
+status: active
+release_date: 2025-04-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 16384
+max_output_tokens: 4096
+modalities:
+  input: [audio]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+  speaker_diarization: true
+  multilingual_stt: true
+parameters:
+  supported: [audio, language_code, diarize, timestamps_granularity, tag_audio_events]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_minute: 0.0037
+  pricing_notes: "$0.0037/minute. Highly accurate multilingual STT with speaker diarization."
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: transcription
+sources:
+  - url: https://elevenlabs.io/docs/speech-to-text/overview
+    last_verified: 2026-05-11
+  - url: https://elevenlabs.io/pricing
+    last_verified: 2026-05-11

@@ -1,0 +1,37 @@
+id: gpt-4o-realtime-preview
+provider: openai
+display_name: GPT-4o Realtime Preview
+status: active
+release_date: 2024-10-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 128000
+max_output_tokens: 4096
+modalities:
+  input: [text, audio]
+  output: [text, audio]
+capabilities:
+  tools: true
+  vision: false
+  streaming: true
+  json_mode: false
+  realtime: true
+  function_calling: true
+parameters:
+  supported: [voice, modalities, instructions, tools, temperature]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 5.00
+  output: 20.00
+  pricing_notes: "$5/M text input, $100/M audio input, $20/M text output, $200/M audio output tokens. Accessed via Realtime API WebSocket."
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: realtime
+sources:
+  - url: https://platform.openai.com/docs/guides/realtime
+    last_verified: 2026-05-11
+  - url: https://openai.com/api/pricing
+    last_verified: 2026-05-11

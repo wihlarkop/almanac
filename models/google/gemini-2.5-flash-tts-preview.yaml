@@ -1,0 +1,36 @@
+id: gemini-2.5-flash-tts-preview
+provider: google
+display_name: Gemini 2.5 Flash TTS Preview
+status: active
+release_date: 2026-01-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 32768
+max_output_tokens: 8192
+modalities:
+  input: [text]
+  output: [audio]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+  multilingual_tts: true
+parameters:
+  supported: [voice, language_code, audio_encoding, speaking_rate, pitch]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.50
+  output: 10.00
+  pricing_notes: "$0.50/M input tokens, $10.00/M audio output tokens. TTS model."
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: speech
+sources:
+  - url: https://ai.google.dev/gemini-api/docs/speech
+    last_verified: 2026-05-11
+  - url: https://ai.google.dev/gemini-api/docs/pricing
+    last_verified: 2026-05-11

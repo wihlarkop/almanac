@@ -1,0 +1,35 @@
+id: qwen3-tts
+provider: alibaba
+display_name: Qwen3 TTS
+status: active
+release_date: 2025-09-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4096
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [audio]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+  multilingual_tts: true
+parameters:
+  supported: [text, voice, format, sample_rate]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_million_chars: 14.00
+  pricing_notes: "~$14/M chars. Pricing varies by platform. Natural-sounding multilingual TTS."
+last_verified: 2026-05-11
+confidence: inferred
+endpoint_family: speech
+sources:
+  - url: https://help.aliyun.com/zh/model-studio/developer-reference/qwen-tts
+    last_verified: 2026-05-11

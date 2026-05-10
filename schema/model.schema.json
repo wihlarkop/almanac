@@ -126,7 +126,7 @@
     },
     "endpoint_family": {
       "type": "string",
-      "enum": ["chat_completions", "responses", "custom", "agent", "search", "embeddings", "image_generation", "speech", "transcription", "video_generation"],
+      "enum": ["chat_completions", "responses", "custom", "agent", "search", "embeddings", "image_generation", "speech", "transcription", "video_generation", "realtime", "ocr"],
       "description": "Primary API shape used by this provider/model."
     },
     "pricing": {
@@ -197,6 +197,11 @@
           "type": "number",
           "minimum": 0,
           "description": "Price per 1M characters (TTS models priced by character)."
+        },
+        "per_page": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Price per page processed (OCR/document models)."
         },
         "pricing_notes": {
           "type": "string"

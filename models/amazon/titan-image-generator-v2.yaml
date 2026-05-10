@@ -1,0 +1,37 @@
+id: titan-image-generator-v2
+provider: amazon
+display_name: Titan Image Generator V2
+status: active
+release_date: 2024-08-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 512
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [image]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+  inpainting: true
+  outpainting: true
+  background_removal: true
+parameters:
+  supported: [textToImageParams, imageVariationParams, inPaintingParams, outPaintingParams, imageGenerationConfig]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_image: 0.01
+  pricing_notes: "$0.01/image (standard quality). Available via Amazon Bedrock as amazon.titan-image-generator-v2:0."
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: image_generation
+sources:
+  - url: https://docs.aws.amazon.com/bedrock/latest/userguide/titan-image-models.html
+    last_verified: 2026-05-11

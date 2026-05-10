@@ -1,0 +1,36 @@
+id: gpt-4o-transcribe
+provider: openai
+display_name: GPT-4o Transcribe
+status: active
+release_date: 2025-03-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 16384
+max_output_tokens: 4096
+modalities:
+  input: [audio]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+parameters:
+  supported: [language, prompt, response_format, temperature, timestamp_granularities]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_minute: 0.006
+  pricing_notes: "$0.006/minute of audio input. Dedicated high-accuracy STT model."
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: transcription
+sources:
+  - url: https://platform.openai.com/docs/guides/speech-to-text
+    last_verified: 2026-05-11
+  - url: https://openai.com/api/pricing
+    last_verified: 2026-05-11

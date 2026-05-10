@@ -1,0 +1,37 @@
+id: voxtral-mini-2507
+provider: mistral
+display_name: Voxtral Mini 2507
+status: active
+release_date: 2025-07-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 32768
+max_output_tokens: 4096
+modalities:
+  input: [audio, text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+  multilingual_stt: true
+parameters:
+  supported: [audio, language, response_format, temperature]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_minute: 0.003
+  pricing_notes: "$0.003/minute of audio. Compact multilingual STT model."
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: transcription
+sources:
+  - url: https://docs.mistral.ai/capabilities/speech/
+    last_verified: 2026-05-11
+  - url: https://mistral.ai/pricing
+    last_verified: 2026-05-11

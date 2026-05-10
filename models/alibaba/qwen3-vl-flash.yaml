@@ -1,0 +1,33 @@
+id: qwen3-vl-flash
+provider: alibaba
+display_name: Qwen3 VL Flash
+status: active
+release_date: 2025-09-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 128000
+max_output_tokens: 8192
+modalities:
+  input: [text, image]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  streaming: true
+  json_mode: true
+parameters:
+  supported: [messages, temperature, top_p, max_tokens, stream, tools]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.07
+  output: 0.20
+  pricing_notes: "$0.07/M input tokens, $0.20/M output tokens. Budget vision model."
+last_verified: 2026-05-11
+confidence: inferred
+endpoint_family: chat_completions
+sources:
+  - url: https://help.aliyun.com/zh/model-studio/user-guide/qwen-vl-series
+    last_verified: 2026-05-11

@@ -1,0 +1,37 @@
+id: voxtral-tts
+provider: mistral
+display_name: Voxtral TTS
+status: active
+release_date: 2025-07-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4096
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [audio]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+  multilingual_tts: true
+parameters:
+  supported: [text, voice, language, audio_format]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_million_chars: 16.00
+  pricing_notes: "$16/M characters ($0.016/1K chars). Multilingual TTS by Mistral."
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: speech
+sources:
+  - url: https://docs.mistral.ai/capabilities/speech/
+    last_verified: 2026-05-11
+  - url: https://mistral.ai/pricing
+    last_verified: 2026-05-11

@@ -1,0 +1,34 @@
+id: cohere-transcribe-03-2026
+provider: cohere
+display_name: Cohere Transcribe 03-2026
+status: active
+release_date: 2026-03-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 16384
+max_output_tokens: 4096
+modalities:
+  input: [audio]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+  multilingual_stt: true
+parameters:
+  supported: [file, language, response_format]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  pricing_notes: "Free during preview. Supports 14 languages."
+last_verified: 2026-05-11
+confidence: inferred
+endpoint_family: transcription
+sources:
+  - url: https://docs.cohere.com/reference/transcribe
+    last_verified: 2026-05-11

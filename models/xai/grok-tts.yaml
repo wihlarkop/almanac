@@ -1,0 +1,34 @@
+id: grok-tts
+provider: xai
+display_name: Grok TTS
+status: active
+release_date: 2026-03-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4096
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [audio]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+parameters:
+  supported: [text, voice, audio_format, speed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_million_chars: 4.20
+  pricing_notes: "$4.20/M characters. xAI text-to-speech."
+last_verified: 2026-05-11
+confidence: inferred
+endpoint_family: speech
+sources:
+  - url: https://docs.x.ai/docs/audio
+    last_verified: 2026-05-11

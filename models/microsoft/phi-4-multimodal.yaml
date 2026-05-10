@@ -9,7 +9,7 @@ replacement: null
 context_window: 131072
 max_output_tokens: 4096
 modalities:
-  input: [text, image]
+  input: [text, image, audio]
   output: [text]
 capabilities:
   tools: true

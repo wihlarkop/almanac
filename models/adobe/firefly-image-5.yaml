@@ -1,0 +1,36 @@
+id: firefly-image-5
+provider: adobe
+display_name: Firefly Image 5
+status: active
+release_date: 2025-10-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4096
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [image]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+  style_reference: true
+  structure_reference: true
+parameters:
+  supported: [prompt, negative_prompt, size, style, structure_strength, style_strength, seeds]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_image: 0.05
+  pricing_notes: "~$0.05/image. Commercially safe generative images by Adobe. Part of Firefly Services API."
+last_verified: 2026-05-11
+confidence: inferred
+endpoint_family: image_generation
+sources:
+  - url: https://developer.adobe.com/firefly-api/
+    last_verified: 2026-05-11

@@ -261,3 +261,50 @@ aliases:
 
   # Kling aliases
   kling-latest: kling-v3.0
+
+  # Google TTS/Realtime/Embedding/Video aliases
+  gemini-flash-tts-latest: gemini-2.5-flash-tts-preview
+  gemini-pro-tts-latest: gemini-2.5-pro-tts-preview
+  gemini-live-latest: gemini-3.1-flash-live-preview
+  gemini-embedding-latest: gemini-embedding-2-preview
+  veo-latest: veo-3.1-generate-preview
+  veo-fast-latest: veo-3.1-fast-generate-preview
+
+  # OpenAI audio/realtime/STT aliases
+  gpt-4o-realtime-latest: gpt-4o-realtime-preview
+  gpt-4o-mini-realtime-latest: gpt-4o-mini-realtime-preview
+  gpt-4o-audio-latest: gpt-4o-audio-preview
+  gpt-4o-mini-audio-latest: gpt-4o-mini-audio-preview
+  gpt-4o-transcribe-latest: gpt-4o-transcribe
+  gpt-4o-mini-transcribe-latest: gpt-4o-mini-transcribe
+  gpt-image-1-mini-latest: gpt-image-1-mini
+
+  # Mistral audio/OCR aliases
+  mistral-ocr-latest: mistral-ocr-3
+  voxtral-tts-latest: voxtral-tts
+  voxtral-stt-latest: voxtral-mini-2507
+
+  # Cohere transcribe aliases
+  cohere-transcribe-latest: cohere-transcribe-03-2026
+
+  # xAI audio/image/video aliases
+  grok-stt-latest: grok-stt
+  grok-tts-latest: grok-tts
+  grok-imagine-latest: grok-imagine-image-quality
+  grok-video-latest: grok-imagine-video
+
+  # ElevenLabs STT aliases
+  scribe-latest: scribe-v2
+  scribe-realtime-latest: scribe-v2-realtime
+
+  # Deepgram TTS aliases
+  aura-latest: aura-2
+
+  # Adobe Firefly aliases
+  firefly-latest: firefly-image-5
+
+  # Pika aliases
+  pika-latest: pika-v2-5
+
+  # Luma aliases
+  ray-latest: ray-3.14
