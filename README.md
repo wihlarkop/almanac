@@ -90,6 +90,42 @@ Optional environment variables:
 - `RUST_LOG` - tracing filter, for example `almanac_server=debug,tower_http=info`.
 - `LOG_FORMAT` - set to `json` for structured JSON logs (recommended for production).
 - `RATE_LIMIT_RPS` - maximum requests per second per IP address. Unset or `0` disables rate limiting. When a limit is exceeded the server returns `429` with a `Retry-After` header.
+- `CATALOG_INCLUDE_PROVIDERS` / `CATALOG_EXCLUDE_PROVIDERS` - comma-separated provider ids for deployment-time catalog scoping.
+- `CATALOG_INCLUDE_MODELS` / `CATALOG_EXCLUDE_MODELS` - comma-separated `provider/model-id` entries for deployment-time catalog scoping.
+- `CATALOG_SCOPE_FILE` - YAML file path for longer catalog scope configs. Cannot be combined with the env scope lists.
+
+### Catalog scoping
+
+Deployments can expose only part of the catalog without editing YAML data.
+
+For simple deployments, use comma-separated environment variables:
+
+```bash
+CATALOG_INCLUDE_PROVIDERS=openai,anthropic
+CATALOG_EXCLUDE_MODELS=openai/gpt-4o-mini
+```
+
+For longer managed configs, use one YAML file:
+
+```bash
+CATALOG_SCOPE_FILE=/etc/almanac/catalog-scope.yaml
+```
+
+```yaml
+include:
+  providers:
+    - openai
+    - anthropic
+  models:
+    - google/gemini-2.5-pro
+exclude:
+  providers:
+    - xai
+  models:
+    - openai/gpt-4o-mini
+```
+
+Use either env vars or `CATALOG_SCOPE_FILE`, not both. Includes are applied first, excludes are applied second, and excludes win. Model entries use `provider/model-id`. Hidden models are removed from providers, aliases, search, suggest, validation, comparison, catalog health, and metrics.
 
 The server logs startup, catalog loading, request traces, and shutdown events. It handles Ctrl+C
 and SIGTERM as graceful shutdown signals.
