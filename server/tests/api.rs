@@ -1,9 +1,13 @@
-use almanac_server::{routes, state};
+use almanac_server::{
+    routes,
+    scope::{CatalogScope, ModelRef},
+    state,
+};
 use axum::{
     body::Body,
     http::{Request, StatusCode},
 };
-use std::{path::Path, sync::Arc};
+use std::{collections::HashSet, path::Path, sync::Arc};
 use tokio::sync::RwLock;
 use tower::ServiceExt;
 
@@ -16,6 +20,12 @@ fn data_dir() -> std::path::PathBuf {
 
 async fn app() -> axum::Router {
     let s = state::load_state(&data_dir()).expect("load_state failed");
+    let shared = Arc::new(RwLock::new(s));
+    routes::router(shared)
+}
+
+async fn scoped_app(scope: CatalogScope) -> axum::Router {
+    let s = state::load_state_with_scope(&data_dir(), &scope).expect("load_state_with_scope failed");
     let shared = Arc::new(RwLock::new(s));
     routes::router(shared)
 }
@@ -36,6 +46,20 @@ fn assert_error_envelope(json: &serde_json::Value, code: &str) {
 
 async fn get_json(uri: &str) -> serde_json::Value {
     let response = app()
+        .await
+        .oneshot(Request::builder().uri(uri).body(Body::empty()).unwrap())
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+    let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    serde_json::from_slice(&body).unwrap()
+}
+
+async fn scoped_get_json(uri: &str, scope: CatalogScope) -> serde_json::Value {
+    let response = scoped_app(scope)
         .await
         .oneshot(Request::builder().uri(uri).body(Body::empty()).unwrap())
         .await
@@ -276,6 +300,96 @@ async fn provider_detail_unknown_returns_not_found() {
     let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
     assert_error_envelope(&json, "PROVIDER_NOT_FOUND");
     assert_eq!(json["error"]["details"]["provider"], "does-not-exist");
+}
+
+#[tokio::test]
+async fn scope_include_provider_hides_other_providers_and_models() {
+    let scope = CatalogScope {
+        include_providers: HashSet::from(["openai".to_string()]),
+        ..CatalogScope::default()
+    };
+
+    let providers = scoped_get_json("/api/v1/providers", scope.clone()).await;
+    assert_success_envelope(&providers);
+    assert!(
+        providers["data"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .all(|provider| provider["id"] == "openai")
+    );
+
+    let models = scoped_get_json("/api/v1/models?limit=200", scope.clone()).await;
+    assert_success_envelope(&models);
+    assert!(
+        models["data"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .all(|model| model["provider"] == "openai")
+    );
+
+    let hidden = scoped_app(scope)
+        .await
+        .oneshot(
+            Request::builder()
+                .uri("/api/v1/providers/anthropic")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(hidden.status(), StatusCode::NOT_FOUND);
+}
+
+#[tokio::test]
+async fn scope_exclude_model_removes_alias_target_and_detail_route() {
+    let scope = CatalogScope {
+        include_providers: HashSet::from(["openai".to_string()]),
+        exclude_models: HashSet::from([ModelRef {
+            provider: "openai".to_string(),
+            id: "gpt-4o".to_string(),
+        }]),
+        ..CatalogScope::default()
+    };
+
+    let aliases = scoped_get_json("/api/v1/aliases", scope.clone()).await;
+    assert_success_envelope(&aliases);
+    assert!(
+        !aliases["data"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|alias| alias["canonical_id"] == "gpt-4o")
+    );
+
+    let response = scoped_app(scope)
+        .await
+        .oneshot(
+            Request::builder()
+                .uri("/api/v1/models/openai/gpt-4o")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::NOT_FOUND);
+}
+
+#[tokio::test]
+async fn scope_changes_catalog_etag() {
+    let full = state::load_state(&data_dir()).unwrap();
+    let scoped = state::load_state_with_scope(
+        &data_dir(),
+        &CatalogScope {
+            include_providers: HashSet::from(["openai".to_string()]),
+            ..CatalogScope::default()
+        },
+    )
+    .unwrap();
+
+    assert_ne!(full.etag, scoped.etag);
 }
 
 #[tokio::test]
