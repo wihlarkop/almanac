@@ -1,0 +1,33 @@
+id: titan-text-express-v1
+provider: amazon
+display_name: Titan Text Express V1
+status: deprecated
+release_date: 2023-09-01
+deprecation_date: 2025-09-01
+sunset_date: null
+replacement: nova-pro-v1
+context_window: 8192
+max_output_tokens: 8192
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+parameters:
+  supported: [inputText, textGenerationConfig]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.20
+  output: 0.60
+  pricing_notes: "$0.20/M input, $0.60/M output. Available via Amazon Bedrock as amazon.titan-text-express-v1."
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: custom
+sources:
+  - url: https://docs.aws.amazon.com/bedrock/latest/userguide/titan-text-models.html
+    last_verified: 2026-05-11

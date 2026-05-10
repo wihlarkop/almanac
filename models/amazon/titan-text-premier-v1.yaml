@@ -1,0 +1,33 @@
+id: titan-text-premier-v1
+provider: amazon
+display_name: Titan Text Premier V1
+status: deprecated
+release_date: 2024-05-01
+deprecation_date: 2025-09-01
+sunset_date: null
+replacement: nova-pro-v1
+context_window: 32000
+max_output_tokens: 3072
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: true
+  vision: false
+  streaming: true
+  json_mode: false
+parameters:
+  supported: [inputText, textGenerationConfig]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.50
+  output: 1.50
+  pricing_notes: "$0.50/M input, $1.50/M output. Available via Amazon Bedrock as amazon.titan-text-premier-v1:0."
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: custom
+sources:
+  - url: https://docs.aws.amazon.com/bedrock/latest/userguide/titan-text-models.html
+    last_verified: 2026-05-11

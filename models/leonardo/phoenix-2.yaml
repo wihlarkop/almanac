@@ -1,0 +1,36 @@
+id: phoenix-2
+provider: leonardo
+display_name: Leonardo Phoenix 2
+status: active
+release_date: 2025-02-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 1024
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [image]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+  style_reference: true
+  inpainting: true
+parameters:
+  supported: [prompt, negative_prompt, model_id, width, height, num_images, guidance_scale, seed, style_uuid]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_image: 0.04
+  pricing_notes: "~$0.04/image (credit-based). Leonardo AI flagship image generation model."
+last_verified: 2026-05-11
+confidence: inferred
+endpoint_family: image_generation
+sources:
+  - url: https://docs.leonardo.ai/reference/creategeneration
+    last_verified: 2026-05-11

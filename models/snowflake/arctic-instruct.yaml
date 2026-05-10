@@ -1,0 +1,33 @@
+id: arctic-instruct
+provider: snowflake
+display_name: Snowflake Arctic Instruct
+status: active
+release_date: 2024-04-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4096
+max_output_tokens: 2048
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+parameters:
+  supported: [messages, temperature, top_p, max_tokens, stream]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  pricing_notes: "Free via Snowflake Cortex for Snowflake customers. Apache 2.0 open weights (480B MoE, 17B active)."
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: chat_completions
+sources:
+  - url: https://docs.snowflake.com/en/user-guide/snowflake-cortex/llm-functions
+    last_verified: 2026-05-11

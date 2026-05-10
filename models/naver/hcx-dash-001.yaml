@@ -1,0 +1,34 @@
+id: hcx-dash-001
+provider: naver
+display_name: HyperCLOVA X HCX-DASH-001
+status: active
+release_date: 2024-06-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 32768
+max_output_tokens: 4096
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+  korean_optimized: true
+parameters:
+  supported: [messages, temperature, topP, topK, maxTokens, stop, stream]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.50
+  output: 1.00
+  pricing_notes: "~$0.50/M input, $1.00/M output (inferred). Faster, lighter HyperCLOVA X variant."
+last_verified: 2026-05-11
+confidence: inferred
+endpoint_family: chat_completions
+sources:
+  - url: https://clovastudio.stream.naver.com/
+    last_verified: 2026-05-11

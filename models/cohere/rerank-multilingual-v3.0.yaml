@@ -1,0 +1,35 @@
+id: rerank-multilingual-v3.0
+provider: cohere
+display_name: Rerank Multilingual v3.0
+status: deprecated
+release_date: 2024-02-01
+deprecation_date: 2025-06-01
+sunset_date: null
+replacement: rerank-v3.5
+context_window: 4096
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+  multilingual: true
+parameters:
+  supported: [query, documents, top_n, return_documents]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  search_fee: 0.002
+  pricing_notes: "$2.00/1K API calls. 100+ language reranker."
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: reranking
+sources:
+  - url: https://docs.cohere.com/reference/rerank
+    last_verified: 2026-05-11

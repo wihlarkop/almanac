@@ -352,3 +352,45 @@ aliases:
 
   # Tripo aliases
   tripo-latest: tripo-3d
+
+  # Cohere reranker aliases
+  rerank-latest: rerank-v3.5
+  cohere-rerank-latest: rerank-v3.5
+
+  # Voyage reranker aliases
+  voyage-rerank-latest: rerank-2
+  voyage-rerank-lite-latest: rerank-lite-2
+
+  # Jina reranker aliases
+  jina-reranker-latest: jina-reranker-v2-multilingual
+  jina-reranker-en-latest: jina-reranker-v2-base-en
+
+  # OpenAI o1-pro aliases
+  o1-pro-latest: o1-pro
+
+  # Leonardo aliases
+  leonardo-latest: phoenix-2
+  phoenix-latest: phoenix-2
+
+  # PlayHT aliases
+  playht-latest: play-3.0-ultra
+  play-ultra-latest: play-3.0-ultra
+
+  # Naver aliases
+  hyperclova-latest: hcx-005
+  hcx-latest: hcx-005
+  hcx-dash-latest: hcx-dash-001
+
+  # IBM Granite aliases
+  granite-latest: granite-3.3-8b-instruct
+  granite-mini-latest: granite-3.3-2b-instruct
+
+  # Snowflake aliases
+  arctic-latest: arctic-instruct
+
+  # PixVerse aliases
+  pixverse-latest: pixverse-v4
+
+  # LMNT aliases
+  lmnt-latest: aurora
+  aurora-latest: aurora

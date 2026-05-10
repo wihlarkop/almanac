@@ -1,0 +1,36 @@
+id: aurora
+provider: lmnt
+display_name: Aurora
+status: active
+release_date: 2025-01-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4096
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [audio]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+  low_latency: true
+  voice_cloning: true
+parameters:
+  supported: [text, voice, language, speed, sample_rate, format]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_million_chars: 12.00
+  pricing_notes: "$12/M characters. Ultra-low latency TTS (<100ms first audio), optimized for real-time applications."
+last_verified: 2026-05-11
+confidence: inferred
+endpoint_family: speech
+sources:
+  - url: https://docs.lmnt.com/api-reference/speech/synthesize-speech-bytes
+    last_verified: 2026-05-11
