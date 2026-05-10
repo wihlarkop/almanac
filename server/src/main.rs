@@ -20,8 +20,9 @@ async fn main() -> Result<()> {
         "starting almanac server"
     );
 
-    let app_state = almanac_server::state::load_state(&config.data_dir)
-        .with_context(|| format!("loading catalog from {}", config.data_dir.display()))?;
+    let app_state =
+        almanac_server::state::load_state_with_scope(&config.data_dir, &config.catalog_scope)
+            .with_context(|| format!("loading catalog from {}", config.data_dir.display()))?;
     tracing::info!(
         providers = app_state.providers.len(),
         models = app_state.models.len(),
@@ -41,6 +42,7 @@ async fn main() -> Result<()> {
     {
         let shared_reload = Arc::clone(&shared);
         let data_dir_reload = config.data_dir.clone();
+        let catalog_scope_reload = config.catalog_scope.clone();
         tokio::spawn(async move {
             use tokio::signal::unix::{SignalKind, signal};
             let mut stream = match signal(SignalKind::hangup()) {
@@ -56,7 +58,10 @@ async fn main() -> Result<()> {
                     data_dir = %data_dir_reload.display(),
                     "SIGHUP received; reloading catalog"
                 );
-                match almanac_server::state::load_state(&data_dir_reload) {
+                match almanac_server::state::load_state_with_scope(
+                    &data_dir_reload,
+                    &catalog_scope_reload,
+                ) {
                     Ok(new_state) => {
                         let providers = new_state.providers.len();
                         let models = new_state.models.len();
