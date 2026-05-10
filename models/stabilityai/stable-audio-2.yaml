@@ -1,0 +1,37 @@
+id: stable-audio-2
+provider: stabilityai
+display_name: Stable Audio 2
+status: active
+release_date: 2024-11-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 1024
+max_output_tokens: 1
+modalities:
+  input: [text, audio]
+  output: [audio, music]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+  music_generation: true
+  sound_design: true
+  audio_variation: true
+parameters:
+  supported: [prompt, negative_prompt, seconds_total, steps, cfg_scale, seed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_second: 0.003
+  pricing_notes: "~$0.003/second of audio generated (~$0.018/clip at max 45s). Music and sound design via Stability AI API."
+last_verified: 2026-05-11
+confidence: inferred
+endpoint_family: music_generation
+sources:
+  - url: https://platform.stability.ai/docs/api-reference#tag/Generate/paths/~1v2beta~1audio~1stable-audio~1generate/post
+    last_verified: 2026-05-11

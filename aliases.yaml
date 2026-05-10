@@ -394,3 +394,6 @@ aliases:
   # LMNT aliases
   lmnt-latest: aurora
   aurora-latest: aurora
+
+  # Stability AI audio aliases
+  stable-audio-latest: stable-audio-2
