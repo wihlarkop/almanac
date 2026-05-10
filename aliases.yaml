@@ -191,3 +191,8 @@ aliases:
   yi-latest: yi-lightning
   yi-lightning-latest: yi-lightning
   yi-large-latest: yi-large
+
+  # SambaNova shorthand aliases
+  sambanova-latest: llama-3.3-70b
+  sambanova-large-latest: llama-3.1-405b
+  sambanova-small-latest: llama-3.1-8b
