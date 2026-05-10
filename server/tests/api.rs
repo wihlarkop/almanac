@@ -25,7 +25,8 @@ async fn app() -> axum::Router {
 }
 
 async fn scoped_app(scope: CatalogScope) -> axum::Router {
-    let s = state::load_state_with_scope(&data_dir(), &scope).expect("load_state_with_scope failed");
+    let s =
+        state::load_state_with_scope(&data_dir(), &scope).expect("load_state_with_scope failed");
     let shared = Arc::new(RwLock::new(s));
     routes::router(shared)
 }

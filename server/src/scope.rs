@@ -137,8 +137,10 @@ impl CatalogScope {
             bail!("catalog scope produced zero visible models");
         }
 
-        let visible_model_ids: HashSet<String> =
-            visible_models.iter().map(|model| model.id.clone()).collect();
+        let visible_model_ids: HashSet<String> = visible_models
+            .iter()
+            .map(|model| model.id.clone())
+            .collect();
         let visible_provider_ids: HashSet<String> = visible_models
             .iter()
             .map(|model| model.provider.clone())
@@ -182,8 +184,10 @@ impl CatalogScope {
     }
 
     fn validate_known_entries(&self, providers: &[Provider], models: &[Model]) -> Result<()> {
-        let provider_ids: HashSet<&str> =
-            providers.iter().map(|provider| provider.id.as_str()).collect();
+        let provider_ids: HashSet<&str> = providers
+            .iter()
+            .map(|provider| provider.id.as_str())
+            .collect();
         let model_refs: HashSet<ModelRef> = models
             .iter()
             .map(|model| ModelRef {
