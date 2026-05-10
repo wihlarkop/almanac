@@ -1,0 +1,36 @@
+id: meshy-4
+provider: meshy
+display_name: Meshy 4
+status: active
+release_date: 2025-01-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 2048
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [3d]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+  pbr_textures: true
+  rigging: false
+parameters:
+  supported: [prompt, negative_prompt, art_style, topology, target_polycount, seed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  request_fee: 0.50
+  pricing_notes: "~$0.50 per 3D model. Outputs .glb/.fbx/.obj with PBR textures."
+last_verified: 2026-05-11
+confidence: inferred
+endpoint_family: mesh_generation
+sources:
+  - url: https://docs.meshy.ai/api-text-to-3d
+    last_verified: 2026-05-11

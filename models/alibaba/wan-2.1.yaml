@@ -1,0 +1,34 @@
+id: wan-2.1
+provider: alibaba
+display_name: Wan 2.1
+status: active
+release_date: 2025-03-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 2048
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [video]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, negative_prompt, duration, resolution, aspect_ratio, seed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_second: 0.08
+  pricing_notes: "~$0.08/second. Alibaba Wan (Wanxiang) 14B video generation model."
+last_verified: 2026-05-11
+confidence: inferred
+endpoint_family: video_generation
+sources:
+  - url: https://help.aliyun.com/zh/model-studio/user-guide/wan
+    last_verified: 2026-05-11

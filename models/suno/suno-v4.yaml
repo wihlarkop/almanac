@@ -1,0 +1,37 @@
+id: suno-v4
+provider: suno
+display_name: Suno V4
+status: active
+release_date: 2024-11-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 1024
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [music]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+  vocals: true
+  instrumental: true
+  custom_lyrics: true
+parameters:
+  supported: [prompt, lyrics, style, instrumental, seed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  request_fee: 0.03
+  pricing_notes: "~$0.03 per song generated (subscription credit-based). API pricing varies."
+last_verified: 2026-05-11
+confidence: inferred
+endpoint_family: music_generation
+sources:
+  - url: https://docs.suno.com
+    last_verified: 2026-05-11

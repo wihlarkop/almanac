@@ -1,0 +1,38 @@
+id: udio-v2
+provider: udio
+display_name: Udio V2
+status: active
+release_date: 2024-10-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 1024
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [music]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+  vocals: true
+  instrumental: true
+  custom_lyrics: true
+  audio_conditioning: true
+parameters:
+  supported: [prompt, lyrics, seed, audio_conditioning_url]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  request_fee: 0.04
+  pricing_notes: "~$0.04 per generation. Subscription credit-based."
+last_verified: 2026-05-11
+confidence: inferred
+endpoint_family: music_generation
+sources:
+  - url: https://udio.com/api
+    last_verified: 2026-05-11

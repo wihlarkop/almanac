@@ -1,0 +1,34 @@
+id: step-2
+provider: stepfun
+display_name: Step-2
+status: active
+release_date: 2025-04-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 256000
+max_output_tokens: 16384
+modalities:
+  input: [text, image]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  streaming: true
+  json_mode: true
+  function_calling: true
+parameters:
+  supported: [messages, temperature, top_p, max_tokens, stream, tools]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 5.00
+  output: 10.00
+  pricing_notes: "~$5/M input, $10/M output tokens (inferred). 1T parameter MoE model by StepFun."
+last_verified: 2026-05-11
+confidence: inferred
+endpoint_family: chat_completions
+sources:
+  - url: https://platform.stepfun.com/docs
+    last_verified: 2026-05-11

@@ -1,0 +1,36 @@
+id: tripo-3d
+provider: tripo
+display_name: Tripo 3D
+status: active
+release_date: 2025-02-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 2048
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [3d]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+  pbr_textures: true
+  rigging: true
+parameters:
+  supported: [prompt, image_url, style, texture_quality, seed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  request_fee: 0.40
+  pricing_notes: "~$0.40 per 3D model. Supports rigging for animation. Outputs .glb/.fbx."
+last_verified: 2026-05-11
+confidence: inferred
+endpoint_family: mesh_generation
+sources:
+  - url: https://platform.tripo3d.ai/docs
+    last_verified: 2026-05-11

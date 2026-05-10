@@ -76,7 +76,7 @@
           "type": "array",
           "items": {
             "type": "string",
-            "enum": ["text", "image", "audio", "video", "embedding"]
+            "enum": ["text", "image", "audio", "video", "embedding", "music", "3d"]
           },
           "minItems": 1,
           "uniqueItems": true
@@ -126,7 +126,7 @@
     },
     "endpoint_family": {
       "type": "string",
-      "enum": ["chat_completions", "responses", "custom", "agent", "search", "embeddings", "image_generation", "speech", "transcription", "video_generation", "realtime", "ocr"],
+      "enum": ["chat_completions", "responses", "custom", "agent", "search", "embeddings", "image_generation", "speech", "transcription", "video_generation", "realtime", "ocr", "music_generation", "mesh_generation"],
       "description": "Primary API shape used by this provider/model."
     },
     "pricing": {

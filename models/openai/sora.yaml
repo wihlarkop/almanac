@@ -1,0 +1,36 @@
+id: sora
+provider: openai
+display_name: Sora
+status: active
+release_date: 2024-02-15
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4096
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [video]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, duration, resolution, aspect_ratio, n_variants, seed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_second: 0.015
+  pricing_notes: "~$0.015/second of video. Up to 20s at 1080p via /v1/video/generations."
+last_verified: 2026-05-11
+confidence: inferred
+endpoint_family: video_generation
+sources:
+  - url: https://platform.openai.com/docs/guides/video
+    last_verified: 2026-05-11
+  - url: https://openai.com/api/pricing
+    last_verified: 2026-05-11

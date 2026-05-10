@@ -1,0 +1,37 @@
+id: avatar-4
+provider: heygen
+display_name: HeyGen Avatar 4
+status: active
+release_date: 2025-01-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4096
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [video]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+  avatar_animation: true
+  lip_sync: true
+  multilingual: true
+parameters:
+  supported: [script, avatar_id, voice_id, background, ratio, speed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_minute: 0.30
+  pricing_notes: "~$0.30/minute of video output. AI avatar talking head video generation."
+last_verified: 2026-05-11
+confidence: inferred
+endpoint_family: video_generation
+sources:
+  - url: https://docs.heygen.com/reference/generate-video
+    last_verified: 2026-05-11

@@ -308,3 +308,47 @@ aliases:
 
   # Luma aliases
   ray-latest: ray-3.14
+
+  # OpenAI Sora aliases
+  sora-latest: sora
+
+  # Google Veo 2 aliases
+  veo-2-latest: veo-2.0-generate-001
+
+  # MiniMax Hailuo video aliases
+  hailuo-latest: hailuo-video-01
+  hailuo-video-latest: hailuo-video-01
+
+  # Alibaba Wan video aliases
+  wan-latest: wan-2.1
+
+  # Suno aliases
+  suno-latest: suno-v4
+
+  # Udio aliases
+  udio-latest: udio-v2
+
+  # Haiper aliases
+  haiper-latest: haiper-video-2
+
+  # Lightricks aliases
+  ltx-latest: ltx-video
+
+  # Vidu aliases
+  vidu-latest: vidu-2
+
+  # HeyGen aliases
+  heygen-latest: avatar-4
+
+  # Synthesia aliases
+  synthesia-latest: synthesia-1
+
+  # StepFun aliases
+  step-latest: step-2
+  step-2-latest: step-2
+
+  # Meshy aliases
+  meshy-latest: meshy-4
+
+  # Tripo aliases
+  tripo-latest: tripo-3d

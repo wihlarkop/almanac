@@ -1,0 +1,35 @@
+id: vidu-2
+provider: vidu
+display_name: Vidu 2
+status: active
+release_date: 2025-03-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 2048
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [video]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+  character_consistency: true
+parameters:
+  supported: [prompt, image_url, duration, aspect_ratio, resolution, seed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_second: 0.06
+  pricing_notes: "~$0.06/second. Video generation by Shengshu Technology (Vidu)."
+last_verified: 2026-05-11
+confidence: inferred
+endpoint_family: video_generation
+sources:
+  - url: https://docs.vidu.com
+    last_verified: 2026-05-11
