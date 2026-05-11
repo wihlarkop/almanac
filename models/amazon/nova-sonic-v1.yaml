@@ -7,7 +7,7 @@ deprecation_date: 2025-12-02
 sunset_date: 2026-09-14
 replacement: nova-2-sonic-v1
 context_window: 200000
-max_output_tokens: 0
+max_output_tokens: 1
 modalities:
   input: [text, audio]
   output: [text, audio]
