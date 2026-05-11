@@ -7,7 +7,7 @@ deprecation_date: 2025-12-02
 sunset_date: 2026-09-14
 replacement: nova-2-sonic-v1
 context_window: 200000
-max_output_tokens: null
+max_output_tokens: 0
 modalities:
   input: [text, audio]
   output: [text, audio]
@@ -23,8 +23,8 @@ parameters:
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: null
-  output: null
+  input: 0.00
+  output: 0.00
   pricing_notes: "$0.0034 per 1K speech input tokens, $0.0136 per 1K speech output tokens. Bedrock model ID: amazon.nova-sonic-v1:0"
 last_verified: 2026-05-12
 confidence: official

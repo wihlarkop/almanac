@@ -163,14 +163,6 @@ aliases:
   phi-4-mini-latest: phi-4-mini
   phi-4-multimodal-latest: phi-4-multimodal
 
-  # Cerebras shorthand aliases
-  cerebras-llama-latest: llama3.3-70b
-  cerebras-llama-fast-latest: llama3.1-8b
-
-  # Groq shorthand aliases
-  groq-llama-latest: llama-3.3-70b-versatile
-  groq-llama-fast-latest: llama-3.1-8b-instant
-
   # Amazon Nova shorthand aliases
   nova-latest: nova-pro-v1
   nova-micro-latest: nova-micro-v1
@@ -191,11 +183,6 @@ aliases:
   yi-latest: yi-lightning
   yi-lightning-latest: yi-lightning
   yi-large-latest: yi-large
-
-  # SambaNova shorthand aliases
-  sambanova-latest: llama-3.3-70b
-  sambanova-large-latest: llama-3.1-405b
-  sambanova-small-latest: llama-3.1-8b
 
   # OpenAI embedding aliases
   text-embedding-latest: text-embedding-3-large
@@ -401,9 +388,6 @@ aliases:
   # Fireworks AI aliases
   firefunction-latest: firefunction-v2
 
-  # Together AI aliases
-  together-llama-latest: llama-3.3-70b-instruct-turbo
-
   # Microsoft Phi-4 reasoning aliases
   phi-4-reasoning-latest: phi-4-reasoning-plus
   phi-4-mini-reasoning-latest: phi-4-mini-reasoning
@@ -425,5 +409,3 @@ aliases:
   devstral-latest: devstral-small-2505
   codestral-mamba-latest: codestral-mamba-2407
 
-  # Meta Llama Guard aliases
-  llama-guard-latest: llama-guard-3-8b

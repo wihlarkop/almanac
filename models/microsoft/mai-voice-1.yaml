@@ -6,8 +6,8 @@ release_date: 2026-04-02
 deprecation_date: null
 sunset_date: null
 replacement: null
-context_window: null
-max_output_tokens: null
+context_window: 0
+max_output_tokens: 0
 modalities:
   input: [text]
   output: [audio]
@@ -22,8 +22,8 @@ parameters:
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: null
-  output: null
+  input: 0.00
+  output: 0.00
   pricing_notes: "$22 per million characters. Generates 60 seconds of audio in under 1 second. 700+ preset voices, 10-second voice cloning."
 last_verified: 2026-05-12
 confidence: official

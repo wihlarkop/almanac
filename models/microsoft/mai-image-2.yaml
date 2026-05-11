@@ -6,8 +6,8 @@ release_date: 2026-04-02
 deprecation_date: null
 sunset_date: null
 replacement: null
-context_window: null
-max_output_tokens: null
+context_window: 0
+max_output_tokens: 0
 modalities:
   input: [text]
   output: [image]

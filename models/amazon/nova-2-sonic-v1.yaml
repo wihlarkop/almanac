@@ -23,8 +23,8 @@ parameters:
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: null
-  output: null
+  input: 0.00
+  output: 0.00
   pricing_notes: "$0.003 per 1K speech input tokens, $0.012 per 1K speech output tokens. Supports 7 languages with polyglot voices. Bedrock model ID: amazon.nova-2-sonic-v1:0"
 last_verified: 2026-05-12
 confidence: official

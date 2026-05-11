@@ -6,8 +6,8 @@ release_date: 2026-05-07
 deprecation_date: null
 sunset_date: null
 replacement: null
-context_window: null
-max_output_tokens: null
+context_window: 0
+max_output_tokens: 0
 modalities:
   input: [audio]
   output: [text]
@@ -23,8 +23,8 @@ parameters:
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: null
-  output: null
+  input: 0.00
+  output: 0.00
   pricing_notes: "$0.017 per minute. Streaming speech-to-text transcription; returns transcript deltas as the speaker talks."
 last_verified: 2026-05-11
 confidence: official
