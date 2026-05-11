@@ -1,0 +1,37 @@
+id: qwen3.6-plus
+provider: alibaba
+display_name: Qwen3.6-Plus
+status: active
+release_date: 2026-03-31
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 1000000
+max_output_tokens: 65536
+modalities:
+  input: [text, image, video]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  video: true
+  streaming: true
+  json_mode: true
+  prompt_caching: true
+  thinking: true
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, tools, response_format, thinking]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.33
+  output: 1.95
+last_verified: 2026-05-12
+confidence: official
+endpoint_family: chat_completions
+sources:
+  - url: https://www.alibabacloud.com/help/en/model-studio/models
+    last_verified: 2026-05-12
+  - url: https://openrouter.ai/qwen/qwen3.6-plus
+    last_verified: 2026-05-12

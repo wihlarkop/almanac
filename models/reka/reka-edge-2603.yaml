@@ -1,0 +1,35 @@
+id: reka-edge-2603
+provider: reka
+display_name: Reka Edge 2603
+status: active
+release_date: 2026-03-20
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 16384
+max_output_tokens: 4096
+modalities:
+  input: [text, image, video]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  streaming: true
+  json_mode: true
+  thinking: false
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.10
+  output: 0.10
+last_verified: 2026-05-12
+confidence: official
+endpoint_family: chat_completions
+sources:
+  - url: https://reka.ai/news/reka-edge-frontier-level-edge-intelligence-for-physical-ai
+    last_verified: 2026-05-12
+  - url: https://huggingface.co/RekaAI/reka-edge-2603
+    last_verified: 2026-05-12

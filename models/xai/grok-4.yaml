@@ -1,13 +1,13 @@
-id: grok-4-1-fast
+id: grok-4
 provider: xai
-display_name: Grok 4.1 Fast
+display_name: Grok 4
 status: deprecated
-release_date: null
+release_date: 2025-07-09
 deprecation_date: 2026-05-06
 sunset_date: 2026-05-15
 replacement: grok-4.3
-context_window: 2000000
-max_output_tokens: 128000
+context_window: 256000
+max_output_tokens: 256000
 modalities:
   input: [text, image]
   output: [text]
@@ -20,17 +20,17 @@ capabilities:
   thinking: true
 parameters:
   supported: [temperature, top_p, max_tokens, stream, tools, response_format, seed]
-  rejected: [reasoning_effort]
+  rejected: []
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 0.20
-  output: 0.50
-last_verified: 2026-05-03
+  input: 3.00
+  output: 15.00
+last_verified: 2026-05-11
 confidence: official
 endpoint_family: chat_completions
 sources:
-  - url: https://docs.x.ai/docs/guides/reasoning
-    last_verified: 2026-05-03
-  - url: https://docs.x.ai/docs/models
-    last_verified: 2026-05-03
+  - url: https://x.ai/news/grok-4
+    last_verified: 2026-05-11
+  - url: https://docs.x.ai/developers/models
+    last_verified: 2026-05-11

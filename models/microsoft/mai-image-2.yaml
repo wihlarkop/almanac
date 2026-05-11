@@ -1,0 +1,33 @@
+id: mai-image-2
+provider: microsoft
+display_name: MAI-Image-2
+status: active
+release_date: 2026-04-02
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: null
+max_output_tokens: null
+modalities:
+  input: [text]
+  output: [image]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [size, quality, style, n]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 5.00
+  output: 33.00
+  pricing_notes: "$5/M text input tokens, $33/M image output tokens. Debuted #3 on Arena.ai leaderboard."
+last_verified: 2026-05-12
+confidence: official
+endpoint_family: custom
+sources:
+  - url: https://techcommunity.microsoft.com/blog/azure-ai-foundry-blog/introducing-mai-transcribe-1-mai-voice-1-and-mai-image-2-in-microsoft-foundry/4507787
+    last_verified: 2026-05-12

@@ -1,13 +1,13 @@
-id: llama-3.1-8b
-provider: sambanova
-display_name: Llama 3.1 8B
+id: nemotron-3-super-120b-a12b
+provider: nvidia
+display_name: Nemotron 3 Super 120B
 status: active
-release_date: 2025-01-01
+release_date: 2026-03-11
 deprecation_date: null
 sunset_date: null
 replacement: null
-context_window: 131072
-max_output_tokens: 4096
+context_window: 1000000
+max_output_tokens: 32768
 modalities:
   input: [text]
   output: [text]
@@ -22,11 +22,13 @@ parameters:
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 0.10
-  output: 0.20
-last_verified: 2026-05-11
+  input: 0.09
+  output: 0.45
+last_verified: 2026-05-12
 confidence: official
 endpoint_family: chat_completions
 sources:
-  - url: https://community.sambanova.ai/t/supported-models/193
-    last_verified: 2026-05-11
+  - url: https://developer.nvidia.com/nemotron
+    last_verified: 2026-05-12
+  - url: https://openrouter.ai/nvidia/nemotron-3-super-120b-a12b
+    last_verified: 2026-05-12

@@ -1,0 +1,36 @@
+id: gpt-realtime-translate
+provider: openai
+display_name: GPT Realtime Translate
+status: active
+release_date: 2026-05-07
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: null
+max_output_tokens: null
+modalities:
+  input: [audio]
+  output: [audio]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+  realtime: true
+parameters:
+  supported: [voice, modalities, instructions]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: null
+  output: null
+  pricing_notes: "$0.034 per minute. Translates speech from 70+ input languages into 13 output languages in real time."
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: realtime
+sources:
+  - url: https://openai.com/index/advancing-voice-intelligence-with-new-models-in-the-api/
+    last_verified: 2026-05-11
+  - url: https://developers.openai.com/api/docs/models/gpt-realtime-translate
+    last_verified: 2026-05-11

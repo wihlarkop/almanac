@@ -1,0 +1,35 @@
+id: mai-transcribe-1
+provider: microsoft
+display_name: MAI-Transcribe-1
+status: active
+release_date: 2026-04-02
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: null
+max_output_tokens: null
+modalities:
+  input: [audio]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+parameters:
+  supported: [language]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: null
+  output: null
+  pricing_notes: "$0.36 per hour of audio. Enterprise-grade ASR across 25 languages. 3.88% WER on FLEURS benchmark."
+last_verified: 2026-05-12
+confidence: official
+endpoint_family: custom
+sources:
+  - url: https://microsoft.ai/news/state-of-the-art-speech-recognition-with-mai-transcribe-1/
+    last_verified: 2026-05-12
+  - url: https://techcommunity.microsoft.com/blog/azure-ai-foundry-blog/introducing-mai-transcribe-1-mai-voice-1-and-mai-image-2-in-microsoft-foundry/4507787
+    last_verified: 2026-05-12

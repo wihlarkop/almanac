@@ -1,11 +1,11 @@
 id: jamba-1.5-large
 provider: ai21
 display_name: Jamba 1.5 Large
-status: active
+status: deprecated
 release_date: 2024-08-22
-deprecation_date: null
-sunset_date: null
-replacement: null
+deprecation_date: 2025-08-27
+sunset_date: 2026-02-27
+replacement: jamba-large-1.7
 context_window: 262144
 max_output_tokens: 4096
 modalities:

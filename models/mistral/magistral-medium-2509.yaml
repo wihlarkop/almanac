@@ -1,13 +1,13 @@
-id: llama-3.1-405b
-provider: sambanova
-display_name: Llama 3.1 405B
+id: magistral-medium-2509
+provider: mistral
+display_name: Magistral Medium
 status: active
-release_date: 2025-01-01
+release_date: 2025-09-01
 deprecation_date: null
 sunset_date: null
 replacement: null
-context_window: 131072
-max_output_tokens: 4096
+context_window: 40000
+max_output_tokens: 40000
 modalities:
   input: [text]
   output: [text]
@@ -16,17 +16,21 @@ capabilities:
   vision: false
   streaming: true
   json_mode: true
+  prompt_caching: false
+  thinking: true
 parameters:
   supported: [temperature, top_p, max_tokens, stream, stop, tools, response_format]
   rejected: []
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 5.00
-  output: 10.00
-last_verified: 2026-05-11
+  input: 2.00
+  output: 5.00
+last_verified: 2026-05-12
 confidence: official
 endpoint_family: chat_completions
 sources:
-  - url: https://community.sambanova.ai/t/supported-models/193
-    last_verified: 2026-05-11
+  - url: https://mistral.ai/news/magistral
+    last_verified: 2026-05-12
+  - url: https://docs.mistral.ai/models/overview
+    last_verified: 2026-05-12

@@ -1,0 +1,35 @@
+id: ernie-5.1
+provider: baidu
+display_name: ERNIE 5.1
+status: active
+release_date: 2026-05-09
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 128000
+max_output_tokens: 65536
+modalities:
+  input: [text, image]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  streaming: true
+  json_mode: false
+  thinking: true
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.59
+  output: 2.65
+last_verified: 2026-05-12
+confidence: official
+endpoint_family: custom
+sources:
+  - url: https://cntechpost.com/2026/05/09/baidu-releases-ernie-5-1-pre-training-cost-at-only-6-industry-peers/
+    last_verified: 2026-05-12
+  - url: https://cloud.baidu.com/doc/WENXINWORKSHOP/index.html
+    last_verified: 2026-05-12

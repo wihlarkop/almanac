@@ -1,0 +1,33 @@
+id: mai-voice-1
+provider: microsoft
+display_name: MAI-Voice-1
+status: active
+release_date: 2026-04-02
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: null
+max_output_tokens: null
+modalities:
+  input: [text]
+  output: [audio]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+parameters:
+  supported: [voice, speed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: null
+  output: null
+  pricing_notes: "$22 per million characters. Generates 60 seconds of audio in under 1 second. 700+ preset voices, 10-second voice cloning."
+last_verified: 2026-05-12
+confidence: official
+endpoint_family: custom
+sources:
+  - url: https://techcommunity.microsoft.com/blog/azure-ai-foundry-blog/introducing-mai-transcribe-1-mai-voice-1-and-mai-image-2-in-microsoft-foundry/4507787
+    last_verified: 2026-05-12

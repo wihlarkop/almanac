@@ -1,0 +1,36 @@
+id: qwen3.5-omni-flash
+provider: alibaba
+display_name: Qwen3.5-Omni-Flash
+status: active
+release_date: 2026-03-30
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 256000
+max_output_tokens: 32768
+modalities:
+  input: [text, image, audio, video]
+  output: [text, audio]
+capabilities:
+  tools: true
+  vision: true
+  video: true
+  streaming: true
+  json_mode: true
+  prompt_caching: false
+  thinking: false
+  multimodal_output: true
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, tools, response_format]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.30
+  output: 1.20
+last_verified: 2026-05-12
+confidence: low
+endpoint_family: custom
+sources:
+  - url: https://www.alibabacloud.com/help/en/model-studio/models
+    last_verified: 2026-05-12

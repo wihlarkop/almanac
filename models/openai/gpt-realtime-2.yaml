@@ -1,0 +1,38 @@
+id: gpt-realtime-2
+provider: openai
+display_name: GPT Realtime 2
+status: active
+release_date: 2026-05-07
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 128000
+max_output_tokens: 32000
+modalities:
+  input: [text, audio]
+  output: [text, audio]
+capabilities:
+  tools: true
+  vision: false
+  streaming: true
+  json_mode: false
+  realtime: true
+  function_calling: true
+  thinking: true
+parameters:
+  supported: [voice, modalities, instructions, tools, temperature, reasoning_effort]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 4.00
+  output: 24.00
+  pricing_notes: "$4/M text input, $32/M audio input ($0.40/M cached), $24/M text output, $64/M audio output. Five reasoning effort levels: minimal, low, medium, high, xhigh."
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: realtime
+sources:
+  - url: https://openai.com/index/advancing-voice-intelligence-with-new-models-in-the-api/
+    last_verified: 2026-05-11
+  - url: https://developers.openai.com/api/docs/models/gpt-realtime-2
+    last_verified: 2026-05-11

@@ -1,0 +1,36 @@
+id: nova-2-sonic-v1
+provider: amazon
+display_name: Amazon Nova 2 Sonic
+status: active
+release_date: 2025-12-02
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 1000000
+max_output_tokens: 65536
+modalities:
+  input: [text, audio]
+  output: [text, audio]
+capabilities:
+  tools: true
+  vision: false
+  streaming: true
+  json_mode: false
+  realtime: true
+parameters:
+  supported: [voice, language, modalities]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: null
+  output: null
+  pricing_notes: "$0.003 per 1K speech input tokens, $0.012 per 1K speech output tokens. Supports 7 languages with polyglot voices. Bedrock model ID: amazon.nova-2-sonic-v1:0"
+last_verified: 2026-05-12
+confidence: official
+endpoint_family: custom
+sources:
+  - url: https://aws.amazon.com/blogs/aws/introducing-amazon-nova-2-sonic-next-generation-speech-to-speech-model-for-conversational-ai/
+    last_verified: 2026-05-12
+  - url: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-amazon-nova-2-sonic.html
+    last_verified: 2026-05-12
