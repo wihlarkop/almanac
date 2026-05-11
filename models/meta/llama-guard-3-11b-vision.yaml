@@ -1,0 +1,31 @@
+id: llama-guard-3-11b-vision
+provider: meta
+display_name: Llama Guard 3 11B Vision
+status: active
+release_date: 2024-09-25
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 131072
+max_output_tokens: 4096
+modalities:
+  input: [text, image]
+  output: [text]
+capabilities:
+  tools: false
+  vision: true
+  streaming: true
+  json_mode: false
+  content_moderation: true
+parameters:
+  supported: [temperature, top_p, max_tokens, stream]
+  rejected: []
+  deprecated_for_this_model: []
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: chat_completions
+sources:
+  - url: https://llama.meta.com/docs/model-cards-and-prompt-formats/llama-guard-3/
+    last_verified: 2026-05-11
+  - url: https://huggingface.co/meta-llama/Llama-Guard-3-11B-Vision-Instruct
+    last_verified: 2026-05-11

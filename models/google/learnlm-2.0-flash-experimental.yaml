@@ -1,0 +1,28 @@
+id: learnlm-2.0-flash-experimental
+provider: google
+display_name: LearnLM 2.0 Flash Experimental
+status: active
+release_date: 2025-05-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 1048576
+max_output_tokens: 32768
+modalities:
+  input: [text, image, audio, video]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  streaming: true
+  json_mode: true
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop, tools, tool_choice]
+  rejected: []
+  deprecated_for_this_model: []
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: chat_completions
+sources:
+  - url: https://ai.google.dev/gemini-api/docs/learnlm
+    last_verified: 2026-05-11

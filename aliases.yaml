@@ -397,3 +397,33 @@ aliases:
 
   # Stability AI audio aliases
   stable-audio-latest: stable-audio-2
+
+  # Fireworks AI aliases
+  firefunction-latest: firefunction-v2
+
+  # Together AI aliases
+  together-llama-latest: llama-3.3-70b-instruct-turbo
+
+  # Microsoft Phi-4 reasoning aliases
+  phi-4-reasoning-latest: phi-4-reasoning-plus
+  phi-4-mini-reasoning-latest: phi-4-mini-reasoning
+
+  # DeepSeek versioned aliases
+  deepseek-r1-0528-latest: deepseek-r1-0528
+  deepseek-v3-0324-latest: deepseek-v3-0324
+
+  # Google Gemma 3 aliases
+  gemma-3-latest: gemma-3-27b-it
+  gemma-3-mini-latest: gemma-3-4b-it
+  learnlm-latest: learnlm-2.0-flash-experimental
+
+  # xAI Grok 3 aliases
+  grok-3-latest: grok-3
+  grok-3-mini-latest: grok-3-mini
+
+  # Mistral dev aliases
+  devstral-latest: devstral-small-2505
+  codestral-mamba-latest: codestral-mamba-2407
+
+  # Meta Llama Guard aliases
+  llama-guard-latest: llama-guard-3-8b

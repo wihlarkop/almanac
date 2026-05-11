@@ -1,0 +1,35 @@
+id: phi-4-mini-reasoning
+provider: microsoft
+display_name: Phi-4 Mini Reasoning
+status: active
+release_date: 2025-04-30
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 32768
+max_output_tokens: 32768
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: true
+  thinking: true
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.10
+  output: 0.40
+last_verified: 2026-05-11
+confidence: official
+endpoint_family: chat_completions
+sources:
+  - url: https://azure.microsoft.com/en-us/products/phi
+    last_verified: 2026-05-11
+  - url: https://huggingface.co/microsoft/phi-4-mini-reasoning
+    last_verified: 2026-05-11
