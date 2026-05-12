@@ -45,6 +45,11 @@ fn assert_error_envelope(json: &serde_json::Value, code: &str) {
     assert!(json["meta"]["timestamp"].as_str().is_some());
 }
 
+fn assert_catalog_cache_headers(headers: &axum::http::HeaderMap) {
+    assert_eq!(headers.get("cache-control").unwrap(), "public, max-age=300");
+    assert!(headers.contains_key("etag"));
+}
+
 async fn get_json(uri: &str) -> serde_json::Value {
     let response = app()
         .await
@@ -80,6 +85,37 @@ fn model_ids(json: &serde_json::Value) -> Vec<String> {
         .iter()
         .map(|model| model["id"].as_str().unwrap().to_string())
         .collect()
+}
+
+#[tokio::test]
+async fn cache_policy_is_consistent_for_catalog_read_endpoints() {
+    let app = app().await;
+    let endpoints = [
+        "/api/v1/providers",
+        "/api/v1/providers/openai",
+        "/api/v1/aliases",
+        "/api/v1/aliases/gpt-4o-latest",
+        "/api/v1/catalog/health",
+        "/api/v1/catalog/issues",
+        "/api/v1/models",
+        "/api/v1/models/openai/gpt-4o",
+    ];
+
+    for endpoint in endpoints {
+        let response = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri(endpoint)
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::OK, "{endpoint}");
+        assert_catalog_cache_headers(response.headers());
+    }
 }
 
 #[tokio::test]

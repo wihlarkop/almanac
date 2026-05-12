@@ -2,6 +2,9 @@
 
 Almanac is a free, open-source model catalog and validator for LLM developers.
 
+Status: public preview. The API is live and usable, but the first stable `v0.1.0` release has not
+been tagged yet.
+
 It answers practical questions:
 
 - What models exist across major LLM providers?
@@ -152,6 +155,19 @@ same request id and request execution time in `meta`. Browser access is enabled 
 for GET and POST API calls, and basic security headers are set on responses.
 
 Requests are limited to 64 KiB bodies and a 10 second server-side timeout.
+
+## Production Smoke Check
+
+Run this against any deployed Almanac API before tagging a release or after changing deployment
+settings:
+
+```powershell
+$env:ALMANAC_BASE_URL = "https://your-deployment.example"
+.\scripts\smoke-production.ps1
+```
+
+The smoke check verifies `/`, `/api/v1/health`, `/openapi.json`, one model lookup, and one validate
+request.
 
 ## Release Readiness
 
