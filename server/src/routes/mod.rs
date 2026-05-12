@@ -14,12 +14,10 @@ use axum::{
 };
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
 use tower_http::{
     cors::{Any, CorsLayer},
     limit::RequestBodyLimitLayer,
 };
-use tracing::Level;
 use utoipa::{OpenApi as DeriveOpenApi, openapi::OpenApi};
 use utoipa_axum::{router::OpenApiRouter, routes};
 use utoipa_scalar::{Scalar, Servable};
@@ -33,6 +31,7 @@ mod health;
 mod metrics_route;
 mod models;
 mod providers;
+mod root;
 mod search;
 mod suggest;
 mod validate;
@@ -72,12 +71,6 @@ pub fn router(state: Arc<RwLock<AppState>>) -> Router {
                 .allow_methods([Method::GET, Method::POST])
                 .allow_headers([header::CONTENT_TYPE, header::IF_NONE_MATCH]),
         )
-        .layer(
-            TraceLayer::new_for_http()
-                .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
-                .on_request(DefaultOnRequest::new().level(Level::INFO))
-                .on_response(DefaultOnResponse::new().level(Level::INFO)),
-        )
         .layer(middleware::from_fn(reject_oversized_payload))
 }
 
@@ -90,6 +83,7 @@ async fn not_found() -> impl IntoResponse {
 
 pub fn api_router() -> OpenApiRouter<Arc<RwLock<AppState>>> {
     OpenApiRouter::with_openapi(ApiDoc::openapi())
+        .routes(routes!(root::root))
         .routes(routes!(health::health))
         .routes(routes!(aliases::list_aliases))
         .routes(routes!(aliases::get_alias))

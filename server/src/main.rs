@@ -124,7 +124,7 @@ fn rate_limit_rps() -> Option<u32> {
 
 fn init_tracing() {
     let filter = EnvFilter::try_from_default_env()
-        .unwrap_or_else(|_| EnvFilter::new("almanac_server=info,tower_http=info,server=info"));
+        .unwrap_or_else(|_| EnvFilter::new("almanac_server=info,tower_http=warn,server=info"));
 
     let json = std::env::var("LOG_FORMAT").as_deref() == Ok("json");
 

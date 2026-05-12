@@ -87,7 +87,7 @@ Optional environment variables:
 
 - `PORT` - server port.
 - `DATA_DIR` - directory containing `providers/`, `models/`, and `aliases.yaml`.
-- `RUST_LOG` - tracing filter, for example `almanac_server=debug,tower_http=info`.
+- `RUST_LOG` - tracing filter, for example `almanac_server=debug,tower_http=warn`.
 - `LOG_FORMAT` - set to `json` for structured JSON logs (recommended for production).
 - `RATE_LIMIT_RPS` - maximum requests per second per IP address. Unset or `0` disables rate limiting. When a limit is exceeded the server returns `429` with a `Retry-After` header.
 - `CATALOG_INCLUDE_PROVIDERS` / `CATALOG_EXCLUDE_PROVIDERS` - comma-separated provider ids for deployment-time catalog scoping.
@@ -127,8 +127,8 @@ exclude:
 
 Use either env vars or `CATALOG_SCOPE_FILE`, not both. Includes are applied first, excludes are applied second, and excludes win. Model entries use `provider/model-id`. Hidden models are removed from providers, aliases, search, suggest, validation, comparison, catalog health, and metrics.
 
-The server logs startup, catalog loading, request traces, and shutdown events. It handles Ctrl+C
-and SIGTERM as graceful shutdown signals.
+The server logs startup, catalog loading, request completion with `request_id`, path, status, and
+latency, and shutdown events. It handles Ctrl+C and SIGTERM as graceful shutdown signals.
 
 Successful JSON responses use this envelope:
 
@@ -153,6 +153,15 @@ for GET and POST API calls, and basic security headers are set on responses.
 
 Requests are limited to 64 KiB bodies and a 10 second server-side timeout.
 
+## Release Readiness
+
+Before creating the first `v0.1.0` release tag:
+
+- Confirm the worktree only contains intended release changes.
+- Run `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo run -p almanac-validator`, `cargo test`, and `cargo build -p almanac-server`.
+- Build the Docker image and smoke check `GET /` plus `GET /api/v1/health` on the deployed service.
+- Update `CHANGELOG.md` with only the major user-facing 0.1.0 features.
+
 ## CI Checks
 
 The GitHub Actions validation workflow runs:
@@ -174,7 +183,8 @@ Full interactive docs are available after starting the server:
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| `GET` | `/api/v1/health` | Server health |
+| `GET` | `/` | API landing metadata |
+| `GET` | `/api/v1/health` | Server health and catalog readiness |
 | `GET` | `/api/v1/providers` | List providers |
 | `GET` | `/api/v1/providers/{id}` | Get provider details |
 | `GET` | `/api/v1/aliases` | List aliases |

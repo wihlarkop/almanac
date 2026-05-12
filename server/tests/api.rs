@@ -111,6 +111,30 @@ async fn health_returns_ok() {
     assert!(json["meta"]["execution_time_seconds"].as_f64().is_some());
     assert_eq!(json["data"]["status"], "ok");
     assert_eq!(json["data"]["version"], "0.1.0");
+    assert!(json["data"]["total_models"].as_u64().unwrap() > 0);
+    assert!(json["data"]["total_providers"].as_u64().unwrap() > 0);
+    assert!(json["data"]["total_aliases"].as_u64().unwrap() > 0);
+}
+
+#[tokio::test]
+async fn root_returns_api_landing() {
+    let response = app()
+        .await
+        .oneshot(Request::builder().uri("/").body(Body::empty()).unwrap())
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+    let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+    assert_success_envelope(&json);
+    assert_eq!(json["data"]["name"], "Almanac API");
+    assert_eq!(json["data"]["version"], "0.1.0");
+    assert_eq!(json["data"]["base_path"], "/api/v1");
+    assert_eq!(json["data"]["health"], "/api/v1/health");
+    assert_eq!(json["data"]["openapi"], "/openapi.json");
 }
 
 #[tokio::test]

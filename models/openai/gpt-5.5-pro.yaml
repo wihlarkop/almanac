@@ -2,7 +2,7 @@ id: gpt-5.5-pro
 provider: openai
 display_name: GPT-5.5 Pro
 status: active
-release_date: 2026-02-01
+release_date: 2026-04-23
 deprecation_date: null
 sunset_date: null
 replacement: null
@@ -26,9 +26,9 @@ pricing:
   currency: USD
   input: 30.00
   output: 180.00
-last_verified: 2026-05-02
+last_verified: 2026-05-12
 confidence: official
 endpoint_family: responses
 sources:
   - url: https://developers.openai.com/api/docs/models/gpt-5.5-pro
-    last_verified: 2026-05-02
+    last_verified: 2026-05-12

@@ -2,11 +2,11 @@ id: gpt-5.5
 provider: openai
 display_name: GPT-5.5
 status: active
-release_date: 2026-02-01
+release_date: 2026-04-23
 deprecation_date: null
 sunset_date: null
 replacement: null
-context_window: 1000000
+context_window: 1050000
 max_output_tokens: 128000
 modalities:
   input: [text, image]
@@ -25,10 +25,11 @@ parameters:
 pricing:
   currency: USD
   input: 5.00
+  cached_input: 0.50
   output: 30.00
-last_verified: 2026-05-02
+last_verified: 2026-05-12
 confidence: official
 endpoint_family: responses
 sources:
-  - url: https://developers.openai.com/api/docs/models
-    last_verified: 2026-05-02
+  - url: https://developers.openai.com/api/docs/models/gpt-5.5
+    last_verified: 2026-05-12

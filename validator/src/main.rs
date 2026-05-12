@@ -77,6 +77,11 @@ struct ModelMeta {
     parameters_deprecated: Vec<String>,
 }
 
+struct ProviderMeta {
+    website: Option<String>,
+    api_docs: Option<String>,
+}
+
 #[cfg(test)]
 #[derive(Debug, PartialEq, Eq)]
 struct FreshnessStats {
@@ -160,6 +165,104 @@ fn validate_sources(errors: &mut Vec<String>, rel: &str, data: &serde_json::Valu
     }
 }
 
+fn url_host(url: &str) -> Option<String> {
+    let host = url
+        .strip_prefix("https://")
+        .or_else(|| url.strip_prefix("http://"))?
+        .split('/')
+        .next()?
+        .split(':')
+        .next()?
+        .trim()
+        .trim_start_matches("www.");
+
+    if host.is_empty() {
+        None
+    } else {
+        Some(host.to_string())
+    }
+}
+
+fn registrable_domain(host: &str) -> Option<String> {
+    let parts: Vec<_> = host.split('.').filter(|part| !part.is_empty()).collect();
+    if parts.len() < 2 {
+        return None;
+    }
+
+    Some(format!(
+        "{}.{}",
+        parts[parts.len() - 2],
+        parts[parts.len() - 1]
+    ))
+}
+
+fn official_source_roots(provider: &str, providers: &HashMap<String, ProviderMeta>) -> Vec<String> {
+    let mut roots = Vec::new();
+
+    if let Some(meta) = providers.get(provider) {
+        for url in [&meta.website, &meta.api_docs].into_iter().flatten() {
+            if let Some(host) = url_host(url)
+                && let Some(root) = registrable_domain(&host)
+            {
+                roots.push(root);
+            }
+        }
+    }
+
+    match provider {
+        "anthropic" => roots.push("claude.com".to_string()),
+        "google" => roots.push("google.com".to_string()),
+        _ => {}
+    }
+
+    roots.sort();
+    roots.dedup();
+    roots
+}
+
+fn is_official_provider_url(url: &str, allowed_roots: &[String]) -> bool {
+    url_host(url)
+        .and_then(|host| registrable_domain(&host))
+        .is_some_and(|root| allowed_roots.iter().any(|allowed| allowed == &root))
+}
+
+fn validate_official_confidence_sources(
+    errors: &mut Vec<String>,
+    rel: &str,
+    data: &serde_json::Value,
+    providers: &HashMap<String, ProviderMeta>,
+) {
+    if data["confidence"].as_str() != Some("official") {
+        return;
+    }
+
+    let provider = data["provider"].as_str().unwrap_or_default();
+    let allowed_roots = official_source_roots(provider, providers);
+    if allowed_roots.is_empty() {
+        return;
+    }
+
+    let has_official_source = data["sources"]
+        .as_array()
+        .map(|sources| {
+            sources
+                .iter()
+                .filter_map(|source| source["url"].as_str())
+                .any(|url| is_official_provider_url(url, &allowed_roots))
+        })
+        .unwrap_or(false);
+
+    if !has_official_source {
+        report_error(
+            errors,
+            format!(
+                "{rel}: official {provider} model must cite an official provider source ({})",
+                allowed_roots.join(", ")
+            ),
+        );
+    }
+}
+
 fn validate_lifecycle_replacement(
     errors: &mut Vec<String>,
     rel: &str,
@@ -184,6 +287,23 @@ fn validate_lifecycle_replacement(
             errors,
             format!(
                 "{rel}: {} model must define replacement model id",
+                meta.status
+            ),
+        );
+    }
+}
+
+fn validate_alias_target_status(
+    errors: &mut Vec<String>,
+    alias: &str,
+    target: &str,
+    meta: &ModelMeta,
+) {
+    if alias.ends_with("-latest") && meta.status != "active" {
+        report_error(
+            errors,
+            format!(
+                "aliases.yaml: '{alias}' -> '{target}' latest alias must point to an active model, found {}",
                 meta.status
             ),
         );
@@ -538,6 +658,7 @@ fn main() -> Result<()> {
 
     let mut errors: Vec<String> = Vec::new();
     let mut provider_ids: HashSet<String> = HashSet::new();
+    let mut provider_meta: HashMap<String, ProviderMeta> = HashMap::new();
     let mut model_ids: HashMap<String, String> = HashMap::new();
     let mut model_meta: HashMap<String, ModelMeta> = HashMap::new();
     let mut model_values: Vec<serde_json::Value> = Vec::new();
@@ -576,6 +697,13 @@ fn main() -> Result<()> {
                         validate_url(&mut errors, &rel, "api_docs", data["api_docs"].as_str());
                         collect_sources(&data, &rel, &mut source_index);
                         provider_ids.insert(actual.to_string());
+                        provider_meta.insert(
+                            actual.to_string(),
+                            ProviderMeta {
+                                website: optional_string(&data, "website"),
+                                api_docs: optional_string(&data, "api_docs"),
+                            },
+                        );
                         println!("  \u{2713} {rel}");
                     }
                 }
@@ -646,6 +774,12 @@ fn main() -> Result<()> {
 
                             model_ids.insert(actual.to_string(), rel.clone());
                             validate_sources(&mut errors, &rel, &data);
+                            validate_official_confidence_sources(
+                                &mut errors,
+                                &rel,
+                                &data,
+                                &provider_meta,
+                            );
                             collect_sources(&data, &rel, &mut source_index);
                             model_meta.insert(
                                 actual.to_string(),
@@ -769,6 +903,7 @@ fn main() -> Result<()> {
                                 errors.push(msg);
                                 continue;
                             }
+                            validate_alias_target_status(&mut errors, alias, t, target);
                             println!("  \u{2713} {alias} \u{2192} {t}");
                         } else {
                             println!("  \u{2713} {alias} \u{2192} {t}");
@@ -921,6 +1056,91 @@ mod tests {
     }
 
     #[test]
+    fn openai_official_confidence_requires_openai_source() {
+        let mut errors = Vec::new();
+        let data = json!({
+            "provider": "openai",
+            "confidence": "official",
+            "sources": [
+                {"url": "https://example.com/models/gpt-test", "last_verified": "2026-05-12"}
+            ]
+        });
+        let providers = HashMap::from([(
+            "openai".to_string(),
+            ProviderMeta {
+                website: Some("https://openai.com".to_string()),
+                api_docs: Some("https://platform.openai.com/docs".to_string()),
+            },
+        )]);
+
+        validate_official_confidence_sources(
+            &mut errors,
+            "models/openai/gpt-test.yaml",
+            &data,
+            &providers,
+        );
+
+        assert_eq!(errors.len(), 1);
+        assert!(errors[0].contains("official openai model must cite an official provider source"));
+    }
+
+    #[test]
+    fn openai_official_confidence_accepts_openai_source() {
+        let mut errors = Vec::new();
+        let data = json!({
+            "provider": "openai",
+            "confidence": "official",
+            "sources": [
+                {"url": "https://developers.openai.com/api/docs/models/gpt-test", "last_verified": "2026-05-12"}
+            ]
+        });
+        let providers = HashMap::from([(
+            "openai".to_string(),
+            ProviderMeta {
+                website: Some("https://openai.com".to_string()),
+                api_docs: Some("https://platform.openai.com/docs".to_string()),
+            },
+        )]);
+
+        validate_official_confidence_sources(
+            &mut errors,
+            "models/openai/gpt-test.yaml",
+            &data,
+            &providers,
+        );
+
+        assert!(errors.is_empty());
+    }
+
+    #[test]
+    fn official_confidence_accepts_provider_api_docs_domain() {
+        let mut errors = Vec::new();
+        let data = json!({
+            "provider": "anthropic",
+            "confidence": "official",
+            "sources": [
+                {"url": "https://docs.anthropic.com/en/docs/about-claude/models", "last_verified": "2026-05-12"}
+            ]
+        });
+        let providers = HashMap::from([(
+            "anthropic".to_string(),
+            ProviderMeta {
+                website: Some("https://www.anthropic.com".to_string()),
+                api_docs: Some("https://docs.anthropic.com".to_string()),
+            },
+        )]);
+
+        validate_official_confidence_sources(
+            &mut errors,
+            "models/anthropic/claude-test.yaml",
+            &data,
+            &providers,
+        );
+
+        assert!(errors.is_empty());
+    }
+
+    #[test]
     fn duplicate_alias_keys_detects_duplicate_yaml_entries() {
         let raw = r#"
 aliases:
@@ -948,6 +1168,29 @@ aliases:
 
         assert_eq!(errors.len(), 1);
         assert!(errors[0].contains("deprecated model must define replacement"));
+    }
+
+    #[test]
+    fn latest_alias_requires_active_target() {
+        let mut errors = Vec::new();
+        let mut meta = meta_with_parameters(vec![], vec![], vec![]);
+        meta.status = "deprecated".to_string();
+
+        validate_alias_target_status(&mut errors, "test-latest", "test-old", &meta);
+
+        assert_eq!(errors.len(), 1);
+        assert!(errors[0].contains("latest alias must point to an active model"));
+    }
+
+    #[test]
+    fn non_latest_alias_allows_deprecated_target() {
+        let mut errors = Vec::new();
+        let mut meta = meta_with_parameters(vec![], vec![], vec![]);
+        meta.status = "deprecated".to_string();
+
+        validate_alias_target_status(&mut errors, "test-old", "test-old", &meta);
+
+        assert!(errors.is_empty());
     }
 
     #[test]

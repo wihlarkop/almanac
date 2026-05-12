@@ -2,7 +2,7 @@ id: gpt-5.4-mini
 provider: openai
 display_name: GPT-5.4 Mini
 status: active
-release_date: 2026-01-01
+release_date: 2026-03-17
 deprecation_date: null
 sunset_date: null
 replacement: null
@@ -25,10 +25,11 @@ parameters:
 pricing:
   currency: USD
   input: 0.75
+  cached_input: 0.075
   output: 4.50
-last_verified: 2026-05-02
+last_verified: 2026-05-12
 confidence: official
 endpoint_family: responses
 sources:
-  - url: https://openai.com/index/introducing-gpt-5-4-mini-and-nano/
-    last_verified: 2026-05-02
+  - url: https://developers.openai.com/api/docs/models/gpt-5.4-mini
+    last_verified: 2026-05-12

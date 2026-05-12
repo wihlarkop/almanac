@@ -26,6 +26,8 @@ pub struct RequestContext {
 }
 
 pub async fn attach_request_context(mut request: Request, next: Next) -> Response {
+    let method = request.method().clone();
+    let path = request.uri().path().to_string();
     let request_id = request
         .headers()
         .get("x-request-id")
@@ -34,12 +36,42 @@ pub async fn attach_request_context(mut request: Request, next: Next) -> Respons
         .map(ToOwned::to_owned)
         .unwrap_or_else(new_request_id);
 
+    let started_at = Instant::now();
     request.extensions_mut().insert(RequestContext {
         request_id: request_id.clone(),
-        started_at: Instant::now(),
+        started_at,
     });
 
     let mut response = next.run(request).await;
+    let status = response.status().as_u16();
+    let latency_ms = started_at.elapsed().as_secs_f64() * 1000.0;
+    match status {
+        500..=599 => tracing::error!(
+            request_id = %request_id,
+            method = %method,
+            path = %path,
+            status,
+            latency_ms,
+            "request completed"
+        ),
+        400..=499 => tracing::warn!(
+            request_id = %request_id,
+            method = %method,
+            path = %path,
+            status,
+            latency_ms,
+            "request completed"
+        ),
+        _ => tracing::info!(
+            request_id = %request_id,
+            method = %method,
+            path = %path,
+            status,
+            latency_ms,
+            "request completed"
+        ),
+    }
+
     if let Ok(value) = HeaderValue::from_str(&request_id) {
         response.headers_mut().insert("x-request-id", value);
     }
