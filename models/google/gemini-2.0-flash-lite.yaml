@@ -5,7 +5,7 @@ status: deprecated
 release_date: 2025-02-05
 deprecation_date: 2026-03-01
 sunset_date: 2026-06-01
-replacement: gemini-3.1-flash-lite-preview
+replacement: gemini-3.1-flash-lite
 context_window: 1048576
 max_output_tokens: 8192
 modalities:
