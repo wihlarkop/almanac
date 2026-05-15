@@ -245,7 +245,10 @@ pub async fn handle_method_not_allowed(response: Response) -> Response {
     if response.status() == StatusCode::METHOD_NOT_ALLOWED {
         return (
             StatusCode::METHOD_NOT_ALLOWED,
-            Json(ApiResponse::error("method not allowed", "METHOD_NOT_ALLOWED")),
+            Json(ApiResponse::error(
+                "method not allowed",
+                "METHOD_NOT_ALLOWED",
+            )),
         )
             .into_response();
     }
