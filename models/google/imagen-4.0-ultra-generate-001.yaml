@@ -1,0 +1,36 @@
+id: imagen-4.0-ultra-generate-001
+provider: google
+display_name: Imagen 4.0 Ultra
+status: active
+release_date: 2025-10-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 1
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [image]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [number_of_images, aspect_ratio, safety_filter_level, person_generation]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_image: 0.06
+  pricing_notes: "Premium Ultra tier at $0.06/image vs $0.02–$0.04 for standard/fast; highest photorealistic quality"
+last_verified: 2026-05-15
+confidence: official
+endpoint_family: image_generation
+sources:
+  - url: https://cloud.google.com/vertex-ai/generative-ai/docs/image/generate-images
+    last_verified: 2026-05-15
+  - url: https://cloud.google.com/vertex-ai/generative-ai/pricing
+    last_verified: 2026-05-15

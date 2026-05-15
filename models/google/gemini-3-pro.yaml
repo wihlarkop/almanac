@@ -1,0 +1,36 @@
+id: gemini-3-pro
+provider: google
+display_name: Gemini 3 Pro
+status: active
+release_date: 2025-11-18
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 1048576
+max_output_tokens: 65536
+modalities:
+  input: [text, image, audio, video]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  streaming: true
+  json_mode: true
+  prompt_caching: false
+  thinking: true
+parameters:
+  supported: [temperature, top_p, max_output_tokens, stream, stop, tools, response_mime_type, thinking_budget]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 2.50
+  output: 15.00
+last_verified: 2026-05-15
+confidence: official
+endpoint_family: custom
+sources:
+  - url: https://blog.google/products-and-platforms/products/gemini/gemini-3/
+    last_verified: 2026-05-15
+  - url: https://ai.google.dev/gemini-api/docs/models
+    last_verified: 2026-05-15

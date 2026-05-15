@@ -1,0 +1,36 @@
+id: gpt-image-1-5
+provider: openai
+display_name: GPT Image 1.5
+status: active
+release_date: 2025-12-15
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 32000
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [image]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [n, size, quality, background, output_format]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 4.00
+  output: 0.00
+  per_image: 0.032
+  pricing_notes: "4x faster than gpt-image-1 with 20% lower pricing; per-image cost varies by quality and size"
+last_verified: 2026-05-15
+confidence: official
+endpoint_family: image_generation
+sources:
+  - url: https://openai.com/index/gpt-image-1-5/
+    last_verified: 2026-05-15
+  - url: https://platform.openai.com/docs/models
+    last_verified: 2026-05-15
