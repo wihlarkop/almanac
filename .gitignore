@@ -27,8 +27,7 @@ __pycache__/
 *.egg-info/
 .DS_Store
 
-# Local docs and specs
-docs/
-!docs/api-contracts.md
+# Local planning artifacts
+docs/superpowers/
 *.pdf
 .claude/
