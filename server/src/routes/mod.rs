@@ -15,6 +15,7 @@ use axum::{
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use tower_http::{
+    compression::CompressionLayer,
     cors::{Any, CorsLayer},
     limit::RequestBodyLimitLayer,
 };
@@ -65,7 +66,8 @@ pub fn router(state: Arc<RwLock<AppState>>) -> Router {
     // Layer order: last .layer() is outermost (runs first on request, last on response).
     // attach_request_context must be outermost so every response — including those
     // short-circuited by inner middleware — gets an x-request-id header.
-    r.layer(middleware::from_fn(reject_oversized_payload))
+    r.layer(CompressionLayer::new())
+        .layer(middleware::from_fn(reject_oversized_payload))
         .layer(
             CorsLayer::new()
                 .allow_origin(Any)
