@@ -1,11 +1,15 @@
 use crate::{
-    catalog::Model, error::ApiError, request::RequestContext, response::ApiResponse,
+    catalog::Model,
+    error::ApiError,
+    request::RequestContext,
+    response::{ApiResponse, catalog_headers},
     state::AppState,
 };
 use axum::{
     Extension,
     extract::{Query, State, rejection::QueryRejection},
-    response::Json,
+    http::{HeaderMap, StatusCode},
+    response::{IntoResponse, Json},
 };
 use serde::{Deserialize, Serialize};
 use std::{collections::HashSet, sync::Arc};
@@ -145,7 +149,8 @@ pub async fn compare(
     State(state): State<Arc<RwLock<AppState>>>,
     Extension(context): Extension<RequestContext>,
     query: Result<Query<CompareQuery>, QueryRejection>,
-) -> Result<Json<ApiResponse<CompareResponse>>, ApiError> {
+    headers: HeaderMap,
+) -> Result<impl IntoResponse, ApiError> {
     let Query(query) = query.map_err(|error| ApiError::BadRequest {
         message: error.body_text(),
     })?;
@@ -163,6 +168,13 @@ pub async fn compare(
     }
 
     let state = state.read().await;
+
+    if let Some(inm) = headers.get("if-none-match")
+        && inm.as_bytes() == state.etag.as_bytes()
+    {
+        return Ok(StatusCode::NOT_MODIFIED.into_response());
+    }
+
     let mut models = Vec::with_capacity(refs.len());
     for (provider, id) in refs {
         let model = state
@@ -208,10 +220,14 @@ pub async fn compare(
         pricing_breakdown: build_pricing_breakdown(&models),
     };
 
-    Ok(Json(ApiResponse::ok_with_context(
-        CompareResponse { models, summary },
-        &context,
-    )))
+    Ok((
+        catalog_headers(&state.etag),
+        Json(ApiResponse::ok_with_context(
+            CompareResponse { models, summary },
+            &context,
+        )),
+    )
+        .into_response())
 }
 
 fn comparable_cost(pricing: &crate::catalog::Pricing) -> Option<f64> {

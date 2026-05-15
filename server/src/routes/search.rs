@@ -1,11 +1,16 @@
 use crate::{
-    catalog::Model, error::ApiError, fuzzy, request::RequestContext, response::ApiResponse,
+    catalog::Model,
+    error::ApiError,
+    fuzzy,
+    request::RequestContext,
+    response::{ApiResponse, catalog_headers},
     state::AppState,
 };
 use axum::{
     Extension,
     extract::{Query, State, rejection::QueryRejection},
-    response::Json,
+    http::{HeaderMap, StatusCode},
+    response::{IntoResponse, Json},
 };
 use serde::{Deserialize, Serialize};
 use std::{cmp::Ordering, sync::Arc};
@@ -130,13 +135,20 @@ pub async fn search(
     State(state): State<Arc<RwLock<AppState>>>,
     Extension(context): Extension<RequestContext>,
     query: Result<Query<SearchQuery>, QueryRejection>,
-) -> Result<Json<ApiResponse<Vec<SearchResult>>>, ApiError> {
+    headers: HeaderMap,
+) -> Result<impl IntoResponse, ApiError> {
     let Query(query) = query.map_err(|error| ApiError::BadRequest {
         message: error.body_text(),
     })?;
     let q = query.q().map(str::to_string);
     let filter = query.filter();
     let state = state.read().await;
+
+    if let Some(inm) = headers.get("if-none-match")
+        && inm.as_bytes() == state.etag.as_bytes()
+    {
+        return Ok(StatusCode::NOT_MODIFIED.into_response());
+    }
     let mut results = Vec::new();
 
     for model in state
@@ -190,11 +202,15 @@ pub async fn search(
     let total = results.len();
     let offset = filter.offset().unwrap_or(0).min(total);
     let limit = filter.limit().unwrap_or(DEFAULT_LIMIT);
-    let data = results.into_iter().skip(offset).take(limit).collect();
+    let data: Vec<_> = results.into_iter().skip(offset).take(limit).collect();
 
-    Ok(Json(ApiResponse::paginated_with_context(
-        data, limit, offset, total, &context,
-    )))
+    Ok((
+        catalog_headers(&state.etag),
+        Json(ApiResponse::paginated_with_context(
+            data, limit, offset, total, &context,
+        )),
+    )
+        .into_response())
 }
 
 fn match_type_name(match_type: fuzzy::MatchType) -> &'static str {
