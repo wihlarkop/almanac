@@ -43,6 +43,8 @@ pub struct ModelFilter {
     pub(crate) max_input_price: Option<f64>,
     #[param(example = "chat_completions")]
     pub(crate) endpoint_family: Option<String>,
+    #[param(example = "gpt")]
+    pub(crate) query: Option<String>,
 }
 
 impl ModelFilter {
@@ -84,6 +86,10 @@ impl ModelFilter {
 
     pub(crate) fn endpoint_family(&self) -> Option<&str> {
         non_empty(self.endpoint_family.as_deref())
+    }
+
+    pub(crate) fn query(&self) -> Option<&str> {
+        non_empty(self.query.as_deref())
     }
 }
 
@@ -323,6 +329,14 @@ pub(crate) fn model_matches_filter(model: &Model, filter: &ModelFilter) -> bool 
         && model.endpoint_family.as_str() != ef
     {
         return false;
+    }
+    if let Some(q) = filter.query() {
+        let q = q.to_lowercase();
+        if !model.display_name.to_lowercase().contains(&q)
+            && !model.id.to_lowercase().contains(&q)
+        {
+            return false;
+        }
     }
     true
 }
