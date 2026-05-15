@@ -67,6 +67,7 @@ impl SearchQuery {
             min_context: self.min_context,
             max_input_price: self.max_input_price,
             endpoint_family: None,
+            query: None,
         }
     }
 }
