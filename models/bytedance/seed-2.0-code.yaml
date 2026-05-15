@@ -1,0 +1,34 @@
+id: seed-2.0-code
+provider: bytedance
+display_name: Seed 2.0 Code
+status: active
+release_date: 2026-02-14
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 256000
+max_output_tokens: 131072
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: true
+  vision: false
+  streaming: true
+  json_mode: true
+  thinking: true
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.47
+  output: 2.37
+  pricing_notes: "Coding-specialized fine-tune of Seed 2.0 Pro; optimized for software engineering tasks"
+last_verified: 2026-05-15
+confidence: inferred
+endpoint_family: chat_completions
+sources:
+  - url: https://www.volcengine.com/docs/82379/1174490
+    last_verified: 2026-05-15

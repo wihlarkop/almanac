@@ -1,0 +1,33 @@
+id: seed-1.6-vision
+provider: bytedance
+display_name: Seed 1.6 Vision
+status: active
+release_date: 2025-08-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 256000
+max_output_tokens: 32768
+modalities:
+  input: [text, image]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  streaming: true
+  json_mode: true
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.10
+  output: 0.50
+  pricing_notes: "Seed 1.6 vision-language variant"
+last_verified: 2026-05-15
+confidence: inferred
+endpoint_family: chat_completions
+sources:
+  - url: https://www.volcengine.com/docs/82379/1174490
+    last_verified: 2026-05-15

@@ -1,0 +1,38 @@
+id: hyperclova-x-seed-think-32b
+provider: naver
+display_name: HyperCLOVA X SEED Think 32B
+status: active
+release_date: 2025-12-26
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 131072
+max_output_tokens: 16384
+modalities:
+  input: [text, image, video]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  video: true
+  streaming: true
+  json_mode: false
+  thinking: true
+  korean_optimized: true
+parameters:
+  supported: [messages, temperature, topP, topK, maxTokens, stop, stream]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 1.00
+  output: 3.00
+  pricing_notes: "32B parameter VLM reasoning model; strongest South Korean open-weights; OpenAI-compatible API via OmniServe; open weights on Hugging Face"
+last_verified: 2026-05-15
+confidence: inferred
+endpoint_family: chat_completions
+sources:
+  - url: https://huggingface.co/naver-hyperclovax/HyperCLOVAX-SEED-Think-32B
+    last_verified: 2026-05-15
+  - url: https://clovastudio.stream.naver.com/
+    last_verified: 2026-05-15

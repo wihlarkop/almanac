@@ -89,6 +89,8 @@ aliases:
   qwen3-max-latest: qwen3-max
   qwen3.5-plus-latest: qwen3.5-plus
   qwen3.5-flash-latest: qwen3.5-flash
+  qwen3.5-397b-latest: qwen3.5-397b-a17b
+  qwen3.5-27b-latest: qwen3.5-27b
 
   # Moonshot AI shorthand aliases
   kimi-latest: kimi-k2.6
@@ -98,9 +100,10 @@ aliases:
   moonshot-latest: moonshot-v1-128k
 
   # Xiaomi MiMo shorthand aliases
-  mimo-latest: mimo-v2-pro
-  mimo-pro-latest: mimo-v2-pro
+  mimo-latest: mimo-v2.5
+  mimo-pro-latest: mimo-v2.5-pro
   mimo-flash-latest: mimo-v2-flash
+  mimo-omni-latest: mimo-v2-omni
 
   # MiniMax shorthand aliases
   minimax-latest: minimax-m2.7
@@ -110,7 +113,9 @@ aliases:
   glm-latest: glm-5.1
   glm-5-latest: glm-5.1
   glm-4.7-latest: glm-4.7
+  glm-4.6v-latest: glm-4.6v
   glm-4.5-latest: glm-4.5
+  glm-4.5-air-latest: glm-4.5-air
   glm-4.5-flash-latest: glm-4.5-flash
   glm-4.7-flash-latest: glm-4.7-flash
 
@@ -141,6 +146,7 @@ aliases:
   doubao-pro-latest: doubao-1.5-pro-256k
   doubao-thinking-latest: doubao-1.5-thinking-pro
   seed-latest: seed-2.0-pro
+  seed-code-latest: seed-2.0-code
 
   # Reka shorthand aliases
   reka-latest: reka-core
@@ -332,8 +338,10 @@ aliases:
   synthesia-latest: synthesia-1
 
   # StepFun aliases
-  step-latest: step-2
+  step-latest: step-3.5-flash
   step-2-latest: step-2
+  step-3-latest: step-3
+  step-3.5-flash-latest: step-3.5-flash
 
   # Meshy aliases
   meshy-latest: meshy-4
@@ -365,9 +373,11 @@ aliases:
   play-ultra-latest: play-3.0-ultra
 
   # Naver aliases
-  hyperclova-latest: hcx-005
+  hyperclova-latest: hyperclova-x-seed-think-32b
   hcx-latest: hcx-005
   hcx-dash-latest: hcx-dash-001
+  hyperclova-seed-think-latest: hyperclova-x-seed-think-32b
+  hyperclova-seed-omni-latest: hyperclova-x-seed-8b-omni
 
   # IBM Granite aliases
   granite-latest: granite-3.3-8b-instruct

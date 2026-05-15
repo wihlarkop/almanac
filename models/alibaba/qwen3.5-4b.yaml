@@ -1,0 +1,34 @@
+id: qwen3.5-4b
+provider: alibaba
+display_name: Qwen3.5 4B
+status: active
+release_date: 2026-03-02
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 262144
+max_output_tokens: 32768
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: true
+  vision: false
+  streaming: true
+  json_mode: true
+  thinking: true
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, tools, response_format, thinking]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.02
+  output: 0.08
+  pricing_notes: "4B open-weight Apache 2.0; 201 languages; edge/local deployment focus"
+last_verified: 2026-05-15
+confidence: inferred
+endpoint_family: chat_completions
+sources:
+  - url: https://www.alibabacloud.com/help/en/model-studio/models
+    last_verified: 2026-05-15

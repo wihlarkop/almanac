@@ -1,0 +1,35 @@
+id: step-3
+provider: stepfun
+display_name: Step-3
+status: active
+release_date: 2025-07-28
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 256000
+max_output_tokens: 65536
+modalities:
+  input: [text, image]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  streaming: true
+  json_mode: true
+parameters:
+  supported: [messages, temperature, top_p, max_tokens, stream, tools]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.57
+  output: 1.42
+  pricing_notes: "321B total / 38B active MoE multimodal; Multi-Matrix Factorization Attention (MFA) + Attention-FFN Disaggregation (AFD)"
+last_verified: 2026-05-15
+confidence: official
+endpoint_family: chat_completions
+sources:
+  - url: https://stepfun.ai/research/en/step3
+    last_verified: 2026-05-15
+  - url: https://platform.stepfun.com/docs
+    last_verified: 2026-05-15

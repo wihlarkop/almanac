@@ -1,0 +1,35 @@
+id: hyperclova-x-seed-8b-omni
+provider: naver
+display_name: HyperCLOVA X SEED 8B Omni
+status: active
+release_date: 2025-12-26
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 131072
+max_output_tokens: 8192
+modalities:
+  input: [text, image, video, audio]
+  output: [text]
+capabilities:
+  tools: false
+  vision: true
+  video: true
+  streaming: true
+  json_mode: false
+  korean_optimized: true
+parameters:
+  supported: [messages, temperature, topP, topK, maxTokens, stop, stream]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.20
+  output: 0.60
+  pricing_notes: "8B multimodal companion to SEED Think 32B; text + image + video + audio inputs; Korean-optimized"
+last_verified: 2026-05-15
+confidence: inferred
+endpoint_family: chat_completions
+sources:
+  - url: https://clovastudio.stream.naver.com/
+    last_verified: 2026-05-15

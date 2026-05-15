@@ -1,0 +1,34 @@
+id: glm-4.6v-flash
+provider: zai
+display_name: GLM-4.6V Flash
+status: active
+release_date: 2025-12-09
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 128000
+max_output_tokens: 32768
+modalities:
+  input: [text, image, video]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  video: true
+  streaming: true
+  json_mode: true
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, tools, response_format]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.10
+  output: 0.30
+  pricing_notes: "9B parameters; local deployment variant of GLM-4.6V; cost-efficient vision-language model"
+last_verified: 2026-05-15
+confidence: inferred
+endpoint_family: chat_completions
+sources:
+  - url: https://docs.z.ai/guides/llm
+    last_verified: 2026-05-15
