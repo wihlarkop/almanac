@@ -106,7 +106,29 @@ pub struct PricingBreakdownEntry {
                             "summary": {
                                 "max_context_window": 128000,
                                 "max_output_tokens": 16384,
-                                "cheapest_input": { "model_id": "gpt-4o", "provider": "openai", "input_price": 2.5, "currency": "USD" }
+                                "cheapest_input": { "model_id": "gpt-4o", "provider": "openai", "input_price": 2.5, "currency": "USD" },
+                                "cheapest_output": { "model_id": "gpt-4o", "provider": "openai", "output_price": 10.0, "currency": "USD" },
+                                "pricing_breakdown": [
+                                    {
+                                        "model_id": "gpt-4o",
+                                        "provider": "openai",
+                                        "currency": "USD",
+                                        "input": 2.5,
+                                        "output": 10.0,
+                                        "cached_input": null,
+                                        "batch_input": null,
+                                        "batch_output": null,
+                                        "request_fee": null,
+                                        "search_fee": null,
+                                        "reasoning": null,
+                                        "per_image": null,
+                                        "per_second": null,
+                                        "per_minute": null,
+                                        "per_million_chars": null,
+                                        "per_page": null,
+                                        "comparable_cost": 2.5
+                                    }
+                                ]
                             }
                         },
                         "meta": { "timestamp": "2026-05-03T00:00:00Z" },
