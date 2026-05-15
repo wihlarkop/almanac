@@ -28,6 +28,7 @@ pub struct CompareSummary {
     max_context_window: u64,
     max_output_tokens: u64,
     cheapest_input: Option<CheapestModel>,
+    cheapest_output: Option<CheapestOutputModel>,
 }
 
 #[derive(Serialize, utoipa::ToSchema)]
@@ -35,6 +36,14 @@ pub struct CheapestModel {
     model_id: String,
     provider: String,
     input_price: f64,
+    currency: String,
+}
+
+#[derive(Serialize, utoipa::ToSchema)]
+pub struct CheapestOutputModel {
+    model_id: String,
+    provider: String,
+    output_price: f64,
     currency: String,
 }
 
@@ -140,6 +149,16 @@ pub async fn compare(
                 model_id: model.id.clone(),
                 provider: model.provider.clone(),
                 input_price: pricing.input,
+                currency: pricing.currency.clone(),
+            }),
+        cheapest_output: models
+            .iter()
+            .filter_map(|model| model.pricing.as_ref().map(|pricing| (model, pricing)))
+            .min_by(|(_, left), (_, right)| left.output.total_cmp(&right.output))
+            .map(|(model, pricing)| CheapestOutputModel {
+                model_id: model.id.clone(),
+                provider: model.provider.clone(),
+                output_price: pricing.output,
                 currency: pricing.currency.clone(),
             }),
     };
