@@ -9,7 +9,8 @@ use crate::{
 use axum::{
     Extension,
     extract::{State, rejection::JsonRejection},
-    response::Json,
+    http::StatusCode,
+    response::{IntoResponse, Json},
 };
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, sync::Arc};
@@ -58,7 +59,7 @@ pub struct ValidationIssue {
     responses(
         (
             status = 200,
-            description = "Validation result",
+            description = "Validation passed",
             body = ApiResponse<ValidateResponse>,
             examples(
                 ("valid" = (
@@ -78,14 +79,15 @@ pub struct ValidationIssue {
                 ))
             )
         ),
-        (status = 400, description = "Invalid JSON body", body = ApiResponse<crate::response::EmptyData>)
+        (status = 400, description = "Invalid JSON body", body = ApiResponse<crate::response::EmptyData>),
+        (status = 422, description = "Validation failed", body = ApiResponse<ValidateResponse>)
     )
 )]
 pub async fn validate(
     State(state): State<Arc<RwLock<AppState>>>,
     Extension(context): Extension<RequestContext>,
     payload: Result<Json<ValidateRequest>, JsonRejection>,
-) -> Result<Json<ApiResponse<ValidateResponse>>, ApiError> {
+) -> Result<impl IntoResponse, ApiError> {
     let Json(req) = payload.map_err(|error| ApiError::BadRequest {
         message: error.body_text(),
     })?;
@@ -189,15 +191,22 @@ pub async fn validate(
         }
     };
 
-    Ok(Json(ApiResponse::ok_with_context(
+    let valid = errors.is_empty();
+    let body = ApiResponse::ok_with_context(
         ValidateResponse {
-            valid: errors.is_empty(),
+            valid,
             canonical_id,
             errors,
             warnings,
         },
         &context,
-    )))
+    );
+    let status = if valid {
+        StatusCode::OK
+    } else {
+        StatusCode::UNPROCESSABLE_ENTITY
+    };
+    Ok((status, Json(body)))
 }
 
 fn validate_parameters(

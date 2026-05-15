@@ -79,8 +79,9 @@ pub async fn suggest(
         .filter(|provider| !provider.is_empty());
     let limit = params.limit.filter(|limit| *limit > 0).unwrap_or(5).min(20);
 
-    let results: Vec<SuggestResult> =
-        fuzzy::top_suggestions(&state, &params.q, provider, limit, 0.7)
+    // Fetch all candidates first to report total_data, then truncate to limit
+    let all_candidates: Vec<SuggestResult> =
+        fuzzy::top_suggestions(&state, &params.q, provider, usize::MAX, 0.7)
             .into_iter()
             .filter_map(|candidate| {
                 let model = state
@@ -97,7 +98,12 @@ pub async fn suggest(
             })
             .collect();
 
-    Ok(Json(ApiResponse::ok_with_context(results, &context)))
+    let total = all_candidates.len();
+    let results: Vec<SuggestResult> = all_candidates.into_iter().take(limit).collect();
+
+    Ok(Json(ApiResponse::paginated_with_context(
+        results, limit, 0, total, &context,
+    )))
 }
 
 fn match_type_name(match_type: fuzzy::MatchType) -> &'static str {

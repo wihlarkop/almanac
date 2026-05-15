@@ -6,13 +6,23 @@ use crate::{
 };
 use axum::{
     Extension,
-    extract::{Path, State},
+    extract::{Path, Query, State, rejection::QueryRejection},
     http::{HeaderMap, StatusCode},
     response::{IntoResponse, Json},
 };
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::RwLock;
+
+const DEFAULT_LIMIT: usize = 100;
+
+#[derive(Deserialize, utoipa::IntoParams)]
+pub struct AliasFilter {
+    #[param(example = 100)]
+    pub limit: Option<usize>,
+    #[param(example = 0)]
+    pub offset: Option<usize>,
+}
 
 #[derive(Clone, Serialize, utoipa::ToSchema)]
 pub struct AliasMapping {
@@ -24,6 +34,7 @@ pub struct AliasMapping {
 #[utoipa::path(
     get,
     path = "/api/v1/aliases",
+    params(AliasFilter),
     responses(
         (
             status = 200,
@@ -42,7 +53,7 @@ pub struct AliasMapping {
                                 "provider": "anthropic"
                             }
                         ],
-                        "meta": { "timestamp": "2026-05-04T00:00:00Z" },
+                        "meta": { "limit": 100, "offset": 0, "total_data": 1, "timestamp": "2026-05-04T00:00:00Z" },
                         "error": null
                     })
                 ))
@@ -54,8 +65,18 @@ pub struct AliasMapping {
 pub async fn list_aliases(
     State(state): State<Arc<RwLock<AppState>>>,
     Extension(context): Extension<RequestContext>,
+    query: Result<Query<AliasFilter>, QueryRejection>,
     headers: HeaderMap,
 ) -> impl IntoResponse {
+    let Query(filter) = match query {
+        Ok(q) => q,
+        Err(error) => {
+            return ApiError::BadRequest {
+                message: error.body_text(),
+            }
+            .into_response();
+        }
+    };
     let state = state.read().await;
     if let Some(inm) = headers.get("if-none-match")
         && inm.as_bytes() == state.etag.as_bytes()
@@ -63,16 +84,23 @@ pub async fn list_aliases(
         return StatusCode::NOT_MODIFIED.into_response();
     }
 
-    let mut aliases = state
+    let mut all_aliases = state
         .aliases
         .iter()
         .map(|(alias, canonical_id)| alias_mapping(&state, alias, canonical_id))
         .collect::<Vec<_>>();
-    aliases.sort_by(|left, right| left.alias.cmp(&right.alias));
+    all_aliases.sort_by(|left, right| left.alias.cmp(&right.alias));
+
+    let total = all_aliases.len();
+    let offset = filter.offset.unwrap_or(0).min(total);
+    let limit = filter.limit.filter(|l| *l > 0).unwrap_or(DEFAULT_LIMIT);
+    let data: Vec<AliasMapping> = all_aliases.into_iter().skip(offset).take(limit).collect();
 
     (
         catalog_headers(&state.etag),
-        Json(ApiResponse::ok_with_context(aliases, &context)),
+        Json(ApiResponse::paginated_with_context(
+            data, limit, offset, total, &context,
+        )),
     )
         .into_response()
 }

@@ -856,7 +856,8 @@ async fn models_offset_past_total_returns_empty_page_with_clamped_offset() {
     assert!(total > 0);
     assert_eq!(json["data"].as_array().unwrap().len(), 0);
     assert_eq!(json["meta"]["offset"].as_u64().unwrap(), total);
-    assert_eq!(json["meta"]["limit"], 0);
+    // meta.limit reflects the requested limit, not the clamped result count
+    assert_eq!(json["meta"]["limit"], 10);
 }
 
 #[tokio::test]
@@ -875,7 +876,8 @@ async fn models_large_limit_reports_actual_remaining_window() {
     assert_eq!(json["data"].as_array().unwrap().len(), 2);
     assert_eq!(json["meta"]["total_data"].as_u64().unwrap(), total);
     assert_eq!(json["meta"]["offset"].as_u64().unwrap(), offset);
-    assert_eq!(json["meta"]["limit"], 2);
+    // meta.limit reflects the requested limit, not the remaining item count
+    assert_eq!(json["meta"]["limit"], 1000);
 }
 
 #[tokio::test]
