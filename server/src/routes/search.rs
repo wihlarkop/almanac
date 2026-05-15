@@ -188,10 +188,7 @@ pub async fn search(
 
     let total = results.len();
     let offset = filter.offset().unwrap_or(0).min(total);
-    let limit = filter
-        .limit()
-        .unwrap_or(DEFAULT_LIMIT)
-        .min(total.saturating_sub(offset));
+    let limit = filter.limit().unwrap_or(DEFAULT_LIMIT);
     let data = results.into_iter().skip(offset).take(limit).collect();
 
     Ok(Json(ApiResponse::paginated_with_context(

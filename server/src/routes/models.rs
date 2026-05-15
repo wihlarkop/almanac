@@ -163,10 +163,7 @@ pub async fn list_models(
 
     let total = models.len();
     let offset = filter.offset().unwrap_or(0).min(total);
-    let limit = filter
-        .limit()
-        .unwrap_or(DEFAULT_LIMIT)
-        .min(total.saturating_sub(offset));
+    let limit = filter.limit().unwrap_or(DEFAULT_LIMIT);
     let data: Vec<_> = models.into_iter().skip(offset).take(limit).collect();
 
     (

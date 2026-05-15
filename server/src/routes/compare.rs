@@ -1,5 +1,5 @@
 use crate::{
-    catalog::{Model, Pricing},
+    catalog::Model,
     error::ApiError,
     request::RequestContext,
     response::ApiResponse,
@@ -30,7 +30,15 @@ pub struct CompareResponse {
 pub struct CompareSummary {
     max_context_window: u64,
     max_output_tokens: u64,
-    lowest_input_price: Option<Pricing>,
+    cheapest_input: Option<CheapestModel>,
+}
+
+#[derive(Serialize, utoipa::ToSchema)]
+pub struct CheapestModel {
+    model_id: String,
+    provider: String,
+    input_price: f64,
+    currency: String,
 }
 
 #[utoipa::path(
@@ -70,7 +78,7 @@ pub struct CompareSummary {
                             "summary": {
                                 "max_context_window": 128000,
                                 "max_output_tokens": 16384,
-                                "lowest_input_price": { "currency": "USD", "input": 2.5, "output": 10.0 }
+                                "cheapest_input": { "model_id": "gpt-4o", "provider": "openai", "input_price": 2.5, "currency": "USD" }
                             }
                         },
                         "meta": { "timestamp": "2026-05-03T00:00:00Z" },
@@ -127,10 +135,18 @@ pub async fn compare(
             .map(|model| model.max_output_tokens)
             .max()
             .unwrap_or(0),
-        lowest_input_price: models
+        cheapest_input: models
             .iter()
-            .filter_map(|model| model.pricing.clone())
-            .min_by(|left, right| left.input.total_cmp(&right.input)),
+            .filter_map(|model| {
+                model.pricing.as_ref().map(|pricing| (model, pricing))
+            })
+            .min_by(|(_, left), (_, right)| left.input.total_cmp(&right.input))
+            .map(|(model, pricing)| CheapestModel {
+                model_id: model.id.clone(),
+                provider: model.provider.clone(),
+                input_price: pricing.input,
+                currency: pricing.currency.clone(),
+            }),
     };
 
     Ok(Json(ApiResponse::ok_with_context(

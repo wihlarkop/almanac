@@ -7,16 +7,28 @@ use crate::{
 };
 use axum::{
     Extension,
-    extract::{Path, State},
+    extract::{Path, Query, State, rejection::QueryRejection},
     http::{HeaderMap, StatusCode},
     response::{IntoResponse, Json},
 };
+use serde::Deserialize;
 use std::sync::Arc;
 use tokio::sync::RwLock;
+
+const DEFAULT_LIMIT: usize = 50;
+
+#[derive(Deserialize, utoipa::IntoParams)]
+pub struct ProviderFilter {
+    #[param(example = 50)]
+    pub limit: Option<usize>,
+    #[param(example = 0)]
+    pub offset: Option<usize>,
+}
 
 #[utoipa::path(
     get,
     path = "/api/v1/providers",
+    params(ProviderFilter),
     responses(
         (
             status = 200,
@@ -36,7 +48,7 @@ use tokio::sync::RwLock;
                                 "api_docs": "https://platform.openai.com/docs"
                             }
                         ],
-                        "meta": { "timestamp": "2026-05-03T00:00:00Z" },
+                        "meta": { "limit": 50, "offset": 0, "total_data": 1, "timestamp": "2026-05-03T00:00:00Z" },
                         "error": null
                     })
                 ))
@@ -48,8 +60,18 @@ use tokio::sync::RwLock;
 pub async fn list_providers(
     State(state): State<Arc<RwLock<AppState>>>,
     Extension(context): Extension<RequestContext>,
+    query: Result<Query<ProviderFilter>, QueryRejection>,
     headers: HeaderMap,
 ) -> impl IntoResponse {
+    let Query(filter) = match query {
+        Ok(q) => q,
+        Err(error) => {
+            return ApiError::BadRequest {
+                message: error.body_text(),
+            }
+            .into_response();
+        }
+    };
     let state = state.read().await;
 
     if let Some(inm) = headers.get("if-none-match")
@@ -58,11 +80,21 @@ pub async fn list_providers(
         return StatusCode::NOT_MODIFIED.into_response();
     }
 
+    let total = state.providers.len();
+    let offset = filter.offset.unwrap_or(0).min(total);
+    let limit = filter.limit.filter(|l| *l > 0).unwrap_or(DEFAULT_LIMIT);
+    let data: Vec<Provider> = state
+        .providers
+        .iter()
+        .skip(offset)
+        .take(limit)
+        .cloned()
+        .collect();
+
     (
         catalog_headers(&state.etag),
-        Json(ApiResponse::ok_with_context(
-            state.providers.clone(),
-            &context,
+        Json(ApiResponse::paginated_with_context(
+            data, limit, offset, total, &context,
         )),
     )
         .into_response()
