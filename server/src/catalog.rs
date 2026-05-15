@@ -130,6 +130,28 @@ pub enum EndpointFamily {
     MeshGeneration,
 }
 
+impl EndpointFamily {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::ChatCompletions => "chat_completions",
+            Self::Responses => "responses",
+            Self::Custom => "custom",
+            Self::Agent => "agent",
+            Self::Search => "search",
+            Self::Embeddings => "embeddings",
+            Self::Reranking => "reranking",
+            Self::ImageGeneration => "image_generation",
+            Self::Speech => "speech",
+            Self::Transcription => "transcription",
+            Self::VideoGeneration => "video_generation",
+            Self::Realtime => "realtime",
+            Self::Ocr => "ocr",
+            Self::MusicGeneration => "music_generation",
+            Self::MeshGeneration => "mesh_generation",
+        }
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, utoipa::ToSchema)]
 pub struct Source {
     pub url: String,

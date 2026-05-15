@@ -61,6 +61,7 @@ impl SearchQuery {
             modality_output: self.modality_output.clone(),
             min_context: self.min_context,
             max_input_price: self.max_input_price,
+            endpoint_family: None,
         }
     }
 }
