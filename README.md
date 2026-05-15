@@ -1,34 +1,192 @@
-# almanac
+# Almanac
 
-Almanac is a free, open-source model catalog and validator for LLM developers.
+A free, open-source model catalog and REST API for LLM developers.
 
-Status: public preview. The API is live and usable, but the first stable `v0.1.0` release has not
-been tagged yet.
+488 models · 68 providers · 274 aliases — all queryable, filterable, and comparable via a single HTTP API.
 
-It answers practical questions:
+[![CI](https://github.com/wihlarkop/almanac/actions/workflows/validate.yml/badge.svg)](https://github.com/wihlarkop/almanac/actions/workflows/validate.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+---
+
+## What it answers
 
 - What models exist across major LLM providers?
-- Is this model string valid?
+- Is this model string valid for this provider?
 - Is this model active, deprecated, or retired?
-- Which provider owns this model?
-- What capabilities, modalities, limits, pricing, and parameters are known?
-- What canonical model ID should this alias resolve to?
+- What capabilities, modalities, context limits, and pricing are known?
+- What canonical model ID does this alias resolve to?
+- Which model is cheapest for input/output tokens?
+
+---
+
+## Quick Start
+
+**Run with Docker (pre-built image):**
+
+```bash
+docker run -p 8080:8080 ghcr.io/wihlarkop/almanac:latest
+```
+
+**Try it:**
+
+```bash
+# Health check
+curl http://localhost:8080/api/v1/health
+
+# List models
+curl http://localhost:8080/api/v1/models?provider=openai&limit=5
+
+# Validate a model parameter
+curl -X POST http://localhost:8080/api/v1/validate \
+  -H "content-type: application/json" \
+  -d '{"model":"gpt-4o","provider":"openai","parameters":{"temperature":0.7}}'
+
+# Search
+curl "http://localhost:8080/api/v1/search?q=claude&limit=5"
+
+# Compare models
+curl "http://localhost:8080/api/v1/compare?models=openai/gpt-4o,anthropic/claude-opus-4-7"
+```
+
+**Interactive API docs:**
+- Swagger UI: `http://localhost:8080/swagger-ui/`
+- Scalar: `http://localhost:8080/scalar`
+- OpenAPI JSON: `http://localhost:8080/openapi.json`
+
+---
+
+## API Reference
+
+| Method | Path | Purpose |
+|---|---|---|
+| `GET` | `/` | API landing metadata |
+| `GET` | `/api/v1/health` | Server health and catalog stats |
+| `GET` | `/api/v1/models` | List and filter models |
+| `GET` | `/api/v1/models/{provider}/{id}` | Get one model |
+| `GET` | `/api/v1/search` | Fuzzy search models |
+| `GET` | `/api/v1/compare` | Side-by-side model comparison with pricing breakdown |
+| `POST` | `/api/v1/validate` | Validate model + parameter usage |
+| `GET` | `/api/v1/suggest` | Suggest canonical model IDs |
+| `GET` | `/api/v1/providers` | List providers |
+| `GET` | `/api/v1/providers/{id}` | Get provider details |
+| `GET` | `/api/v1/aliases` | List aliases |
+| `GET` | `/api/v1/aliases/{alias}` | Resolve one alias |
+| `GET` | `/api/v1/catalog/health` | Catalog health summary |
+| `GET` | `/api/v1/catalog/issues` | Catalog quality issues |
+| `GET` | `/metrics` | Prometheus metrics (requires `--features metrics`) |
+
+All responses use a consistent JSON envelope:
+
+```json
+{
+  "success": true,
+  "message": "OK",
+  "data": {},
+  "meta": { "timestamp": "2026-05-16T00:00:00Z" },
+  "error": null
+}
+```
+
+Paginated responses add `limit`, `offset`, and `total_data` to `meta`. Error responses set `success: false`, `data: null`, and include an `error.code` string.
+
+Every response includes an `x-request-id` header. Responses are gzip-compressed when the client sends `Accept-Encoding: gzip`. List endpoints support `ETag` / `If-None-Match` for conditional requests.
+
+---
+
+## Deployment
+
+See [docs/deployment.md](docs/deployment.md) for full instructions covering:
+
+- **Render** (reference deployment)
+- **Fly.io**
+- **Railway**
+- **Google Cloud Run**
+- **Docker / Docker Compose** (self-hosted)
+- **Build from source**
+
+---
 
 ## Repository Structure
 
-- `providers/` - one YAML file per provider.
-- `models/<provider>/` - one YAML file per model.
-- `aliases.yaml` - shorthand aliases mapped to canonical model IDs.
-- `schema/` - JSON Schemas used to validate catalog files.
-- `validator/` - Rust CLI that validates the catalog.
-- `server/` - Rust HTTP API for querying and validating model metadata.
-- `docs/api-contracts.md` - response envelope, error codes, pagination, and caching reference.
+```
+providers/          one YAML file per provider
+models/<provider>/  one YAML file per model
+aliases.yaml        shorthand aliases → canonical model IDs
+schema/             JSON Schemas for catalog validation
+validator/          Rust CLI that validates the catalog
+server/             Rust HTTP API server
+docs/               deployment guide, API contracts
+```
+
+---
+
+## Run Locally
+
+```bash
+# API server
+cargo run -p almanac-server
+
+# Release build (much faster)
+cargo run -p almanac-server --release
+
+# With Prometheus metrics endpoint at GET /metrics
+cargo run -p almanac-server --features metrics
+```
+
+Server listens on `0.0.0.0:8080` by default. Set `PORT` to change it.
+
+---
+
+## Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `PORT` | `8080` | TCP port |
+| `DATA_DIR` | `.` | Directory containing catalog files |
+| `RUST_LOG` | `almanac_server=info` | Log level filter |
+| `LOG_FORMAT` | _(unset)_ | Set to `json` for structured logs |
+| `RATE_LIMIT_RPS` | _(unset)_ | Max requests/sec per IP. Unset = disabled |
+| `CATALOG_INCLUDE_PROVIDERS` | _(unset)_ | Comma-separated provider IDs to include |
+| `CATALOG_EXCLUDE_PROVIDERS` | _(unset)_ | Comma-separated provider IDs to exclude |
+| `CATALOG_INCLUDE_MODELS` | _(unset)_ | Comma-separated `provider/model-id` to include |
+| `CATALOG_EXCLUDE_MODELS` | _(unset)_ | Comma-separated `provider/model-id` to exclude |
+| `CATALOG_SCOPE_FILE` | _(unset)_ | YAML file for fine-grained catalog scoping |
+
+---
+
+## Catalog Scoping
+
+Expose only part of the catalog without editing YAML files:
+
+```bash
+# Env vars (simple)
+CATALOG_INCLUDE_PROVIDERS=openai,anthropic cargo run -p almanac-server
+
+# Scope file (complex)
+CATALOG_SCOPE_FILE=/etc/almanac/scope.yaml cargo run -p almanac-server
+```
+
+Scope file format:
+
+```yaml
+include:
+  providers: [openai, anthropic]
+  models: [google/gemini-2.5-pro]
+exclude:
+  providers: [xai]
+  models: [openai/gpt-4o-mini]
+```
+
+Includes are applied first, excludes second. Hidden models are removed from all endpoints including search, suggest, validate, compare, and metrics.
+
+---
 
 ## Local CI Checks
 
-Run the same core checks before pushing:
+Run before pushing:
 
-```powershell
+```bash
 cargo fmt --check
 cargo clippy --workspace --all-targets -- -D warnings
 cargo run -p almanac-validator
@@ -36,241 +194,18 @@ cargo test
 cargo build -p almanac-server
 ```
 
-Dependency audit is enforced in GitHub Actions:
-
-```powershell
-cargo install cargo-audit --version 0.22.1 --locked
-cargo audit
-```
-
-The repository pins Rust with `rust-toolchain.toml`. If Rustup prompts to install the pinned
-toolchain, accept it before running the checks.
-
-## Validate Locally
-
-```bash
-cargo run -p almanac-validator
-```
-
-The validator checks schema validity, filename/id consistency, provider references, aliases, lifecycle dates, replacements, and parameter conflicts.
-
-To also verify that every source URL is reachable (requires internet access, runs slowly):
-
-```bash
-cargo run -p almanac-validator -- --check-urls
-```
-
-Unreachable URLs are reported as warnings and do not fail the build.
-
-## Run the API Server
-
-```bash
-cargo run -p almanac-server
-```
-
-Enable Prometheus metrics at `GET /metrics`:
-
-```bash
-cargo run -p almanac-server --features metrics
-```
-
-The server listens on `0.0.0.0:8080` by default.
-
-## Run with Docker
-
-```bash
-docker build -t almanac-server:local .
-docker run --rm -p 8080:8080 almanac-server:local
-```
-
-The production image includes the public catalog under `/data` and runs the server as a non-root
-user. The Docker build context intentionally excludes `docs/`.
-
-Optional environment variables:
-
-- `PORT` - server port.
-- `DATA_DIR` - directory containing `providers/`, `models/`, and `aliases.yaml`.
-- `RUST_LOG` - tracing filter, for example `almanac_server=debug,tower_http=warn`.
-- `LOG_FORMAT` - set to `json` for structured JSON logs (recommended for production).
-- `RATE_LIMIT_RPS` - maximum requests per second per IP address. Unset or `0` disables rate limiting. When a limit is exceeded the server returns `429` with a `Retry-After` header.
-- `CATALOG_INCLUDE_PROVIDERS` / `CATALOG_EXCLUDE_PROVIDERS` - comma-separated provider ids for deployment-time catalog scoping.
-- `CATALOG_INCLUDE_MODELS` / `CATALOG_EXCLUDE_MODELS` - comma-separated `provider/model-id` entries for deployment-time catalog scoping.
-- `CATALOG_SCOPE_FILE` - YAML file path for longer catalog scope configs. Cannot be combined with the env scope lists.
-
-### Catalog scoping
-
-Deployments can expose only part of the catalog without editing YAML data.
-
-For simple deployments, use comma-separated environment variables:
-
-```bash
-CATALOG_INCLUDE_PROVIDERS=openai,anthropic
-CATALOG_EXCLUDE_MODELS=openai/gpt-4o-mini
-```
-
-For longer managed configs, use one YAML file:
-
-```bash
-CATALOG_SCOPE_FILE=/etc/almanac/catalog-scope.yaml
-```
-
-```yaml
-include:
-  providers:
-    - openai
-    - anthropic
-  models:
-    - google/gemini-2.5-pro
-exclude:
-  providers:
-    - xai
-  models:
-    - openai/gpt-4o-mini
-```
-
-Use either env vars or `CATALOG_SCOPE_FILE`, not both. Includes are applied first, excludes are applied second, and excludes win. Model entries use `provider/model-id`. Hidden models are removed from providers, aliases, search, suggest, validation, comparison, catalog health, and metrics.
-
-The server logs startup, catalog loading, request completion with `request_id`, path, status, and
-latency, and shutdown events. It handles Ctrl+C and SIGTERM as graceful shutdown signals.
-
-Successful JSON responses use this envelope:
-
-```json
-{
-  "success": true,
-  "message": "OK",
-  "data": {},
-  "meta": {
-    "timestamp": "2026-05-02T21:12:00Z"
-  },
-  "error": null
-}
-```
-
-Paginated responses add `limit`, `offset`, and `total_data` to `meta`. Error responses use the
-same envelope with `success=false`, `data=null`, and an `error.code` value.
-
-Every API response includes an `x-request-id` header. Successful JSON responses also include the
-same request id and request execution time in `meta`. Browser access is enabled with explicit CORS
-for GET and POST API calls, and basic security headers are set on responses.
-
-Requests are limited to 64 KiB bodies and a 10 second server-side timeout.
-
-## Production Smoke Check
-
-Run this against any deployed Almanac API before tagging a release or after changing deployment
-settings:
-
-```powershell
-$env:ALMANAC_BASE_URL = "https://your-deployment.example"
-.\scripts\smoke-production.ps1
-```
-
-The smoke check verifies `/`, `/api/v1/health`, `/openapi.json`, one model lookup, and one validate
-request.
-
-## Release Readiness
-
-Before creating the first `v0.1.0` release tag:
-
-- Confirm the worktree only contains intended release changes.
-- Run `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo run -p almanac-validator`, `cargo test`, and `cargo build -p almanac-server`.
-- Build the Docker image and smoke check `GET /` plus `GET /api/v1/health` on the deployed service.
-- Update `CHANGELOG.md` with only the major user-facing 0.1.0 features.
-
-## CI Checks
-
-The GitHub Actions validation workflow runs:
-
-- `cargo fmt --check`
-- `cargo clippy --workspace --all-targets -- -D warnings`
-- `cargo run -p almanac-validator`
-- `cargo test`
-- `cargo build -p almanac-server`
-- RustSec dependency audit
-
-## API Reference
-
-Full interactive docs are available after starting the server:
-
-- `http://localhost:8080/swagger-ui/`
-- `http://localhost:8080/scalar`
-- `http://localhost:8080/openapi.json`
-
-| Method | Path | Purpose |
-| --- | --- | --- |
-| `GET` | `/` | API landing metadata |
-| `GET` | `/api/v1/health` | Server health and catalog readiness |
-| `GET` | `/api/v1/providers` | List providers |
-| `GET` | `/api/v1/providers/{id}` | Get provider details |
-| `GET` | `/api/v1/aliases` | List aliases |
-| `GET` | `/api/v1/aliases/{alias}` | Resolve one alias |
-| `GET` | `/api/v1/catalog/health` | Catalog health summary |
-| `GET` | `/api/v1/catalog/issues` | Catalog quality issue details |
-| `GET` | `/api/v1/models` | List and filter models |
-| `GET` | `/api/v1/models/{provider}/{id}` | Get one model |
-| `GET` | `/api/v1/search` | Search models |
-| `GET` | `/api/v1/compare` | Compare models |
-| `POST` | `/api/v1/validate` | Validate model usage |
-| `GET` | `/api/v1/suggest` | Suggest model IDs |
-| `GET` | `/metrics` | Prometheus metrics (requires `--features metrics`) |
-
-Validate a model:
-
-```bash
-curl -X POST http://localhost:8080/api/v1/validate \
-  -H "content-type: application/json" \
-  -d '{"model":"gpt-4o","provider":"openai"}'
-```
-
-Search models:
-
-```bash
-curl "http://localhost:8080/api/v1/search?q=gpt&provider=openai&limit=5"
-```
-
-Compare models:
-
-```bash
-curl "http://localhost:8080/api/v1/compare?models=openai/gpt-4o,anthropic/claude-opus-4-7"
-```
-
-## Model File Format
-
-Each model YAML file includes:
-
-- canonical model ID
-- provider ID
-- display name
-- lifecycle status
-- release, deprecation, and sunset dates
-- replacement model
-- context and output token limits
-- modalities
-- capabilities
-- supported, rejected, and deprecated parameters
-- model-level last verified date
-- metadata confidence
-- endpoint family
-- pricing
-- source URLs with verification dates
-
-See `schema/model.schema.json` for the full contract.
+---
 
 ## Contributing
 
-When adding or changing a model:
+When adding or updating a model:
 
-1. Add or update `models/<provider>/<model-id>.yaml`.
-2. Make sure `id` matches the filename without `.yaml`.
-3. Make sure `provider` matches both `providers/<provider>.yaml` and the model directory.
-4. Add a `replacement` when deprecating or retiring a model, if a successor exists.
-5. Update `aliases.yaml` only when the alias should resolve to a non-retired canonical model.
-6. Include at least one source URL and `last_verified` date.
-7. Keep model-level `last_verified`, `confidence`, and `endpoint_family` current.
-8. Run:
+1. Add or update `models/<provider>/<model-id>.yaml`
+2. Ensure `id` matches the filename (without `.yaml`)
+3. Ensure `provider` matches the directory name and `providers/<provider>.yaml`
+4. Set `replacement` when deprecating or retiring a model
+5. Update `aliases.yaml` if a new alias is needed
+6. Include at least one source URL with a `last_verified` date
+7. Run `cargo run -p almanac-validator && cargo test`
 
-```bash
-cargo run -p almanac-validator
-cargo test
-```
+See `schema/model.schema.json` for the full model contract and `docs/api-contracts.md` for the response envelope spec.
