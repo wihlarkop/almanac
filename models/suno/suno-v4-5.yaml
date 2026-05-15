@@ -1,0 +1,37 @@
+id: suno-v4-5
+provider: suno
+display_name: Suno V4.5
+status: active
+release_date: 2025-04-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 1024
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [music]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+  vocals: true
+  instrumental: true
+  custom_lyrics: true
+parameters:
+  supported: [prompt, lyrics, style, instrumental, seed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  request_fee: 0.03
+  pricing_notes: "~$0.03 per song. Suno V4.5 — enhanced vocal quality and style adherence over V4"
+last_verified: 2026-05-15
+confidence: inferred
+endpoint_family: music_generation
+sources:
+  - url: https://docs.suno.com
+    last_verified: 2026-05-15

@@ -1,0 +1,36 @@
+id: flux-2-pro
+provider: bfl
+display_name: FLUX.2 Pro
+status: active
+release_date: 2025-11-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4096
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [image]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, width, height, steps, guidance, seed, output_format]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_image: 0.03
+  pricing_notes: "~$0.03/megapixel; balanced quality/speed production model; positioned between FLUX.2 Klein and FLUX.2 Max"
+last_verified: 2026-05-15
+confidence: official
+endpoint_family: image_generation
+sources:
+  - url: https://bfl.ai/pricing
+    last_verified: 2026-05-15
+  - url: https://docs.bfl.ml
+    last_verified: 2026-05-15

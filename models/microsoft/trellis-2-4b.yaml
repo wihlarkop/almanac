@@ -1,0 +1,36 @@
+id: trellis-2-4b
+provider: microsoft
+display_name: TRELLIS 2 4B
+status: active
+release_date: 2026-04-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 2048
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [3d]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+  pbr_textures: true
+  rigging: false
+parameters:
+  supported: [prompt, image_url, seed, sparse_steps, slat_steps]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  request_fee: 0.00
+  pricing_notes: "Open-weight 4B parameter model; Microsoft Research TRELLIS 2 using Structured Latent (SLAT) representation; MIT license; self-hosted or via third-party APIs"
+last_verified: 2026-05-15
+confidence: inferred
+endpoint_family: mesh_generation
+sources:
+  - url: https://github.com/microsoft/TRELLIS
+    last_verified: 2026-05-15

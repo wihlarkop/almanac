@@ -1,0 +1,36 @@
+id: reve-image-1.0
+provider: reve
+display_name: Reve Image 1.0
+status: active
+release_date: 2025-03-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4096
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [image]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, width, height, steps, guidance, seed, output_format]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_image: 0.04
+  pricing_notes: "12B parameter hybrid multimodal + parallel diffusion transformer; native 2048x2048 (upscale to 4K); 98% text accuracy via proprietary typography engine; held #1 on Artificial Analysis Image Arena"
+last_verified: 2026-05-15
+confidence: official
+endpoint_family: image_generation
+sources:
+  - url: https://venturebeat.com/ai/the-new-best-ai-image-generation-model-is-here-say-hello-to-reve-image-1-0
+    last_verified: 2026-05-15
+  - url: https://replicate.com/reve-image
+    last_verified: 2026-05-15

@@ -1,0 +1,37 @@
+id: tripo-p1-0
+provider: tripo
+display_name: Tripo P1.0
+status: active
+release_date: 2026-03-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 2048
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [3d]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+  pbr_textures: true
+  rigging: true
+  animation: true
+parameters:
+  supported: [prompt, image_url, style, texture_quality, seed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  request_fee: 0.80
+  pricing_notes: "~$0.80 per 3D model. Tripo P1.0 — professional-grade flagship 3D model; photorealistic textures; full animation rigging pipeline"
+last_verified: 2026-05-15
+confidence: inferred
+endpoint_family: mesh_generation
+sources:
+  - url: https://platform.tripo3d.ai/docs
+    last_verified: 2026-05-15

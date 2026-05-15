@@ -1,0 +1,34 @@
+id: hidream-i1
+provider: hidream
+display_name: HiDream I1
+status: active
+release_date: 2025-04-07
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4096
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [image]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, negative_prompt, width, height, steps, guidance, seed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_image: 0.009
+  pricing_notes: "17B parameter sparse Diffusion Transformer with MoE design; open-source Apache 2.0; $0.009/MP via Together AI; full/dev/fast variants"
+last_verified: 2026-05-15
+confidence: official
+endpoint_family: image_generation
+sources:
+  - url: https://github.com/HiDream-ai/HiDream-I1
+    last_verified: 2026-05-15

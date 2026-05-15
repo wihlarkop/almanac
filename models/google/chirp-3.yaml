@@ -1,0 +1,35 @@
+id: chirp-3
+provider: google
+display_name: Chirp 3
+status: active
+release_date: 2025-03-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 1
+max_output_tokens: 1
+modalities:
+  input: [audio]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+  multilingual_stt: true
+parameters:
+  supported: [audio, language_code, model, enable_automatic_punctuation, enable_word_timestamps]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_second: 0.000036
+  pricing_notes: "$0.000036/second ($0.00216/minute) of audio. Google Cloud Speech-to-Text v2 Chirp 3; 100+ languages; improved accuracy over Chirp 2"
+last_verified: 2026-05-15
+confidence: official
+endpoint_family: transcription
+sources:
+  - url: https://cloud.google.com/speech-to-text/docs/chirp-model
+    last_verified: 2026-05-15

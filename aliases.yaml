@@ -307,7 +307,10 @@ aliases:
   ray-latest: ray-3.14
 
   # OpenAI Sora aliases
-  sora-latest: sora
+  sora-latest: sora-2
+  sora-2-latest: sora-2
+  sora-2-pro-latest: sora-2-pro
+  sora-1-latest: sora
 
   # Google Veo 2 aliases
 
@@ -316,10 +319,18 @@ aliases:
   hailuo-video-latest: hailuo-video-01
 
   # Alibaba Wan video aliases
-  wan-latest: wan-2.1
+  wan-latest: wan-2.7
+  wan-2-latest: wan-2.7
+  wan-2.1-latest: wan-2.1
+  seedance-latest: seedance-2.0
+  seedance-1-latest: seedance-1.0
 
   # Suno aliases
-  suno-latest: suno-v4
+  suno-latest: suno-v5-5
+  suno-v4-latest: suno-v4
+  suno-v4-5-latest: suno-v4-5
+  suno-v5-latest: suno-v5
+  suno-v5-5-latest: suno-v5-5
 
   # Udio aliases
   udio-latest: udio-v2
@@ -346,10 +357,13 @@ aliases:
   step-3.5-flash-latest: step-3.5-flash
 
   # Meshy aliases
-  meshy-latest: meshy-4
+  meshy-latest: meshy-6
+  meshy-4-latest: meshy-4
 
   # Tripo aliases
-  tripo-latest: tripo-3d
+  tripo-latest: tripo-p1-0
+  tripo-h3-latest: tripo-h3-1
+  tripo-p1-latest: tripo-p1-0
 
   # Cohere reranker aliases
   rerank-latest: rerank-v4-fast
@@ -400,7 +414,8 @@ aliases:
   aurora-latest: aurora
 
   # Stability AI audio aliases
-  stable-audio-latest: stable-audio-2
+  stable-audio-latest: stable-audio-2-5
+  stable-audio-2-latest: stable-audio-2-5
 
   # Fireworks AI aliases
   firefunction-latest: firefunction-v2
@@ -425,3 +440,21 @@ aliases:
   # Mistral dev aliases
   devstral-latest: devstral-small-2505
   codestral-mamba-latest: codestral-mamba-2407
+
+  # Inworld TTS aliases
+  inworld-tts-latest: inworld-tts-1-5-max
+  inworld-tts-mini-latest: inworld-tts-1-5-mini
+  inworld-tts-max-latest: inworld-tts-1-5-max
+
+  # Mistral STT aliases
+  voxtral-small-latest: voxtral-small-24b-2507
+  voxtral-stt-small-latest: voxtral-small-24b-2507
+
+  # Google STT aliases
+  chirp-latest: chirp-3
+
+  # ElevenLabs music aliases
+  elevenlabs-music-latest: elevenlabs-music-1
+
+  # Microsoft TRELLIS aliases
+  trellis-latest: trellis-2-4b

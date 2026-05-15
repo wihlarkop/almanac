@@ -1,0 +1,34 @@
+id: hidream-o1-image
+provider: hidream
+display_name: HiDream O1 Image
+status: active
+release_date: 2026-05-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4096
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [image]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, negative_prompt, width, height, steps, guidance, seed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_image: 0.02
+  pricing_notes: "8B pixel-native Unified Transformer (UiT); no external VAE; native 2K (2048x2048); outscores models 7x its size; #8 on Artificial Analysis Image Arena (highest-ranked open-weight)"
+last_verified: 2026-05-15
+confidence: inferred
+endpoint_family: image_generation
+sources:
+  - url: https://wavespeed.ai/blog/posts/hidream-o1-image-dev-pixel-unified-transformer/
+    last_verified: 2026-05-15

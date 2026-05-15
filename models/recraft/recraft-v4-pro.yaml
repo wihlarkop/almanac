@@ -1,0 +1,36 @@
+id: recraft-v4-pro
+provider: recraft
+display_name: Recraft V4 Pro
+status: active
+release_date: 2026-02-17
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4096
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [image]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, style, width, height, seed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_image: 0.08
+  pricing_notes: "4MP output; highest quality Recraft V4 variant; designed for professional/production use"
+last_verified: 2026-05-15
+confidence: official
+endpoint_family: image_generation
+sources:
+  - url: https://www.recraft.ai/blog/introducing-recraft-v4-design-taste-meets-image-generation
+    last_verified: 2026-05-15
+  - url: https://www.recraft.ai/docs
+    last_verified: 2026-05-15

@@ -1,0 +1,34 @@
+id: inworld-tts-1-5-max
+provider: inworld
+display_name: Inworld TTS 1.5 Max
+status: active
+release_date: 2025-10-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 1
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [audio]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+parameters:
+  supported: [voice, speed, sample_rate]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_million_chars: 30.00
+  pricing_notes: "Highest quality Inworld TTS 1.5 variant; expressive and emotionally nuanced speech; designed for premium interactive experiences"
+last_verified: 2026-05-15
+confidence: official
+endpoint_family: speech
+sources:
+  - url: https://inworld.ai/blog/inworld-tts-1-5
+    last_verified: 2026-05-15

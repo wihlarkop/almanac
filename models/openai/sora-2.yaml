@@ -1,0 +1,36 @@
+id: sora-2
+provider: openai
+display_name: Sora 2
+status: active
+release_date: 2025-12-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4096
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [video]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, duration, resolution, aspect_ratio, n_variants, seed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_second: 0.020
+  pricing_notes: "~$0.020/second. Second-generation Sora; improved motion coherence, longer duration support; up to 20s at 1080p"
+last_verified: 2026-05-15
+confidence: inferred
+endpoint_family: video_generation
+sources:
+  - url: https://platform.openai.com/docs/guides/video
+    last_verified: 2026-05-15
+  - url: https://openai.com/api/pricing
+    last_verified: 2026-05-15

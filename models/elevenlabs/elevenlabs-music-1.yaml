@@ -1,0 +1,36 @@
+id: elevenlabs-music-1
+provider: elevenlabs
+display_name: ElevenLabs Music 1
+status: active
+release_date: 2025-10-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 1024
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [music]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+  music_generation: true
+  instrumental: true
+parameters:
+  supported: [prompt, duration, genre, mood, seed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_second: 0.005
+  pricing_notes: "~$0.005/second. ElevenLabs Music 1 — text-to-music generation; high fidelity audio; multiple genres and moods"
+last_verified: 2026-05-15
+confidence: inferred
+endpoint_family: music_generation
+sources:
+  - url: https://elevenlabs.io/docs/api-reference
+    last_verified: 2026-05-15
