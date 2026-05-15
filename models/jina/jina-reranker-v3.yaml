@@ -1,0 +1,34 @@
+id: jina-reranker-v3
+provider: jina
+display_name: Jina Reranker v3
+status: active
+release_date: 2025-10-03
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 131072
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+  multilingual: true
+parameters:
+  supported: [query, documents, top_n, return_documents]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.05
+  output: 0.00
+  pricing_notes: "0.6B params on Qwen3-0.6B; listwise 'Last but Not Late Interaction' architecture; 131K combined context; up to 64 docs simultaneously; 100+ languages; 10M free tokens on new keys"
+last_verified: 2026-05-15
+confidence: official
+endpoint_family: reranking
+sources:
+  - url: https://jina.ai/models/jina-reranker-v3/
+    last_verified: 2026-05-15

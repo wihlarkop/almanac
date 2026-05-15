@@ -1,0 +1,34 @@
+id: jina-embeddings-v5-text-small
+provider: jina
+display_name: Jina Embeddings v5 Text Small
+status: active
+release_date: 2026-02-18
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 32000
+max_output_tokens: 1024
+modalities:
+  input: [text]
+  output: [embedding]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+  multilingual: true
+parameters:
+  supported: [dimensions, task, embedding_type]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.02
+  output: 0.00
+  pricing_notes: "677M params on Qwen3-0.6B-Base backbone; 1024-dim Matryoshka; MTEB English v2: 71.7"
+last_verified: 2026-05-15
+confidence: official
+endpoint_family: embeddings
+sources:
+  - url: https://jina.ai/news/jina-embeddings-v5-text-distilling-4b-quality-into-sub-1b-multilingual-embeddings/
+    last_verified: 2026-05-15

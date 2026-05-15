@@ -1,0 +1,37 @@
+id: rerank-v4-pro
+provider: cohere
+display_name: Rerank v4 Pro
+status: active
+release_date: 2025-12-16
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 32768
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+  multilingual: true
+parameters:
+  supported: [query, documents, top_n, return_documents, rank_fields]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  search_fee: 0.0025
+  pricing_notes: "$2.50/1K API calls; maximum precision variant; 32K context; SOTA on 10 major business languages"
+last_verified: 2026-05-15
+confidence: official
+endpoint_family: reranking
+sources:
+  - url: https://cohere.com/blog/rerank-4
+    last_verified: 2026-05-15
+  - url: https://cohere.com/pricing
+    last_verified: 2026-05-15

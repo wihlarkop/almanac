@@ -1,0 +1,34 @@
+id: jina-embeddings-v5-omni-nano
+provider: jina
+display_name: Jina Embeddings v5 Omni Nano
+status: active
+release_date: 2026-05-11
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 32000
+max_output_tokens: 768
+modalities:
+  input: [text, image, video, audio]
+  output: [embedding]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+  multilingual: true
+parameters:
+  supported: [dimensions, task, embedding_type]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.01
+  output: 0.00
+  pricing_notes: "<1B params; cost-efficient multimodal embeddings; same modality coverage as omni-small"
+last_verified: 2026-05-15
+confidence: official
+endpoint_family: embeddings
+sources:
+  - url: https://jina.ai/news/jina-embeddings-v5-omni-multimodal-embeddings-for-text-image-audio-and-video/
+    last_verified: 2026-05-15

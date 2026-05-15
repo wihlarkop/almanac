@@ -210,7 +210,9 @@ aliases:
   voyage-large-latest: voyage-4-large
 
   # Jina AI aliases
-  jina-embed-latest: jina-embeddings-v4
+  jina-embed-latest: jina-embeddings-v5-omni-small
+  jina-embed-v5-latest: jina-embeddings-v5-omni-small
+  jina-embed-v4-latest: jina-embeddings-v4
   jina-embed-v3-latest: jina-embeddings-v3
 
   # Cohere embed aliases
@@ -350,16 +352,20 @@ aliases:
   tripo-latest: tripo-3d
 
   # Cohere reranker aliases
-  rerank-latest: rerank-v3.5
-  cohere-rerank-latest: rerank-v3.5
+  rerank-latest: rerank-v4-fast
+  cohere-rerank-latest: rerank-v4-fast
+  cohere-rerank-pro-latest: rerank-v4-pro
 
   # Voyage reranker aliases
-  voyage-rerank-latest: rerank-2
-  voyage-rerank-lite-latest: rerank-lite-2
+  voyage-rerank-latest: rerank-2.5
+  voyage-rerank-lite-latest: rerank-lite-2.5
 
   # Jina reranker aliases
-  jina-reranker-latest: jina-reranker-v2-multilingual
+  jina-reranker-latest: jina-reranker-v3
+  jina-reranker-v3-latest: jina-reranker-v3
   jina-reranker-en-latest: jina-reranker-v2-base-en
+  codestral-embed-latest: codestral-embed-2505
+  nomic-embed-latest: nomic-embed-text-v2
 
   # OpenAI o1-pro aliases
   o1-pro-latest: o1-pro

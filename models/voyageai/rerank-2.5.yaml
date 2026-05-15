@@ -1,0 +1,36 @@
+id: rerank-2.5
+provider: voyageai
+display_name: Rerank 2.5
+status: active
+release_date: 2025-08-11
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 32000
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+  multilingual: true
+parameters:
+  supported: [query, documents, model, top_k, return_documents, truncation, instruction]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.02
+  output: 0.00
+  pricing_notes: "$0.02/1M tokens; first Voyage reranker with instruction-following; 32K context (4x rerank-2); +7.94% over Cohere Rerank v3.5 on 93 datasets; Batch API 33% discount"
+last_verified: 2026-05-15
+confidence: official
+endpoint_family: reranking
+sources:
+  - url: https://blog.voyageai.com/2025/08/11/rerank-2-5/
+    last_verified: 2026-05-15
+  - url: https://docs.voyageai.com/docs/pricing
+    last_verified: 2026-05-15

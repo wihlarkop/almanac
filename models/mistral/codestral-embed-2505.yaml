@@ -1,0 +1,35 @@
+id: codestral-embed-2505
+provider: mistral
+display_name: Codestral Embed 2505
+status: active
+release_date: 2025-05-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 32000
+max_output_tokens: 3072
+modalities:
+  input: [text]
+  output: [embedding]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [input, encoding_format, dimensions]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.15
+  output: 0.00
+  pricing_notes: "Code-specialized embedding; outperforms text-embedding-3-large and Cohere embed-v3 on SWE-Bench Lite and CodeSearchNet; 256-dim int8 variant beats full-precision competitors; 50% Batch API discount"
+last_verified: 2026-05-15
+confidence: official
+endpoint_family: embeddings
+sources:
+  - url: https://mistral.ai/news/codestral-embed
+    last_verified: 2026-05-15
+  - url: https://docs.mistral.ai/getting-started/models/
+    last_verified: 2026-05-15
