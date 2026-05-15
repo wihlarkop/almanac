@@ -29,6 +29,7 @@ pub struct CompareSummary {
     max_output_tokens: u64,
     cheapest_input: Option<CheapestModel>,
     cheapest_output: Option<CheapestOutputModel>,
+    pricing_breakdown: Vec<PricingBreakdownEntry>,
 }
 
 #[derive(Serialize, utoipa::ToSchema)]
@@ -45,6 +46,27 @@ pub struct CheapestOutputModel {
     provider: String,
     output_price: f64,
     currency: String,
+}
+
+#[derive(Serialize, utoipa::ToSchema)]
+pub struct PricingBreakdownEntry {
+    model_id: String,
+    provider: String,
+    currency: Option<String>,
+    input: Option<f64>,
+    output: Option<f64>,
+    cached_input: Option<f64>,
+    batch_input: Option<f64>,
+    batch_output: Option<f64>,
+    request_fee: Option<f64>,
+    search_fee: Option<f64>,
+    reasoning: Option<f64>,
+    per_image: Option<f64>,
+    per_second: Option<f64>,
+    per_minute: Option<f64>,
+    per_million_chars: Option<f64>,
+    per_page: Option<f64>,
+    comparable_cost: Option<f64>,
 }
 
 #[utoipa::path(
@@ -161,12 +183,72 @@ pub async fn compare(
                 output_price: pricing.output,
                 currency: pricing.currency.clone(),
             }),
+        pricing_breakdown: build_pricing_breakdown(&models),
     };
 
     Ok(Json(ApiResponse::ok_with_context(
         CompareResponse { models, summary },
         &context,
     )))
+}
+
+fn comparable_cost(pricing: &crate::catalog::Pricing) -> Option<f64> {
+    if pricing.input > 0.0 {
+        return Some(pricing.input);
+    }
+    if let Some(pmc) = pricing.per_million_chars {
+        return Some(pmc * 5.0);
+    }
+    if let Some(pm) = pricing.per_minute {
+        return Some(pm * 833.0);
+    }
+    None
+}
+
+fn build_pricing_breakdown(models: &[crate::catalog::Model]) -> Vec<PricingBreakdownEntry> {
+    models
+        .iter()
+        .map(|model| match &model.pricing {
+            None => PricingBreakdownEntry {
+                model_id: model.id.clone(),
+                provider: model.provider.clone(),
+                currency: None,
+                input: None,
+                output: None,
+                cached_input: None,
+                batch_input: None,
+                batch_output: None,
+                request_fee: None,
+                search_fee: None,
+                reasoning: None,
+                per_image: None,
+                per_second: None,
+                per_minute: None,
+                per_million_chars: None,
+                per_page: None,
+                comparable_cost: None,
+            },
+            Some(p) => PricingBreakdownEntry {
+                model_id: model.id.clone(),
+                provider: model.provider.clone(),
+                currency: Some(p.currency.clone()),
+                input: Some(p.input),
+                output: Some(p.output),
+                cached_input: p.cached_input,
+                batch_input: p.batch_input,
+                batch_output: p.batch_output,
+                request_fee: p.request_fee,
+                search_fee: p.search_fee,
+                reasoning: p.reasoning,
+                per_image: p.per_image,
+                per_second: p.per_second,
+                per_minute: p.per_minute,
+                per_million_chars: p.per_million_chars,
+                per_page: p.per_page,
+                comparable_cost: comparable_cost(p),
+            },
+        })
+        .collect()
 }
 
 fn parse_model_refs(raw: &str) -> Result<Vec<(String, String)>, ApiError> {

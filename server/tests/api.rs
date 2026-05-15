@@ -1091,6 +1091,45 @@ async fn compare_summary_includes_cheapest_output() {
 }
 
 #[tokio::test]
+async fn compare_summary_includes_pricing_breakdown() {
+    let json = get_json("/api/v1/compare?models=openai/gpt-4o,anthropic/claude-opus-4-7").await;
+    assert_success_envelope(&json);
+
+    let breakdown = json["data"]["summary"]["pricing_breakdown"]
+        .as_array()
+        .expect("pricing_breakdown should be an array");
+    assert_eq!(breakdown.len(), 2, "one entry per requested model");
+
+    let gpt = breakdown
+        .iter()
+        .find(|e| e["model_id"] == "gpt-4o")
+        .unwrap();
+    assert_eq!(gpt["provider"], "openai");
+    assert!(gpt["input"].is_number());
+    assert!(gpt["output"].is_number());
+    assert!(gpt["currency"].is_string());
+    assert!(gpt["comparable_cost"].is_number());
+}
+
+#[tokio::test]
+async fn compare_pricing_breakdown_comparable_cost_null_for_per_second_model() {
+    let json = get_json("/api/v1/compare?models=openai/gpt-4o,openai/sora-2").await;
+    assert_success_envelope(&json);
+
+    let breakdown = json["data"]["summary"]["pricing_breakdown"]
+        .as_array()
+        .expect("pricing_breakdown should be an array");
+    assert_eq!(breakdown.len(), 2);
+
+    let sora = breakdown
+        .iter()
+        .find(|e| e["model_id"] == "sora-2")
+        .unwrap();
+    assert!(sora["comparable_cost"].is_null());
+    assert!(sora["per_second"].is_number());
+}
+
+#[tokio::test]
 async fn compare_requires_two_unique_models() {
     for uri in [
         "/api/v1/compare",
