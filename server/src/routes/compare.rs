@@ -1,8 +1,5 @@
 use crate::{
-    catalog::Model,
-    error::ApiError,
-    request::RequestContext,
-    response::ApiResponse,
+    catalog::Model, error::ApiError, request::RequestContext, response::ApiResponse,
     state::AppState,
 };
 use axum::{
@@ -137,9 +134,7 @@ pub async fn compare(
             .unwrap_or(0),
         cheapest_input: models
             .iter()
-            .filter_map(|model| {
-                model.pricing.as_ref().map(|pricing| (model, pricing))
-            })
+            .filter_map(|model| model.pricing.as_ref().map(|pricing| (model, pricing)))
             .min_by(|(_, left), (_, right)| left.input.total_cmp(&right.input))
             .map(|(model, pricing)| CheapestModel {
                 model_id: model.id.clone(),
