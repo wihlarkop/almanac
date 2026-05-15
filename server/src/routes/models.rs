@@ -41,6 +41,8 @@ pub struct ModelFilter {
     pub(crate) min_context: Option<u64>,
     #[param(example = 1.0)]
     pub(crate) max_input_price: Option<f64>,
+    #[param(example = "chat_completions")]
+    pub(crate) endpoint_family: Option<String>,
 }
 
 impl ModelFilter {
@@ -78,6 +80,10 @@ impl ModelFilter {
 
     pub(crate) fn offset(&self) -> Option<usize> {
         self.offset
+    }
+
+    pub(crate) fn endpoint_family(&self) -> Option<&str> {
+        non_empty(self.endpoint_family.as_deref())
     }
 }
 
@@ -310,6 +316,11 @@ pub(crate) fn model_matches_filter(model: &Model, filter: &ModelFilter) -> bool 
             .map(|pricing| pricing.input)
             .unwrap_or(f64::MAX)
             > max_input_price
+    {
+        return false;
+    }
+    if let Some(ef) = filter.endpoint_family()
+        && model.endpoint_family.as_str() != ef
     {
         return false;
     }

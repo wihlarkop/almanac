@@ -2,7 +2,7 @@ use crate::{
     error::ApiError,
     request::{
         MAX_REQUEST_BODY_BYTES, attach_request_context, enforce_request_timeout,
-        reject_oversized_payload,
+        handle_method_not_allowed, reject_oversized_payload,
     },
     state::AppState,
 };
@@ -62,16 +62,20 @@ pub fn router(state: Arc<RwLock<AppState>>) -> Router {
         r = r.layer(middleware::from_fn(crate::metrics::record_request));
     }
 
-    r.layer(middleware::from_fn(attach_request_context))
-        .layer(middleware::from_fn(enforce_request_timeout))
-        .layer(RequestBodyLimitLayer::new(MAX_REQUEST_BODY_BYTES as usize))
+    // Layer order: last .layer() is outermost (runs first on request, last on response).
+    // attach_request_context must be outermost so every response — including those
+    // short-circuited by inner middleware — gets an x-request-id header.
+    r.layer(middleware::from_fn(reject_oversized_payload))
         .layer(
             CorsLayer::new()
                 .allow_origin(Any)
                 .allow_methods([Method::GET, Method::POST])
                 .allow_headers([header::CONTENT_TYPE, header::IF_NONE_MATCH]),
         )
-        .layer(middleware::from_fn(reject_oversized_payload))
+        .layer(RequestBodyLimitLayer::new(MAX_REQUEST_BODY_BYTES as usize))
+        .layer(middleware::from_fn(enforce_request_timeout))
+        .layer(middleware::map_response(handle_method_not_allowed))
+        .layer(middleware::from_fn(attach_request_context))
 }
 
 async fn not_found() -> impl IntoResponse {
