@@ -332,7 +332,9 @@ pub(crate) fn model_matches_filter(model: &Model, filter: &ModelFilter) -> bool 
     }
     if let Some(q) = filter.query() {
         let q = q.to_lowercase();
-        if !model.display_name.to_lowercase().contains(&q) && !model.id.to_lowercase().contains(&q) {
+        let name_match = model.display_name.to_lowercase().contains(&q);
+        let id_match = model.id.to_lowercase().contains(&q);
+        if !name_match && !id_match {
             return false;
         }
     }
