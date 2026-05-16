@@ -48,8 +48,11 @@ pub struct ModelFilter {
 }
 
 impl ModelFilter {
-    pub(crate) fn provider(&self) -> Option<&str> {
-        non_empty(self.provider.as_deref())
+    pub(crate) fn providers(&self) -> Vec<&str> {
+        match non_empty(self.provider.as_deref()) {
+            None => vec![],
+            Some(s) => s.split(',').map(str::trim).filter(|s| !s.is_empty()).collect(),
+        }
     }
 
     pub(crate) fn status(&self) -> Option<&str> {
@@ -269,9 +272,8 @@ fn non_empty(value: Option<&str>) -> Option<&str> {
 }
 
 pub(crate) fn model_matches_filter(model: &Model, filter: &ModelFilter) -> bool {
-    if let Some(provider) = filter.provider()
-        && model.provider != provider
-    {
+    let providers = filter.providers();
+    if !providers.is_empty() && !providers.contains(&model.provider.as_str()) {
         return false;
     }
     if let Some(status) = filter.status()
