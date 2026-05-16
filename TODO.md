@@ -23,6 +23,6 @@ These items are intentionally deferred from the first production-readiness batch
 - [ ] Add CI step to auto-regenerate clients on OpenAPI schema changes
 
 ## Website / UI
-- [ ] Build a static frontend (Next.js or Astro) for browsing, filtering, and comparing models visually
-- [ ] Deploy to a subdomain (e.g. almanac.dev or via Cloudflare Pages)
-- [ ] Add model detail pages, provider pages, and a pricing comparison table
+- [x] Build a static frontend (Next.js or Astro) for browsing, filtering, and comparing models visually
+- [x] Deploy to a subdomain (e.g. almanac.dev or via Cloudflare Pages)
+- [x] Add model detail pages, provider pages, and a pricing comparison table
