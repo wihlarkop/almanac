@@ -51,7 +51,11 @@ impl ModelFilter {
     pub(crate) fn providers(&self) -> Vec<&str> {
         match non_empty(self.provider.as_deref()) {
             None => vec![],
-            Some(s) => s.split(',').map(str::trim).filter(|s| !s.is_empty()).collect(),
+            Some(s) => s
+                .split(',')
+                .map(str::trim)
+                .filter(|s| !s.is_empty())
+                .collect(),
         }
     }
 
