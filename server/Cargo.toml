@@ -47,6 +47,9 @@ prometheus = { workspace = true, optional = true }
 hex.workspace = true
 sha2.workspace = true
 
+# Redis client
+redis.workspace = true
+
 # Fuzzy search
 strsim.workspace = true
 

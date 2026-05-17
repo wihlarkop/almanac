@@ -53,6 +53,9 @@ jsonschema = "0.46.5"
 hex = "0.4.3"
 sha2 = "0.11.0"
 
+# Redis client
+redis = { version = "=1.2.1", features = ["tokio-native-tls-comp", "connection-manager"] }
+
 # Fuzzy search
 strsim = "0.11.1"
 
