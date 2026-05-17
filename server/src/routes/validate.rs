@@ -55,6 +55,10 @@ pub struct ValidationIssue {
 #[utoipa::path(
     post,
     path = "/api/v1/validate",
+    tag = "Validation",
+    operation_id = "validate_model",
+    summary = "Validate model",
+    description = "Validates a model id, provider, parameters, and modalities.",
     request_body = ValidateRequest,
     responses(
         (
@@ -79,8 +83,51 @@ pub struct ValidationIssue {
                 ))
             )
         ),
-        (status = 400, description = "Invalid JSON body", body = ApiResponse<crate::response::EmptyData>),
-        (status = 422, description = "Validation failed", body = ApiResponse<ValidateResponse>)
+        (
+            status = 400,
+            description = "Invalid JSON body",
+            body = ApiResponse<crate::response::EmptyData>,
+            examples(
+                ("error" = (
+                    summary = "Bad request",
+                    value = json!({
+                        "success": false,
+                        "message": "Failed to parse the request body as JSON: missing field `model`",
+                        "data": null,
+                        "meta": { "timestamp": "2026-05-03T00:00:00Z" },
+                        "error": { "code": "BAD_REQUEST" }
+                    })
+                ))
+            )
+        ),
+        (
+            status = 422,
+            description = "Validation failed",
+            body = ApiResponse<ValidateResponse>,
+            examples(
+                ("invalid" = (
+                    summary = "Unknown model",
+                    value = json!({
+                        "success": true,
+                        "message": "OK",
+                        "data": {
+                            "valid": false,
+                            "canonical_id": null,
+                            "errors": [
+                                {
+                                    "code": "MODEL_NOT_FOUND",
+                                    "message": "'gpt-99' is not a known model id or alias",
+                                    "suggestions": ["gpt-4o", "gpt-4o-mini"]
+                                }
+                            ],
+                            "warnings": []
+                        },
+                        "meta": { "timestamp": "2026-05-03T00:00:00Z" },
+                        "error": null
+                    })
+                ))
+            )
+        )
     )
 )]
 pub async fn validate(
