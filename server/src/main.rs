@@ -1,5 +1,5 @@
 use almanac_server::config::ServerConfig;
-use almanac_server::request::{RateLimiter, enforce_rate_limit};
+use almanac_server::request::{MemoryRateLimiter, RateLimiter, enforce_rate_limit};
 use anyhow::{Context, Result};
 use axum::middleware;
 use std::{net::SocketAddr, sync::Arc};
@@ -88,7 +88,7 @@ async fn main() -> Result<()> {
     let app = match rate_limit_rps() {
         Some(rps) => {
             tracing::info!(rps, "rate limiting enabled");
-            let limiter = Arc::new(RateLimiter::new(rps));
+            let limiter = Arc::new(RateLimiter::Memory(MemoryRateLimiter::new(rps)));
             app.layer(middleware::from_fn(move |req, next| {
                 let lim = Arc::clone(&limiter);
                 async move { enforce_rate_limit(lim, req, next).await }
