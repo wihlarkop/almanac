@@ -31,3 +31,5 @@ __pycache__/
 docs/superpowers/
 *.pdf
 .claude/
+.playwright-mcp/
+bacon.toml
