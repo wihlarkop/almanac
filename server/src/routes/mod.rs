@@ -75,6 +75,8 @@ pub fn router(state: Arc<RwLock<AppState>>, cache: Arc<crate::cache::Cache>) -> 
     // Layer order: last .layer() is outermost (runs first on request, last on response).
     // attach_request_context must be outermost so every response — including those
     // short-circuited by inner middleware — gets an x-request-id header.
+    // cache_request must be innermost (first .layer()) so it sees the raw uncompressed
+    // response from the handler — before CompressionLayer gzips the body.
     r.layer(CompressionLayer::new())
         .layer(middleware::from_fn(reject_oversized_payload))
         .layer(
@@ -86,6 +88,7 @@ pub fn router(state: Arc<RwLock<AppState>>, cache: Arc<crate::cache::Cache>) -> 
         .layer(RequestBodyLimitLayer::new(MAX_REQUEST_BODY_BYTES as usize))
         .layer(middleware::from_fn(enforce_request_timeout))
         .layer(middleware::map_response(handle_method_not_allowed))
+        .layer(middleware::from_fn(attach_request_context))
         .layer(middleware::from_fn({
             move |req: axum::extract::Request, next: middleware::Next| {
                 let c = Arc::clone(&cache);
@@ -93,7 +96,6 @@ pub fn router(state: Arc<RwLock<AppState>>, cache: Arc<crate::cache::Cache>) -> 
                 async move { crate::cache::cache_request(c, s, req, next).await }
             }
         }))
-        .layer(middleware::from_fn(attach_request_context))
 }
 
 async fn not_found() -> impl IntoResponse {
