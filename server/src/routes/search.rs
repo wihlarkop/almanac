@@ -22,28 +22,40 @@ const DEFAULT_LIMIT: usize = 20;
 
 #[derive(Deserialize, utoipa::IntoParams)]
 pub struct SearchQuery {
+    /// Fuzzy search query matched against model id, display name, and aliases
     #[param(example = "gpt")]
     q: Option<String>,
+    /// Filter by provider id (comma-separated for multiple)
     #[param(example = "openai")]
     provider: Option<String>,
+    /// Filter by lifecycle status: active, deprecating, deprecated, retired
     #[param(example = "active")]
     status: Option<String>,
+    /// Filter by capability key (comma-separated, e.g. vision,tools)
     #[param(example = "vision")]
     capability: Option<String>,
+    /// Maximum number of results to return
     #[param(example = 5)]
     limit: Option<usize>,
+    /// Number of results to skip for pagination
     #[param(example = 0)]
     offset: Option<usize>,
+    /// Sort field when q is absent: provider, id, status, context_window, max_output_tokens
     #[param(example = "context_window")]
     sort: Option<String>,
+    /// Sort direction: asc or desc
     #[param(example = "desc")]
     order: Option<String>,
+    /// Filter by required input modality (e.g. image, audio)
     #[param(example = "image")]
     modality_input: Option<String>,
+    /// Filter by required output modality
     #[param(example = "text")]
     modality_output: Option<String>,
+    /// Minimum context window size in tokens
     #[param(example = 100000)]
     min_context: Option<u64>,
+    /// Maximum input price per million tokens in USD
     #[param(example = 1.0)]
     max_input_price: Option<f64>,
 }
@@ -83,6 +95,10 @@ pub struct SearchResult {
 #[utoipa::path(
     get,
     path = "/api/v1/search",
+    tag = "Discovery",
+    operation_id = "search_models",
+    summary = "Search models",
+    description = "Fuzzy + filter search returning ranked results with match metadata.",
     params(SearchQuery),
     responses(
         (
@@ -129,7 +145,23 @@ pub struct SearchResult {
                 ))
             )
         ),
-        (status = 400, description = "Invalid search query", body = ApiResponse<crate::response::EmptyData>)
+        (
+            status = 400,
+            description = "Invalid search query",
+            body = ApiResponse<crate::response::EmptyData>,
+            examples(
+                ("error" = (
+                    summary = "Bad request",
+                    value = json!({
+                        "success": false,
+                        "message": "Failed to deserialize query string: invalid digit found in string",
+                        "data": null,
+                        "meta": { "timestamp": "2026-05-03T00:00:00Z" },
+                        "error": { "code": "BAD_REQUEST" }
+                    })
+                ))
+            )
+        )
     )
 )]
 pub async fn search(
