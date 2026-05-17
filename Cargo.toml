@@ -54,7 +54,8 @@ hex = "0.4.3"
 sha2 = "0.11.0"
 
 # Redis client
-redis = { version = "=1.2.1", features = ["tokio-native-tls-comp", "connection-manager"] }
+redis = { version = "=1.2.1", features = ["tokio-rustls-comp", "connection-manager"] }
+rustls = { version = "0.23", features = ["ring"] }
 
 # Config / env loading
 dotenvy = "0.15.7"
