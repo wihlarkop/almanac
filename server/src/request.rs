@@ -187,13 +187,13 @@ pub struct RedisRateLimiter {
 }
 
 impl RedisRateLimiter {
-    pub async fn new(
-        client: &redis::Client,
-        limit: u32,
-        window_secs: u64,
-    ) -> anyhow::Result<Self> {
+    pub async fn new(client: &redis::Client, limit: u32, window_secs: u64) -> anyhow::Result<Self> {
         let conn = client.get_connection_manager().await?;
-        Ok(Self { conn, limit, window_secs })
+        Ok(Self {
+            conn,
+            limit,
+            window_secs,
+        })
     }
 
     pub async fn check(&self, ip: IpAddr) -> RateLimitResult {

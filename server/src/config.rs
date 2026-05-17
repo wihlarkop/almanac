@@ -12,7 +12,11 @@ pub enum RateLimitBackend {
 impl FromStr for RateLimitBackend {
     type Err = std::convert::Infallible;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(if s == "redis" { Self::Redis } else { Self::Memory })
+        Ok(if s == "redis" {
+            Self::Redis
+        } else {
+            Self::Memory
+        })
     }
 }
 
@@ -139,11 +143,13 @@ mod tests {
     fn reads_catalog_scope_include_providers() {
         let mut config = cfg(".", 8080);
         config.catalog_include_providers = Some("openai".into());
-        assert!(config
-            .catalog_scope()
-            .unwrap()
-            .include_providers
-            .contains("openai"));
+        assert!(
+            config
+                .catalog_scope()
+                .unwrap()
+                .include_providers
+                .contains("openai")
+        );
     }
 
     #[test]
@@ -172,7 +178,10 @@ mod tests {
             cache_backend: CacheBackendKind::Redis,
             cache_ttl_secs: 600,
         };
-        assert_eq!(config.redis_url.as_deref(), Some("rediss://example.upstash.io"));
+        assert_eq!(
+            config.redis_url.as_deref(),
+            Some("rediss://example.upstash.io")
+        );
         assert_eq!(config.rate_limit_backend, RateLimitBackend::Redis);
         assert_eq!(config.rate_limit_rps, Some(10));
         assert_eq!(config.cache_backend, CacheBackendKind::Redis);

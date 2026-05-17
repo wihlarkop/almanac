@@ -178,9 +178,7 @@ pub async fn cache_request(
     let is_get = request.method() == Method::GET;
     let path = request.uri().path().to_string();
     // Cache all /api/v1/ GET routes except the health liveness endpoint.
-    let is_cacheable = is_get
-        && path.starts_with("/api/v1/")
-        && path != "/api/v1/health";
+    let is_cacheable = is_get && path.starts_with("/api/v1/") && path != "/api/v1/health";
 
     if !is_cacheable {
         return next.run(request).await;
@@ -216,10 +214,16 @@ pub async fn cache_request(
                     .headers
                     .iter()
                     .filter_map(|(name, value)| {
-                        value.to_str().ok().map(|v| (name.to_string(), v.to_string()))
+                        value
+                            .to_str()
+                            .ok()
+                            .map(|v| (name.to_string(), v.to_string()))
                     })
                     .collect();
-                let entry = CachedEntry { headers, body: body_str };
+                let entry = CachedEntry {
+                    headers,
+                    body: body_str,
+                };
                 cache.set(&key, &entry, cache.ttl()).await;
 
                 let mut rebuilt = Response::from_parts(parts, Body::from(bytes));
@@ -247,7 +251,10 @@ mod tests {
         cache
             .set(
                 "k",
-                &CachedEntry { headers: vec![], body: "v".into() },
+                &CachedEntry {
+                    headers: vec![],
+                    body: "v".into(),
+                },
                 Duration::from_secs(60),
             )
             .await;
@@ -276,7 +283,10 @@ mod tests {
     #[tokio::test]
     async fn memory_entry_expires() {
         let cache = Cache::memory(Duration::from_secs(60));
-        let entry = CachedEntry { headers: vec![], body: "val".into() };
+        let entry = CachedEntry {
+            headers: vec![],
+            body: "val".into(),
+        };
         cache.set("k", &entry, Duration::from_millis(1)).await;
         tokio::time::sleep(Duration::from_millis(10)).await;
         assert!(cache.get("k").await.is_none());
