@@ -11,21 +11,25 @@ use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitEx
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    dotenvy::dotenv().ok();
     init_tracing();
 
     #[cfg(feature = "metrics")]
     almanac_server::metrics::init();
 
     let config = ServerConfig::from_env()?;
+    let bind_addr = config.bind_addr();
+    let catalog_scope = config.catalog_scope()?;
+    let data_dir = config.data_dir_path();
+
     tracing::info!(
-        bind_addr = %config.bind_addr,
-        data_dir = %config.data_dir.display(),
+        bind_addr = %bind_addr,
+        data_dir = %data_dir.display(),
         "starting almanac server"
     );
 
-    let app_state =
-        almanac_server::state::load_state_with_scope(&config.data_dir, &config.catalog_scope)
-            .with_context(|| format!("loading catalog from {}", config.data_dir.display()))?;
+    let app_state = almanac_server::state::load_state_with_scope(&data_dir, &catalog_scope)
+        .with_context(|| format!("loading catalog from {}", data_dir.display()))?;
     tracing::info!(
         providers = app_state.providers.len(),
         models = app_state.models.len(),
@@ -65,8 +69,8 @@ async fn main() -> Result<()> {
     #[cfg(unix)]
     {
         let shared_reload = Arc::clone(&shared);
-        let data_dir_reload = config.data_dir.clone();
-        let catalog_scope_reload = config.catalog_scope.clone();
+        let data_dir_reload = data_dir.clone();
+        let catalog_scope_reload = catalog_scope.clone();
         tokio::spawn(async move {
             use tokio::signal::unix::{SignalKind, signal};
             let mut stream = match signal(SignalKind::hangup()) {
@@ -123,10 +127,10 @@ async fn main() -> Result<()> {
         }
     };
 
-    let listener = tokio::net::TcpListener::bind(config.bind_addr)
+    let listener = tokio::net::TcpListener::bind(bind_addr)
         .await
-        .with_context(|| format!("binding listener on {}", config.bind_addr))?;
-    tracing::info!(bind_addr = %config.bind_addr, "server listening");
+        .with_context(|| format!("binding listener on {}", bind_addr))?;
+    tracing::info!(bind_addr = %bind_addr, "server listening");
     axum::serve(
         listener,
         app.into_make_service_with_connect_info::<SocketAddr>(),

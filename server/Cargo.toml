@@ -50,6 +50,10 @@ sha2.workspace = true
 # Redis client
 redis.workspace = true
 
+# Config / env loading
+dotenvy.workspace = true
+envconfig.workspace = true
+
 # Fuzzy search
 strsim.workspace = true
 
