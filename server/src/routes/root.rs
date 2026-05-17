@@ -16,6 +16,10 @@ pub struct RootData {
 #[utoipa::path(
     get,
     path = "/",
+    tag = "Root",
+    operation_id = "root",
+    summary = "Landing",
+    description = "Returns API metadata and documentation links.",
     responses((
         status = 200,
         description = "API landing metadata",
