@@ -209,7 +209,7 @@ async fn build_rate_limiter(
 
 fn init_tracing() {
     let filter = EnvFilter::try_from_default_env()
-        .unwrap_or_else(|_| EnvFilter::new("almanac_server=info,tower_http=warn,server=info"));
+        .unwrap_or_else(|_| EnvFilter::new("almanac_server=info,tower_http=warn"));
 
     let json = std::env::var("LOG_FORMAT").as_deref() == Ok("json");
 

@@ -1,11 +1,21 @@
+use crate::state::AppState;
+use axum::{
+    body::Body,
+    extract::Request,
+    http::{HeaderName, HeaderValue, Method, StatusCode},
+    middleware::Next,
+    response::Response,
+};
 use hex;
 use redis::aio::ConnectionManager;
 use sha2::{Digest, Sha256};
 use std::{
     collections::HashMap,
+    str::FromStr,
     sync::{Arc, Mutex},
     time::{Duration, Instant},
 };
+use tokio::sync::RwLock;
 
 /// A cached HTTP response: headers and serialized JSON body.
 #[derive(Clone, serde::Serialize, serde::Deserialize)]
@@ -156,17 +166,6 @@ pub fn build_cache_key(etag: &str, path: &str, query: &str) -> String {
 
 // --- Cache middleware ---
 
-use crate::state::AppState;
-use axum::{
-    body::Body,
-    extract::Request,
-    http::{HeaderName, HeaderValue, Method, StatusCode},
-    middleware::Next,
-    response::Response,
-};
-use std::str::FromStr;
-use tokio::sync::RwLock;
-
 /// Tower middleware: intercepts cacheable GET requests, returns cached responses on HIT,
 /// stores new responses on MISS. Non-cacheable requests pass through unchanged.
 pub async fn cache_request(
@@ -189,6 +188,7 @@ pub async fn cache_request(
     let key = build_cache_key(&etag, &path, &query);
 
     if let Some(entry) = cache.get(&key).await {
+        tracing::debug!(key = %key, "cache HIT");
         let mut response = Response::new(Body::from(entry.body));
         *response.status_mut() = StatusCode::OK;
         for (name, value) in &entry.headers {
@@ -203,6 +203,7 @@ pub async fn cache_request(
         return response;
     }
 
+    tracing::debug!(key = %key, "cache MISS");
     let response = next.run(request).await;
 
     if response.status() == StatusCode::OK {
