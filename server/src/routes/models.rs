@@ -72,8 +72,15 @@ impl ModelFilter {
         }
     }
 
-    pub(crate) fn status(&self) -> Option<&str> {
-        non_empty(self.status.as_deref())
+    pub(crate) fn statuses(&self) -> Vec<&str> {
+        match non_empty(self.status.as_deref()) {
+            None => vec![],
+            Some(s) => s
+                .split(',')
+                .map(str::trim)
+                .filter(|s| !s.is_empty())
+                .collect(),
+        }
     }
 
     pub(crate) fn capability(&self) -> Option<&str> {
@@ -333,9 +340,8 @@ pub(crate) fn model_matches_filter(model: &Model, filter: &ModelFilter) -> bool 
     if !providers.is_empty() && !providers.contains(&model.provider.as_str()) {
         return false;
     }
-    if let Some(status) = filter.status()
-        && model.status.as_str() != status
-    {
+    let statuses = filter.statuses();
+    if !statuses.is_empty() && !statuses.contains(&model.status.as_str()) {
         return false;
     }
     if let Some(caps) = filter.capability() {
@@ -408,6 +414,16 @@ pub(crate) fn sort_models(models: &mut [Model], sort: Option<&str>, order: Optio
         let ordering = match sort {
             "context_window" => a.context_window.cmp(&b.context_window),
             "max_output_tokens" => a.max_output_tokens.cmp(&b.max_output_tokens),
+            "input_price" => {
+                let a_p = a.pricing.as_ref().map(|p| p.input).unwrap_or(f64::MAX);
+                let b_p = b.pricing.as_ref().map(|p| p.input).unwrap_or(f64::MAX);
+                a_p.partial_cmp(&b_p).unwrap_or(std::cmp::Ordering::Equal)
+            }
+            "output_price" => {
+                let a_p = a.pricing.as_ref().map(|p| p.output).unwrap_or(f64::MAX);
+                let b_p = b.pricing.as_ref().map(|p| p.output).unwrap_or(f64::MAX);
+                a_p.partial_cmp(&b_p).unwrap_or(std::cmp::Ordering::Equal)
+            }
             "status" => a.status.as_str().cmp(b.status.as_str()),
             "id" => a.id.cmp(&b.id),
             "provider" => a.provider.cmp(&b.provider),
