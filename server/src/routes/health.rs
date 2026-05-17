@@ -17,6 +17,10 @@ pub struct HealthData {
 #[utoipa::path(
     get,
     path = "/api/v1/health",
+    tag = "Observability",
+    operation_id = "health",
+    summary = "Server health",
+    description = "Returns server status and loaded catalog counts.",
     responses((
         status = 200,
         description = "Server health status",

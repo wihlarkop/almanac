@@ -17,6 +17,7 @@ use tokio::sync::RwLock;
 
 #[derive(Deserialize, utoipa::IntoParams)]
 pub struct CompareQuery {
+    /// Comma-separated provider/id pairs (2–5 models, e.g. openai/gpt-4o,anthropic/claude-opus-4-7)
     #[param(example = "openai/gpt-4o,anthropic/claude-opus-4-7")]
     models: String,
 }
@@ -76,6 +77,10 @@ pub struct PricingBreakdownEntry {
 #[utoipa::path(
     get,
     path = "/api/v1/compare",
+    tag = "Catalog",
+    operation_id = "compare_models",
+    summary = "Compare models",
+    description = "Side-by-side comparison of 2–5 models with pricing breakdown.",
     params(CompareQuery),
     responses(
         (
@@ -141,8 +146,40 @@ pub struct PricingBreakdownEntry {
                 ))
             )
         ),
-        (status = 400, description = "Invalid compare query", body = ApiResponse<crate::response::EmptyData>),
-        (status = 404, description = "Model not found", body = ApiResponse<crate::response::EmptyData>)
+        (
+            status = 400,
+            description = "Invalid compare query",
+            body = ApiResponse<crate::response::EmptyData>,
+            examples(
+                ("error" = (
+                    summary = "Bad request",
+                    value = json!({
+                        "success": false,
+                        "message": "models must use provider/id references",
+                        "data": null,
+                        "meta": { "timestamp": "2026-05-03T00:00:00Z" },
+                        "error": { "code": "BAD_REQUEST" }
+                    })
+                ))
+            )
+        ),
+        (
+            status = 404,
+            description = "Model not found",
+            body = ApiResponse<crate::response::EmptyData>,
+            examples(
+                ("error" = (
+                    summary = "Model not found",
+                    value = json!({
+                        "success": false,
+                        "message": "model not found",
+                        "data": null,
+                        "meta": { "timestamp": "2026-05-03T00:00:00Z" },
+                        "error": { "code": "MODEL_NOT_FOUND", "details": { "provider": "openai", "id": "gpt-99" } }
+                    })
+                ))
+            )
+        )
     )
 )]
 pub async fn compare(

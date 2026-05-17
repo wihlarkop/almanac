@@ -18,8 +18,10 @@ const DEFAULT_LIMIT: usize = 100;
 
 #[derive(Deserialize, utoipa::IntoParams)]
 pub struct AliasFilter {
+    /// Maximum number of results to return
     #[param(example = 100)]
     pub limit: Option<usize>,
+    /// Number of results to skip for pagination
     #[param(example = 0)]
     pub offset: Option<usize>,
 }
@@ -34,6 +36,10 @@ pub struct AliasMapping {
 #[utoipa::path(
     get,
     path = "/api/v1/aliases",
+    tag = "Catalog",
+    operation_id = "list_aliases",
+    summary = "List aliases",
+    description = "Paginated list of model alias mappings with ETag support.",
     params(AliasFilter),
     responses(
         (
@@ -108,7 +114,11 @@ pub async fn list_aliases(
 #[utoipa::path(
     get,
     path = "/api/v1/aliases/{alias}",
-    params(("alias" = String, Path, description = "Alias", example = "claude-opus-4")),
+    tag = "Catalog",
+    operation_id = "get_alias",
+    summary = "Get alias",
+    description = "Resolves a single alias to its canonical model id.",
+    params(("alias" = String, Path, description = "Alias string", example = "claude-opus-4")),
     responses(
         (
             status = 200,
@@ -132,7 +142,23 @@ pub async fn list_aliases(
             )
         ),
         (status = 304, description = "Catalog not modified"),
-        (status = 404, description = "Alias not found", body = ApiResponse<crate::response::EmptyData>)
+        (
+            status = 404,
+            description = "Alias not found",
+            body = ApiResponse<crate::response::EmptyData>,
+            examples(
+                ("error" = (
+                    summary = "Alias not found",
+                    value = json!({
+                        "success": false,
+                        "message": "alias not found",
+                        "data": null,
+                        "meta": { "timestamp": "2026-05-03T00:00:00Z" },
+                        "error": { "code": "ALIAS_NOT_FOUND", "details": { "alias": "unknown-alias" } }
+                    })
+                ))
+            )
+        )
     )
 )]
 pub async fn get_alias(

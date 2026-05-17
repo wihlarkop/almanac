@@ -19,30 +19,43 @@ const DEFAULT_LIMIT: usize = 20;
 
 #[derive(Deserialize, utoipa::IntoParams)]
 pub struct ModelFilter {
+    /// Filter by provider id (comma-separated for multiple)
     #[param(example = "openai")]
     pub(crate) provider: Option<String>,
+    /// Filter by lifecycle status: active, deprecating, deprecated, retired
     #[param(example = "active")]
     pub(crate) status: Option<String>,
+    /// Filter by capability key (comma-separated, e.g. vision,tools)
     #[param(example = "vision")]
     pub(crate) capability: Option<String>,
+    /// Maximum number of results to return
     #[param(example = 20)]
     pub(crate) limit: Option<usize>,
+    /// Number of results to skip for pagination
     #[param(example = 0)]
     pub(crate) offset: Option<usize>,
+    /// Sort field: provider, id, status, context_window, max_output_tokens
     #[param(example = "context_window")]
     pub(crate) sort: Option<String>,
+    /// Sort direction: asc or desc
     #[param(example = "desc")]
     pub(crate) order: Option<String>,
+    /// Filter by required input modality (e.g. image, audio)
     #[param(example = "image")]
     pub(crate) modality_input: Option<String>,
+    /// Filter by required output modality
     #[param(example = "text")]
     pub(crate) modality_output: Option<String>,
+    /// Minimum context window size in tokens
     #[param(example = 100000)]
     pub(crate) min_context: Option<u64>,
+    /// Maximum input price per million tokens in USD
     #[param(example = 1.0)]
     pub(crate) max_input_price: Option<f64>,
+    /// Filter by endpoint family (e.g. chat_completions, responses)
     #[param(example = "chat_completions")]
     pub(crate) endpoint_family: Option<String>,
+    /// Substring match on model id or display name
     #[param(example = "gpt")]
     pub(crate) query: Option<String>,
 }
@@ -103,6 +116,10 @@ impl ModelFilter {
 #[utoipa::path(
     get,
     path = "/api/v1/models",
+    tag = "Catalog",
+    operation_id = "list_models",
+    summary = "List models",
+    description = "Paginated, filterable model list with ETag support.",
     params(ModelFilter),
     responses(
         (
@@ -144,7 +161,23 @@ impl ModelFilter {
                 ))
             )
         ),
-        (status = 400, description = "Invalid query parameters", body = ApiResponse<crate::response::EmptyData>),
+        (
+            status = 400,
+            description = "Invalid query parameters",
+            body = ApiResponse<crate::response::EmptyData>,
+            examples(
+                ("error" = (
+                    summary = "Bad request",
+                    value = json!({
+                        "success": false,
+                        "message": "Failed to deserialize query string: invalid digit found in string",
+                        "data": null,
+                        "meta": { "timestamp": "2026-05-03T00:00:00Z" },
+                        "error": { "code": "BAD_REQUEST" }
+                    })
+                ))
+            )
+        ),
         (status = 304, description = "Catalog not modified")
     )
 )]
@@ -197,9 +230,13 @@ pub async fn list_models(
 #[utoipa::path(
     get,
     path = "/api/v1/models/{provider}/{id}",
+    tag = "Catalog",
+    operation_id = "get_model",
+    summary = "Get model",
+    description = "Returns metadata for a single model by provider and id.",
     params(
-        ("provider" = String, Path, description = "Provider id"),
-        ("id" = String, Path, description = "Model id")
+        ("provider" = String, Path, description = "Provider id", example = "openai"),
+        ("id" = String, Path, description = "Model id", example = "gpt-4o")
     ),
     responses(
         (
@@ -235,7 +272,23 @@ pub async fn list_models(
             )
         ),
         (status = 304, description = "Catalog not modified"),
-        (status = 404, description = "Model not found", body = ApiResponse<crate::response::EmptyData>)
+        (
+            status = 404,
+            description = "Model not found",
+            body = ApiResponse<crate::response::EmptyData>,
+            examples(
+                ("error" = (
+                    summary = "Model not found",
+                    value = json!({
+                        "success": false,
+                        "message": "model not found",
+                        "data": null,
+                        "meta": { "timestamp": "2026-05-03T00:00:00Z" },
+                        "error": { "code": "MODEL_NOT_FOUND", "details": { "provider": "openai", "id": "gpt-99" } }
+                    })
+                ))
+            )
+        )
     )
 )]
 pub async fn get_model(

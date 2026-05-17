@@ -43,6 +43,13 @@ mod validate;
         title = "Almanac API",
         version = env!("CARGO_PKG_VERSION"),
         description = "Model catalog, validation, suggestions, and provider metadata for LLM developers."
+    ),
+    tags(
+        (name = "Catalog", description = "Models, providers, aliases, and comparisons"),
+        (name = "Discovery", description = "Fuzzy search and model suggestions"),
+        (name = "Validation", description = "Model and parameter validation"),
+        (name = "Observability", description = "Server and catalog health"),
+        (name = "Root", description = "API landing")
     )
 )]
 struct ApiDoc;

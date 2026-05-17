@@ -52,6 +52,10 @@ pub struct ModelIssue {
 #[utoipa::path(
     get,
     path = "/api/v1/catalog/health",
+    tag = "Observability",
+    operation_id = "catalog_health",
+    summary = "Catalog health",
+    description = "Summary of catalog quality metrics (stale, missing pricing, etc.).",
     responses(
         (
             status = 200,
@@ -153,6 +157,10 @@ pub async fn health(
 #[utoipa::path(
     get,
     path = "/api/v1/catalog/issues",
+    tag = "Observability",
+    operation_id = "catalog_issues",
+    summary = "Catalog issues",
+    description = "Detailed lists of stale, deprecated, retired, and gap models.",
     responses(
         (
             status = 200,

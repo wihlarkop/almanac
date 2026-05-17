@@ -12,10 +12,13 @@ use tokio::sync::RwLock;
 
 #[derive(Deserialize, utoipa::IntoParams)]
 pub struct SuggestQuery {
+    /// Fuzzy search query matched against model id, display name, and aliases
     #[param(example = "claude-opus-4")]
     pub q: String,
+    /// Restrict suggestions to a specific provider
     #[param(example = "anthropic")]
     pub provider: Option<String>,
+    /// Maximum number of suggestions to return (default 5, max 20)
     #[param(example = 5)]
     pub limit: Option<usize>,
 }
@@ -32,6 +35,10 @@ pub struct SuggestResult {
 #[utoipa::path(
     get,
     path = "/api/v1/suggest",
+    tag = "Discovery",
+    operation_id = "suggest_models",
+    summary = "Suggest models",
+    description = "Returns ranked fuzzy suggestions for a query string.",
     params(SuggestQuery),
     responses(
         (
