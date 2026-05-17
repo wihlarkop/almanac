@@ -64,6 +64,9 @@ impl ApiError {
 impl IntoResponse for ApiError {
     fn into_response(self) -> Response {
         let status = self.status_code();
+        if let Self::Internal(ref err) = self {
+            tracing::error!(error = %err, "internal server error");
+        }
         let body =
             ApiResponse::error_with_details(self.to_string(), self.error_code(), self.details());
 

@@ -28,6 +28,17 @@ pub struct RequestContext {
 pub async fn attach_request_context(mut request: Request, next: Next) -> Response {
     let method = request.method().clone();
     let path = request.uri().path().to_string();
+    let query = request
+        .uri()
+        .query()
+        .filter(|q| !q.is_empty())
+        .map(ToOwned::to_owned);
+    let ip = extract_client_ip(&request);
+    let user_agent = request
+        .headers()
+        .get(header::USER_AGENT)
+        .and_then(|v| v.to_str().ok())
+        .map(ToOwned::to_owned);
     let request_id = request
         .headers()
         .get("x-request-id")
@@ -50,6 +61,9 @@ pub async fn attach_request_context(mut request: Request, next: Next) -> Respons
             request_id = %request_id,
             method = %method,
             path = %path,
+            query = query.as_deref().unwrap_or(""),
+            ip = %ip,
+            user_agent = user_agent.as_deref().unwrap_or(""),
             status,
             latency_ms,
             "request completed"
@@ -58,6 +72,9 @@ pub async fn attach_request_context(mut request: Request, next: Next) -> Respons
             request_id = %request_id,
             method = %method,
             path = %path,
+            query = query.as_deref().unwrap_or(""),
+            ip = %ip,
+            user_agent = user_agent.as_deref().unwrap_or(""),
             status,
             latency_ms,
             "request completed"
@@ -66,6 +83,9 @@ pub async fn attach_request_context(mut request: Request, next: Next) -> Respons
             request_id = %request_id,
             method = %method,
             path = %path,
+            query = query.as_deref().unwrap_or(""),
+            ip = %ip,
+            user_agent = user_agent.as_deref().unwrap_or(""),
             status,
             latency_ms,
             "request completed"
@@ -80,24 +100,37 @@ pub async fn attach_request_context(mut request: Request, next: Next) -> Respons
 }
 
 pub async fn enforce_request_timeout(request: Request, next: Next) -> Response {
+    let path = request.uri().path().to_string();
     match tokio::time::timeout(Duration::from_secs(10), next.run(request)).await {
         Ok(response) => response,
-        Err(_) => (
-            StatusCode::REQUEST_TIMEOUT,
-            Json(ApiResponse::error("request timed out", "REQUEST_TIMEOUT")),
-        )
-            .into_response(),
+        Err(_) => {
+            tracing::warn!(path = %path, timeout_secs = 10, "request timed out");
+            (
+                StatusCode::REQUEST_TIMEOUT,
+                Json(ApiResponse::error("request timed out", "REQUEST_TIMEOUT")),
+            )
+                .into_response()
+        }
     }
 }
 
 pub async fn reject_oversized_payload(request: Request, next: Next) -> Response {
-    if request
+    let content_length = request
         .headers()
         .get(header::CONTENT_LENGTH)
         .and_then(|value| value.to_str().ok())
-        .and_then(|value| value.parse::<u64>().ok())
-        .is_some_and(|length| length > MAX_REQUEST_BODY_BYTES)
-    {
+        .and_then(|value| value.parse::<u64>().ok());
+
+    if content_length.is_some_and(|length| length > MAX_REQUEST_BODY_BYTES) {
+        let ip = extract_client_ip(&request);
+        let path = request.uri().path().to_string();
+        tracing::warn!(
+            ip = %ip,
+            path = %path,
+            content_length = content_length.unwrap_or(0),
+            limit = MAX_REQUEST_BODY_BYTES,
+            "request body too large"
+        );
         return (
             StatusCode::PAYLOAD_TOO_LARGE,
             Json(ApiResponse::error(
@@ -272,6 +305,21 @@ pub async fn enforce_rate_limit(
             response
         }
         RateLimitResult::Limited { retry_after_secs } => {
+            let path = request.uri().path().to_string();
+            let request_id = request
+                .headers()
+                .get("x-request-id")
+                .and_then(|v| v.to_str().ok())
+                .filter(|v| !v.trim().is_empty())
+                .map(ToOwned::to_owned)
+                .unwrap_or_else(new_request_id);
+            tracing::warn!(
+                request_id = %request_id,
+                ip = %ip,
+                path = %path,
+                retry_after_secs,
+                "rate limit exceeded"
+            );
             let mut response = (
                 StatusCode::TOO_MANY_REQUESTS,
                 Json(ApiResponse::error(
@@ -282,6 +330,9 @@ pub async fn enforce_rate_limit(
                 .into_response();
             if let Ok(value) = HeaderValue::from_str(&retry_after_secs.to_string()) {
                 response.headers_mut().insert("retry-after", value);
+            }
+            if let Ok(value) = HeaderValue::from_str(&request_id) {
+                response.headers_mut().insert("x-request-id", value);
             }
             response
         }

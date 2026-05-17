@@ -1,7 +1,7 @@
 FROM rust:1.95-slim AS chef
 WORKDIR /build
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends musl-tools \
+    && apt-get install -y --no-install-recommends musl-tools ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
     && rustup target add x86_64-unknown-linux-musl \
     && cargo install cargo-chef
@@ -17,6 +17,7 @@ COPY . .
 RUN cargo build --release --target x86_64-unknown-linux-musl -p almanac-server
 
 FROM scratch
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=builder /build/target/x86_64-unknown-linux-musl/release/server /server
 COPY providers /data/providers
 COPY models /data/models
@@ -25,7 +26,7 @@ COPY schema /data/schema
 
 ENV DATA_DIR=/data
 ENV PORT=8080
-ENV RUST_LOG=almanac_server=info,tower_http=info,server=info
+ENV RUST_LOG=almanac_server=info,tower_http=info
 
 USER 10001:10001
 EXPOSE 8080
