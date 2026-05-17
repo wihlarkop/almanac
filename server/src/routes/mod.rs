@@ -54,14 +54,14 @@ mod validate;
 )]
 struct ApiDoc;
 
-pub fn router(state: Arc<RwLock<AppState>>) -> Router {
+pub fn router(state: Arc<RwLock<AppState>>, cache: Arc<crate::cache::Cache>) -> Router {
     let (api_router, openapi) = api_router().split_for_parts();
 
     #[allow(unused_mut)]
     let mut r = api_router
         .merge(docs_router(openapi))
         .fallback(not_found)
-        .with_state(state);
+        .with_state(Arc::clone(&state));
 
     #[cfg(feature = "metrics")]
     {
@@ -70,21 +70,31 @@ pub fn router(state: Arc<RwLock<AppState>>) -> Router {
         r = r.layer(middleware::from_fn(crate::metrics::record_request));
     }
 
+    let state_for_cache = Arc::clone(&state);
+
     // Layer order: last .layer() is outermost (runs first on request, last on response).
-    // attach_request_context must be outermost so every response — including those
-    // short-circuited by inner middleware — gets an x-request-id header.
-    r.layer(CompressionLayer::new())
-        .layer(middleware::from_fn(reject_oversized_payload))
-        .layer(
-            CorsLayer::new()
-                .allow_origin(Any)
-                .allow_methods([Method::GET, Method::POST])
-                .allow_headers([header::CONTENT_TYPE, header::IF_NONE_MATCH]),
-        )
-        .layer(RequestBodyLimitLayer::new(MAX_REQUEST_BODY_BYTES as usize))
-        .layer(middleware::from_fn(enforce_request_timeout))
-        .layer(middleware::map_response(handle_method_not_allowed))
-        .layer(middleware::from_fn(attach_request_context))
+    // attach_request_context must be outermost so every response gets an x-request-id.
+    // cache_request must be first .layer() (innermost) so on the response path it runs
+    // before CompressionLayer — storing plain JSON, not gzipped bytes.
+    r.layer(middleware::from_fn({
+        move |req: axum::extract::Request, next: middleware::Next| {
+            let c = Arc::clone(&cache);
+            let s = Arc::clone(&state_for_cache);
+            async move { crate::cache::cache_request(c, s, req, next).await }
+        }
+    }))
+    .layer(CompressionLayer::new())
+    .layer(middleware::from_fn(reject_oversized_payload))
+    .layer(
+        CorsLayer::new()
+            .allow_origin(Any)
+            .allow_methods([Method::GET, Method::POST])
+            .allow_headers([header::CONTENT_TYPE, header::IF_NONE_MATCH]),
+    )
+    .layer(RequestBodyLimitLayer::new(MAX_REQUEST_BODY_BYTES as usize))
+    .layer(middleware::from_fn(enforce_request_timeout))
+    .layer(middleware::map_response(handle_method_not_allowed))
+    .layer(middleware::from_fn(attach_request_context))
 }
 
 async fn not_found() -> impl IntoResponse {

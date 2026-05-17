@@ -53,6 +53,14 @@ jsonschema = "0.46.5"
 hex = "0.4.3"
 sha2 = "0.11.0"
 
+# Redis client
+redis = { version = "=1.2.1", features = ["tokio-rustls-comp", "connection-manager"] }
+rustls = { version = "0.23", features = ["ring"] }
+
+# Config / env loading
+dotenvy = "0.15.7"
+envconfig = "0.11.1"
+
 # Fuzzy search
 strsim = "0.11.1"
 

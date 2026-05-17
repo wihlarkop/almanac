@@ -129,13 +129,13 @@ struct Window {
     started_at: Instant,
 }
 
-pub struct RateLimiter {
+pub struct MemoryRateLimiter {
     map: Arc<Mutex<HashMap<IpAddr, Window>>>,
     limit: u32,
     window: Duration,
 }
 
-impl RateLimiter {
+impl MemoryRateLimiter {
     pub fn new(requests_per_second: u32) -> Self {
         Self {
             map: Arc::new(Mutex::new(HashMap::new())),
@@ -180,6 +180,76 @@ impl RateLimiter {
     }
 }
 
+pub struct RedisRateLimiter {
+    conn: redis::aio::ConnectionManager,
+    limit: u32,
+    window_secs: u64,
+}
+
+impl RedisRateLimiter {
+    pub async fn new(client: &redis::Client, limit: u32, window_secs: u64) -> anyhow::Result<Self> {
+        let conn = client.get_connection_manager().await?;
+        Ok(Self {
+            conn,
+            limit,
+            window_secs,
+        })
+    }
+
+    pub async fn check(&self, ip: IpAddr) -> RateLimitResult {
+        // Atomic fixed-window counter: INCR sets TTL only on first call in window.
+        let script = redis::Script::new(
+            r#"
+            local current = redis.call('INCR', KEYS[1])
+            if current == 1 then
+                redis.call('EXPIRE', KEYS[1], ARGV[1])
+            end
+            local ttl = redis.call('TTL', KEYS[1])
+            return {current, ttl}
+            "#,
+        );
+        let key = format!("almanac:rl:{ip}");
+        let mut conn = self.conn.clone();
+        match script
+            .key(&key)
+            .arg(self.window_secs)
+            .invoke_async::<(i64, i64)>(&mut conn)
+            .await
+        {
+            Ok((count, ttl)) => {
+                let count = count as u32;
+                if count <= self.limit {
+                    RateLimitResult::Allowed {
+                        remaining: self.limit.saturating_sub(count),
+                    }
+                } else {
+                    RateLimitResult::Limited {
+                        retry_after_secs: ttl.max(1) as u64,
+                    }
+                }
+            }
+            // Fail open: if Redis is unavailable, allow the request.
+            Err(_) => RateLimitResult::Allowed {
+                remaining: self.limit,
+            },
+        }
+    }
+}
+
+pub enum RateLimiter {
+    Memory(MemoryRateLimiter),
+    Redis(RedisRateLimiter),
+}
+
+impl RateLimiter {
+    pub async fn check(&self, ip: IpAddr) -> RateLimitResult {
+        match self {
+            Self::Memory(m) => m.check(ip),
+            Self::Redis(r) => r.check(ip).await,
+        }
+    }
+}
+
 pub enum RateLimitResult {
     Allowed { remaining: u32 },
     Limited { retry_after_secs: u64 },
@@ -191,7 +261,7 @@ pub async fn enforce_rate_limit(
     next: Next,
 ) -> Response {
     let ip = extract_client_ip(&request);
-    match limiter.check(ip) {
+    match limiter.check(ip).await {
         RateLimitResult::Allowed { remaining } => {
             let mut response = next.run(request).await;
             if let Ok(value) = HeaderValue::from_str(&remaining.to_string()) {

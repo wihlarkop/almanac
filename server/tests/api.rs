@@ -21,14 +21,14 @@ fn data_dir() -> std::path::PathBuf {
 async fn app() -> axum::Router {
     let s = state::load_state(&data_dir()).expect("load_state failed");
     let shared = Arc::new(RwLock::new(s));
-    routes::router(shared)
+    routes::router(shared, Arc::new(almanac_server::cache::Cache::noop()))
 }
 
 async fn scoped_app(scope: CatalogScope) -> axum::Router {
     let s =
         state::load_state_with_scope(&data_dir(), &scope).expect("load_state_with_scope failed");
     let shared = Arc::new(RwLock::new(s));
-    routes::router(shared)
+    routes::router(shared, Arc::new(almanac_server::cache::Cache::noop()))
 }
 
 fn assert_success_envelope(json: &serde_json::Value) {
@@ -1777,4 +1777,150 @@ async fn search_supports_pagination_and_provider_filter() {
     }));
     assert_eq!(json["meta"]["limit"], 2);
     assert_eq!(json["meta"]["offset"], 1);
+}
+
+// --- Cache middleware behavior ---
+
+#[tokio::test]
+async fn noop_cache_adds_x_cache_miss_header() {
+    let response = app()
+        .await
+        .oneshot(
+            Request::builder()
+                .uri("/api/v1/providers")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+    assert_eq!(response.headers().get("x-cache").unwrap(), "MISS");
+}
+
+#[tokio::test]
+async fn memory_cache_returns_hit_on_second_request() {
+    use almanac_server::cache::Cache;
+    use std::time::Duration;
+
+    let s = state::load_state(&data_dir()).expect("load_state failed");
+    let shared = Arc::new(RwLock::new(s));
+    let cache = Arc::new(Cache::memory(Duration::from_secs(60)));
+    let app = routes::router(shared, Arc::clone(&cache));
+
+    let resp1 = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .uri("/api/v1/providers")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(resp1.status(), StatusCode::OK);
+    assert_eq!(resp1.headers().get("x-cache").unwrap(), "MISS");
+
+    let resp2 = app
+        .oneshot(
+            Request::builder()
+                .uri("/api/v1/providers")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(resp2.status(), StatusCode::OK);
+    assert_eq!(resp2.headers().get("x-cache").unwrap(), "HIT");
+}
+
+#[tokio::test]
+async fn cache_hit_preserves_catalog_headers() {
+    use almanac_server::cache::Cache;
+    use std::time::Duration;
+
+    let s = state::load_state(&data_dir()).expect("load_state failed");
+    let shared = Arc::new(RwLock::new(s));
+    let cache = Arc::new(Cache::memory(Duration::from_secs(60)));
+    let app = routes::router(shared, Arc::clone(&cache));
+
+    // Prime the cache.
+    app.clone()
+        .oneshot(
+            Request::builder()
+                .uri("/api/v1/models")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    let hit = app
+        .oneshot(
+            Request::builder()
+                .uri("/api/v1/models")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(hit.headers().get("x-cache").unwrap(), "HIT");
+    assert_catalog_cache_headers(hit.headers());
+}
+
+#[tokio::test]
+async fn health_endpoint_is_not_cached() {
+    use almanac_server::cache::Cache;
+    use std::time::Duration;
+
+    let s = state::load_state(&data_dir()).expect("load_state failed");
+    let shared = Arc::new(RwLock::new(s));
+    let cache = Arc::new(Cache::memory(Duration::from_secs(60)));
+    let app = routes::router(shared, cache);
+
+    let response = app
+        .oneshot(
+            Request::builder()
+                .uri("/api/v1/health")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    assert!(response.headers().get("x-cache").is_none());
+}
+
+#[tokio::test]
+async fn different_query_params_produce_separate_cache_entries() {
+    use almanac_server::cache::Cache;
+    use std::time::Duration;
+
+    let s = state::load_state(&data_dir()).expect("load_state failed");
+    let shared = Arc::new(RwLock::new(s));
+    let cache = Arc::new(Cache::memory(Duration::from_secs(60)));
+    let app = routes::router(shared, Arc::clone(&cache));
+
+    let r1 = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .uri("/api/v1/models?limit=1")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(r1.headers().get("x-cache").unwrap(), "MISS");
+
+    let r2 = app
+        .oneshot(
+            Request::builder()
+                .uri("/api/v1/models?limit=2")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(r2.headers().get("x-cache").unwrap(), "MISS");
 }

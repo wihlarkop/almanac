@@ -27,6 +27,9 @@ __pycache__/
 *.egg-info/
 .DS_Store
 
+# Local env (never commit secrets)
+.env
+
 # Local planning artifacts
 docs/superpowers/
 *.pdf
