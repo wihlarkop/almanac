@@ -1,0 +1,35 @@
+id: stable-audio-3-0-small
+provider: stabilityai
+display_name: Stable Audio 3.0 Small
+status: active
+release_date: 2026-05-20
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 1024
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [audio, music]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+  music_generation: true
+  sound_design: true
+parameters:
+  supported: [prompt, negative_prompt, seconds_total, steps, cfg_scale, seed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  pricing_notes: "Open-weight model. 459M parameters. Generates up to 2 min tracks. ~0.44s inference on H200 GPU."
+last_verified: 2026-05-23
+confidence: official
+endpoint_family: music_generation
+sources:
+  - url: https://stability.ai/news-updates/meet-stable-audio-3-the-model-family-built-for-artistic-experimentation-with-open-weight-models
+    last_verified: 2026-05-23
