@@ -1,0 +1,31 @@
+[package]
+name = "almanac-scraper"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "scraper"
+path = "src/main.rs"
+
+[dependencies]
+# Scraping framework
+kumo = { version = "0.3.2", features = ["derive"] }
+async-trait = "0.1"
+
+# CLI
+clap = { version = "4", features = ["derive"] }
+
+# Workspace deps
+tokio.workspace = true
+serde.workspace = true
+serde_yaml.workspace = true
+anyhow.workspace = true
+walkdir.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+time.workspace = true
+
+[dev-dependencies]
+tempfile = "3"
