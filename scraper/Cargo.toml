@@ -20,6 +20,7 @@ clap = { version = "4", features = ["derive"] }
 # Workspace deps
 tokio.workspace = true
 serde.workspace = true
+serde_json.workspace = true
 serde_yaml.workspace = true
 anyhow.workspace = true
 walkdir.workspace = true
