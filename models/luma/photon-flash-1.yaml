@@ -1,0 +1,34 @@
+id: photon-flash-1
+provider: luma
+display_name: Photon Flash 1
+status: active
+release_date: null
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4096
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [image]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, aspect_ratio, image_ref, style_ref, character_ref, seed, callback_url]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_image: 0.01
+  pricing_notes: "Faster, cheaper variant of Photon."
+last_verified: 2026-05-23
+confidence: official
+endpoint_family: image_generation
+sources:
+  - url: https://docs.lumalabs.ai/docs/image-generation
+    last_verified: 2026-05-23

@@ -1,0 +1,33 @@
+id: granite-guardian-4.1-8b
+provider: ibm
+display_name: Granite Guardian 4.1 8B
+status: active
+release_date: 2026-04-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 128000
+max_output_tokens: 4096
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: true
+parameters:
+  supported: [messages, temperature, max_tokens, stream]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.20
+  output: 0.60
+  pricing_notes: "Available via IBM watsonx.ai. Safety and content moderation model. Apache 2.0 open weights."
+last_verified: 2026-05-23
+confidence: inferred
+endpoint_family: chat_completions
+sources:
+  - url: https://www.ibm.com/granite/docs/models/granite4-1
+    last_verified: 2026-05-23

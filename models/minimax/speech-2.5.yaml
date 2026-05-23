@@ -1,0 +1,33 @@
+id: speech-2.5
+provider: minimax
+display_name: Speech-2.5
+status: active
+release_date: 2025-08-06
+deprecation_date: null
+sunset_date: null
+replacement: speech-2.6
+context_window: 5000
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [audio]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+parameters:
+  supported: [model, text, voice_id, speed, vol, pitch, format]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_million_chars: 80.00
+last_verified: 2026-05-23
+confidence: official
+endpoint_family: speech
+sources:
+  - url: https://platform.minimax.io/docs
+    last_verified: 2026-05-23

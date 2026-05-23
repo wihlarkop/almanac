@@ -1,0 +1,34 @@
+id: recraft-v4-pro-vector
+provider: recraft
+display_name: Recraft V4 Pro Vector
+status: active
+release_date: null
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 512
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [image]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, style, size, n, controls]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_image: 0.08
+  pricing_notes: "High-resolution vector (SVG) output variant of V4 Pro."
+last_verified: 2026-05-23
+confidence: official
+endpoint_family: image_generation
+sources:
+  - url: https://www.recraft.ai/docs/recraft-models/recraft-V4
+    last_verified: 2026-05-23

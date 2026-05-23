@@ -1,0 +1,33 @@
+id: mercury-edit-2
+provider: inception
+display_name: Mercury Edit 2
+status: active
+release_date: null
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 131072
+max_output_tokens: 50000
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+parameters:
+  supported: [temperature, max_tokens, stream]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.25
+  output: 0.75
+  pricing_notes: "Code editing/fill-in-the-middle variant of Mercury 2."
+last_verified: 2026-05-24
+confidence: inferred
+endpoint_family: chat_completions
+sources:
+  - url: https://docs.inceptionlabs.ai
+    last_verified: 2026-05-24

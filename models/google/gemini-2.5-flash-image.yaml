@@ -1,0 +1,36 @@
+id: gemini-2.5-flash-image
+provider: google
+display_name: Gemini 2.5 Flash Image (Nano Banana)
+status: active
+release_date: null
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 65536
+max_output_tokens: 32768
+modalities:
+  input: [text, image]
+  output: [text, image]
+capabilities:
+  tools: false
+  vision: true
+  streaming: true
+  json_mode: true
+  prompt_caching: true
+  thinking: false
+  image_generation: true
+parameters:
+  supported: []
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  pricing_notes: "Pricing not yet published. Check https://ai.google.dev/gemini-api/pricing"
+last_verified: 2026-05-23
+confidence: community
+endpoint_family: image_generation
+sources:
+  - url: https://ai.google.dev/gemini-api/docs/models/gemini-2.5-flash-image
+    last_verified: 2026-05-23

@@ -1,0 +1,34 @@
+id: stable-diffusion-3-medium
+provider: stabilityai
+display_name: Stable Diffusion 3 Medium
+status: active
+release_date: 2025-06-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 512
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [image]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, negative_prompt, image, strength, aspect_ratio, seed, output_format, model]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_image: 0.035
+  pricing_notes: "2B parameter model. API param: sd3-medium. Open weights released June 2025."
+last_verified: 2026-05-23
+confidence: official
+endpoint_family: image_generation
+sources:
+  - url: https://platform.stability.ai/docs/api-reference
+    last_verified: 2026-05-23

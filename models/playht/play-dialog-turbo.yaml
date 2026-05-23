@@ -1,0 +1,34 @@
+id: play-dialog-turbo
+provider: playht
+display_name: PlayDialog Turbo
+status: active
+release_date: null
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 5000
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [audio]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+parameters:
+  supported: [voice, text, output_format, speed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_million_chars: 60.00
+  pricing_notes: "Faster PlayDialog variant powered by Groq inference."
+last_verified: 2026-05-23
+confidence: inferred
+endpoint_family: speech
+sources:
+  - url: https://docs.play.ai/documentation/rest-api
+    last_verified: 2026-05-23

@@ -1,0 +1,34 @@
+id: qwen3-coder-plus
+provider: alibaba
+display_name: Qwen3-Coder-Plus
+status: active
+release_date: 2025-07-23
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 1000000
+max_output_tokens: 65536
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: true
+  vision: false
+  streaming: true
+  json_mode: true
+  thinking: true
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, tools, response_format, thinking]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 3.50
+  output: 7.00
+  pricing_notes: "Flagship coding model. Available via DashScope and Amazon Bedrock."
+last_verified: 2026-05-23
+confidence: community
+endpoint_family: chat_completions
+sources:
+  - url: https://www.alibabacloud.com/help/en/model-studio/qwen-coder
+    last_verified: 2026-05-23

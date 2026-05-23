@@ -1,0 +1,33 @@
+id: seed3d-2.0
+provider: bytedance
+display_name: Seed3D 2.0
+status: active
+release_date: 2026-04-23
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 512
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [image]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, image, format]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  pricing_notes: "3D model generation. Available via Volcano Engine Ark."
+last_verified: 2026-05-23
+confidence: community
+endpoint_family: mesh_generation
+sources:
+  - url: https://www.volcengine.com/docs/82379/1174490
+    last_verified: 2026-05-23

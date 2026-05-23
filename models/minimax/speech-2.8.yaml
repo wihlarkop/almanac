@@ -1,0 +1,34 @@
+id: speech-2.8
+provider: minimax
+display_name: Speech-2.8
+status: active
+release_date: 2026-01-23
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 5000
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [audio]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+parameters:
+  supported: [model, text, voice_id, speed, vol, pitch, format]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_million_chars: 80.00
+  pricing_notes: "Latest MiniMax TTS model."
+last_verified: 2026-05-23
+confidence: official
+endpoint_family: speech
+sources:
+  - url: https://platform.minimax.io/docs
+    last_verified: 2026-05-23

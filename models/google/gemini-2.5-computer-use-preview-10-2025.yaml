@@ -1,0 +1,35 @@
+id: gemini-2.5-computer-use-preview-10-2025
+provider: google
+display_name: Gemini 2.5 Computer Use
+status: active
+release_date: 2025-10-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 128000
+max_output_tokens: 64000
+modalities:
+  input: [text, image]
+  output: [text]
+capabilities:
+  tools: false
+  vision: true
+  streaming: true
+  json_mode: false
+  prompt_caching: false
+  thinking: false
+parameters:
+  supported: []
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  pricing_notes: "Pricing not yet published. Note: Gemini 3 Pro/Flash now include built-in computer use. Check https://ai.google.dev/gemini-api/pricing"
+last_verified: 2026-05-23
+confidence: community
+endpoint_family: chat_completions
+sources:
+  - url: https://ai.google.dev/gemini-api/docs/models/gemini-2.5-computer-use-preview-10-2025
+    last_verified: 2026-05-23

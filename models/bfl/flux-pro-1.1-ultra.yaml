@@ -1,0 +1,36 @@
+id: flux-pro-1.1-ultra
+provider: bfl
+display_name: FLUX1.1 Pro Ultra
+status: active
+release_date: null
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4096
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [image]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, width, height, steps, guidance, seed, output_format, raw]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_image: 0.06
+  pricing_notes: "Up to 4MP resolution. Supports Raw mode for photorealistic output."
+last_verified: 2026-05-23
+confidence: official
+endpoint_family: image_generation
+sources:
+  - url: https://docs.bfl.ml
+    last_verified: 2026-05-23
+  - url: https://bfl.ai/pricing
+    last_verified: 2026-05-23

@@ -1,0 +1,33 @@
+id: flux
+provider: deepgram
+display_name: Flux
+status: active
+release_date: null
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 30
+max_output_tokens: 1
+modalities:
+  input: [audio]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+parameters:
+  supported: [model, language, smart_format, diarize, utterances]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  pricing_notes: "Conversational speech recognition for voice agents. Includes turn-end detection. Nova-3-level accuracy."
+last_verified: 2026-05-23
+confidence: official
+endpoint_family: transcription
+sources:
+  - url: https://developers.deepgram.com/docs/flux/quickstart
+    last_verified: 2026-05-23

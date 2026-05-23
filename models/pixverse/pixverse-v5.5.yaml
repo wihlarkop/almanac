@@ -1,0 +1,34 @@
+id: pixverse-v5.5
+provider: pixverse
+display_name: PixVerse V5.5
+status: active
+release_date: null
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 2048
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [video]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, negative_prompt, image_url, duration, aspect_ratio, quality, seed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_second: 0.12
+  pricing_notes: "Latest PixVerse model. Director-focused with multi-image fusion and native audio."
+last_verified: 2026-05-23
+confidence: official
+endpoint_family: video_generation
+sources:
+  - url: https://docs.platform.pixverse.ai
+    last_verified: 2026-05-23

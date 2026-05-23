@@ -1,0 +1,34 @@
+id: gen4-image
+provider: runway
+display_name: Gen-4 Image
+status: active
+release_date: 2025-05-16
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4096
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [image]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, reference_images, ratio, seed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_image: 0.04
+  pricing_notes: "Text/image to image generation via Runway API."
+last_verified: 2026-05-23
+confidence: official
+endpoint_family: image_generation
+sources:
+  - url: https://docs.dev.runwayml.com/guides/models/
+    last_verified: 2026-05-23

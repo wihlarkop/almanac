@@ -1,0 +1,35 @@
+id: qwen-image-edit-max
+provider: alibaba
+display_name: Qwen Image Edit Max
+status: active
+release_date: 2026-01-17
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 512
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [image]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+  inpainting: true
+parameters:
+  supported: [prompt, image, mask, size]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_image: 0.06
+  pricing_notes: "Image editing/inpainting via DashScope."
+last_verified: 2026-05-23
+confidence: community
+endpoint_family: image_generation
+sources:
+  - url: https://www.alibabacloud.com/help/en/model-studio/models
+    last_verified: 2026-05-23
