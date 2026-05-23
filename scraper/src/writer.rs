@@ -3,7 +3,11 @@ use anyhow::Result;
 use std::path::Path;
 
 pub fn generate_yaml(model: &ScrapedModel, today: &str) -> String {
-    let display = model.display_name.as_deref().unwrap_or(&model.id).to_string();
+    let display = model
+        .display_name
+        .as_deref()
+        .unwrap_or(&model.id)
+        .to_string();
     let context = model.context_window.unwrap_or(0);
     let max_out = model.max_output_tokens.unwrap_or(0);
     let input = model.input_price.unwrap_or(0.0);
@@ -57,7 +61,11 @@ sources:
     )
 }
 
-pub fn write_model(model: &ScrapedModel, models_root: &Path, today: &str) -> Result<std::path::PathBuf> {
+pub fn write_model(
+    model: &ScrapedModel,
+    models_root: &Path,
+    today: &str,
+) -> Result<std::path::PathBuf> {
     let dir = models_root.join(&model.provider);
     std::fs::create_dir_all(&dir)?;
     let path = dir.join(format!("{}.yaml", model.id));

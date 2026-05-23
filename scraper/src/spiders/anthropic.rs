@@ -2,8 +2,7 @@ use crate::model::ScrapedModel;
 use async_trait::async_trait;
 use kumo::prelude::*;
 
-const START_URL: &str =
-    "https://platform.claude.com/docs/en/docs/about-claude/models/all-models";
+const START_URL: &str = "https://platform.claude.com/docs/en/docs/about-claude/models/all-models";
 
 pub struct AnthropicSpider;
 

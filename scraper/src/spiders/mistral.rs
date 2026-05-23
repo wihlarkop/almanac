@@ -79,4 +79,3 @@ impl Spider for MistralSpider {
         Ok(output)
     }
 }
-

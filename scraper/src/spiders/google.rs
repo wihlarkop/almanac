@@ -110,14 +110,22 @@ fn parse_token_count(text: &str) -> Option<u64> {
     // "1M", "1 million"
     if let Some(m_pos) = lower.find('m') {
         let before = lower[..m_pos].trim();
-        if let Some(n) = before.split_whitespace().last().and_then(|s| s.replace(',', "").parse::<f64>().ok()) {
+        if let Some(n) = before
+            .split_whitespace()
+            .last()
+            .and_then(|s| s.replace(',', "").parse::<f64>().ok())
+        {
             return Some((n * 1_000_000.0) as u64);
         }
     }
     // "128k"
     if let Some(k_pos) = lower.find('k') {
         let before = lower[..k_pos].trim();
-        if let Some(n) = before.split_whitespace().last().and_then(|s| s.replace(',', "").parse::<f64>().ok()) {
+        if let Some(n) = before
+            .split_whitespace()
+            .last()
+            .and_then(|s| s.replace(',', "").parse::<f64>().ok())
+        {
             return Some((n * 1_000.0) as u64);
         }
     }

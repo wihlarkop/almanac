@@ -7,7 +7,7 @@ pub mod writer;
 use anyhow::Result;
 use catalog::load_catalog;
 use clap::{Parser, ValueEnum};
-use diff::{diff, DiffResult};
+use diff::{DiffResult, diff};
 use kumo::prelude::*;
 use model::ScrapedModel;
 use spiders::{anthropic::AnthropicSpider, google::GoogleSpider, mistral::MistralSpider};
@@ -24,7 +24,10 @@ enum Provider {
 }
 
 #[derive(Parser, Debug)]
-#[command(name = "scraper", about = "Scrape AI provider pages and diff against the model catalog")]
+#[command(
+    name = "scraper",
+    about = "Scrape AI provider pages and diff against the model catalog"
+)]
 struct Args {
     #[arg(short, long, default_value = "all")]
     provider: Provider,
@@ -38,7 +41,9 @@ struct Args {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    tracing_subscriber::fmt().with_env_filter("kumo=warn").init();
+    tracing_subscriber::fmt()
+        .with_env_filter("kumo=warn")
+        .init();
 
     let args = Args::parse();
     let models_dir = args.root.join("models");
@@ -78,10 +83,20 @@ async fn main() -> Result<()> {
                     }
                 }
             }
-            DiffResult::PriceChanged { model: m, old_input, old_output } => {
+            DiffResult::PriceChanged {
+                model: m,
+                old_input,
+                old_output,
+            } => {
                 println!(
                     "\n[PRICE CHANGE] {}/{}\n  input:  {:?} -> {:?}\n  output: {:?} -> {:?}\n  source: {}",
-                    m.provider, m.id, old_input, m.input_price, old_output, m.output_price, m.source_url,
+                    m.provider,
+                    m.id,
+                    old_input,
+                    m.input_price,
+                    old_output,
+                    m.output_price,
+                    m.source_url,
                 );
             }
         }
@@ -127,5 +142,10 @@ where
 
 fn today_str() -> String {
     let now = OffsetDateTime::now_utc();
-    format!("{:04}-{:02}-{:02}", now.year(), now.month() as u8, now.day())
+    format!(
+        "{:04}-{:02}-{:02}",
+        now.year(),
+        now.month() as u8,
+        now.day()
+    )
 }
