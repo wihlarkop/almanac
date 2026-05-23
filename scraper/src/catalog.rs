@@ -34,7 +34,7 @@ pub fn load_catalog(models_dir: &Path) -> Result<HashMap<String, CatalogEntry>> 
     for entry in WalkDir::new(models_dir)
         .into_iter()
         .filter_map(|e| e.ok())
-        .filter(|e| e.path().extension().map_or(false, |ext| ext == "yaml"))
+        .filter(|e| e.path().extension().is_some_and(|ext| ext == "yaml"))
     {
         let content = std::fs::read_to_string(entry.path())
             .with_context(|| format!("reading {}", entry.path().display()))?;
