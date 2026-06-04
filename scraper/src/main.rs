@@ -4,32 +4,137 @@ use almanac_scraper::engine::run_spider;
 use almanac_scraper::model::ScrapedModel;
 use almanac_scraper::spiders::{
     alibaba::AlibabaSpider, anthropic::AnthropicSpider, cohere::CohereSpider,
-    deepseek::DeepSeekSpider, elevenlabs::ElevenLabsSpider, google::GoogleSpider, meta::MetaSpider,
-    mistral::MistralSpider, mistral_html::MistralHtmlSpider, moonshot::MoonshotSpider,
-    openai::OpenAiSpider, perplexity::PerplexitySpider, xai::XaiSpider,
+    deepseek::DeepSeekSpider, doc_page::DocPageSpider, elevenlabs::ElevenLabsSpider,
+    google::GoogleSpider, meta::MetaSpider, mistral::MistralSpider,
+    mistral_html::MistralHtmlSpider, moonshot::MoonshotSpider, openai::OpenAiSpider,
+    perplexity::PerplexitySpider, xai::XaiSpider,
 };
 use almanac_scraper::writer::write_model;
 use anyhow::Result;
-use clap::{Parser, ValueEnum};
+use clap::Parser;
 use std::path::PathBuf;
 use time::OffsetDateTime;
 
-#[derive(Debug, Clone, ValueEnum)]
-enum Provider {
-    All,
-    Alibaba,
-    Anthropic,
-    Cohere,
-    DeepSeek,
-    ElevenLabs,
-    Google,
-    Meta,
-    Mistral,
-    Moonshot,
-    OpenAi,
-    Perplexity,
-    Xai,
-}
+/// Providers with custom HTML spiders (need filtering or multi-page crawl).
+/// All others are handled automatically by SIMPLE_PROVIDERS below.
+const CUSTOM_PROVIDERS: &[&str] = &[
+    "anthropic",
+    "google",
+    "mistral",
+    "openai",
+    "cohere",
+    "deepseek",
+    "xai",
+    "alibaba",
+    "moonshot",
+    "meta",
+    "perplexity",
+    "elevenlabs",
+];
+
+/// Simple providers: scraped with a single public docs URL, no custom logic.
+/// Model IDs are extracted from <code> elements via the generic heuristic.
+const SIMPLE_PROVIDERS: &[(&str, &str)] = &[
+    (
+        "adobe",
+        "https://developer.adobe.com/firefly-api/docs/guides/models/",
+    ),
+    ("ai21", "https://docs.ai21.com/docs/overview"),
+    (
+        "amazon",
+        "https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html",
+    ),
+    ("assemblyai", "https://www.assemblyai.com/docs/models"),
+    (
+        "baidu",
+        "https://qianfan.cloud.baidu.com/doc/WENXINWORKSHOP/s/Nlks5zkzu",
+    ),
+    ("bfl", "https://docs.bfl.ml/"),
+    ("bytedance", "https://www.volcengine.com/docs/82379/1382513"),
+    (
+        "cartesia",
+        "https://docs.cartesia.ai/build-with-cartesia/tts-models/api-changes",
+    ),
+    (
+        "deepgram",
+        "https://developers.deepgram.com/docs/models-languages-overview",
+    ),
+    ("fireworks", "https://fireworks.ai/models"),
+    (
+        "heygen",
+        "https://docs.heygen.com/reference/list-avatars-v2",
+    ),
+    ("hidream", "https://www.hidream.ai/"),
+    (
+        "ibm",
+        "https://www.ibm.com/products/watsonx-ai/foundation-models",
+    ),
+    (
+        "ideogram",
+        "https://developer.ideogram.ai/api-reference/api-reference/generate",
+    ),
+    ("inception", "https://docs.inceptionlabs.ai/"),
+    (
+        "inflection",
+        "https://developers.inflection.ai/docs/introduction",
+    ),
+    ("inworld", "https://docs.inworld.ai/docs/tutorial-text/v2/"),
+    ("jina", "https://jina.ai/models/"),
+    ("kling", "https://klingai.com/"),
+    ("leonardo", "https://docs.leonardo.ai/"),
+    ("lightricks", "https://docs.ltx.video/"),
+    ("lmnt", "https://docs.lmnt.com/"),
+    ("luma", "https://docs.lumalabs.ai/"),
+    ("meshy", "https://docs.meshy.ai/"),
+    (
+        "microsoft",
+        "https://azure.microsoft.com/en-us/products/phi/",
+    ),
+    (
+        "minimax",
+        "https://platform.minimaxi.com/document/model-introduction",
+    ),
+    ("naver", "https://clovastudio.stream.naver.com/docs"),
+    ("nomic", "https://www.nomic.ai/atlas"),
+    ("nvidia", "https://build.nvidia.com/explore/discover"),
+    ("pika", "https://pika.art/"),
+    ("pixverse", "https://pixverse.ai/"),
+    ("playht", "https://docs.play.ai/documentation/rest-api"),
+    ("recraft", "https://www.recraft.ai/docs"),
+    ("reka", "https://docs.reka.ai/"),
+    ("reve", "https://reveai.com/"),
+    ("runway", "https://docs.runwayml.com/"),
+    (
+        "snowflake",
+        "https://docs.snowflake.com/en/user-guide/snowflake-cortex/llm-functions",
+    ),
+    (
+        "stabilityai",
+        "https://platform.stability.ai/docs/api-reference",
+    ),
+    (
+        "stepfun",
+        "https://platform.stepfun.com/docs/overview/concept",
+    ),
+    ("suno", "https://suno.com/"),
+    ("synthesia", "https://docs.synthesia.io/"),
+    (
+        "tencent",
+        "https://cloud.tencent.com/document/product/1729/104753",
+    ),
+    ("tripo", "https://platform.tripo3d.ai/docs"),
+    ("udio", "https://www.udio.com/"),
+    (
+        "upstage",
+        "https://developers.upstage.ai/docs/apis/model-overview",
+    ),
+    ("vidu", "https://platform.vidu.studio/docs"),
+    ("voyageai", "https://docs.voyageai.com/docs/embeddings"),
+    ("writer", "https://dev.writer.com/api-guides/models"),
+    ("xiaomi", "https://github.com/MiMo-ai"),
+    ("yi", "https://platform.lingyiwanwu.com/docs"),
+    ("zai", "https://docs.z.ai/"),
+];
 
 #[derive(Parser, Debug)]
 #[command(
@@ -37,8 +142,10 @@ enum Provider {
     about = "Scrape AI provider docs pages and diff against the model catalog"
 )]
 struct Args {
+    /// Provider name to scrape, or "all" to run every provider sequentially.
+    /// Examples: anthropic, openai, google, mistral, all
     #[arg(short, long, default_value = "all")]
-    provider: Provider,
+    provider: String,
 
     #[arg(short, long, default_value = ".")]
     root: PathBuf,
@@ -106,98 +213,66 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-/// Runs all spiders sequentially — one provider at a time, no parallelism.
-/// Each provider is independent so failures don't block the rest.
-async fn run_all_spiders(provider: &Provider) -> Result<Vec<ScrapedModel>> {
+/// Runs spiders sequentially — one provider at a time, no parallelism.
+/// Each provider is isolated: failures are logged but never block the rest.
+async fn run_all_spiders(provider: &str) -> Result<Vec<ScrapedModel>> {
     let mut all = Vec::new();
-    let run_all = matches!(provider, Provider::All);
+    let run_all = provider == "all";
 
-    if run_all || matches!(provider, Provider::Anthropic) {
-        println!("  Scraping anthropic...");
-        match run_spider(AnthropicSpider).await {
-            Ok(items) => all.extend(items),
-            Err(e) => eprintln!("  [warn] anthropic failed: {e}"),
+    // ── Custom spiders ────────────────────────────────────────────────────────
+    macro_rules! run_custom {
+        ($name:expr, $spider:expr) => {
+            if run_all || provider == $name {
+                println!("  Scraping {}...", $name);
+                match run_spider($spider).await {
+                    Ok(items) => all.extend(items),
+                    Err(e) => eprintln!("  [warn] {} failed: {e}", $name),
+                }
+            }
+        };
+    }
+
+    run_custom!("anthropic", AnthropicSpider);
+    run_custom!("google", GoogleSpider);
+    run_custom!("mistral", MistralSpider);
+    run_custom!("mistral", MistralHtmlSpider); // multi-page model-cards variant
+    run_custom!("openai", OpenAiSpider);
+    run_custom!("cohere", CohereSpider);
+    run_custom!("deepseek", DeepSeekSpider);
+    run_custom!("xai", XaiSpider);
+    run_custom!("alibaba", AlibabaSpider);
+    run_custom!("moonshot", MoonshotSpider);
+    run_custom!("meta", MetaSpider);
+    run_custom!("perplexity", PerplexitySpider);
+    run_custom!("elevenlabs", ElevenLabsSpider);
+
+    // ── Simple providers (DocPageSpider) ──────────────────────────────────────
+    for &(name, url) in SIMPLE_PROVIDERS {
+        if run_all || provider == name {
+            println!("  Scraping {name}...");
+            match run_spider(DocPageSpider {
+                provider: name,
+                start_url: url,
+            })
+            .await
+            {
+                Ok(items) => all.extend(items),
+                Err(e) => eprintln!("  [warn] {name} failed: {e}"),
+            }
         }
     }
-    if run_all || matches!(provider, Provider::Google) {
-        println!("  Scraping google...");
-        match run_spider(GoogleSpider).await {
-            Ok(items) => all.extend(items),
-            Err(e) => eprintln!("  [warn] google failed: {e}"),
-        }
-    }
-    if run_all || matches!(provider, Provider::Mistral) {
-        println!("  Scraping mistral (HTML)...");
-        match run_spider(MistralSpider).await {
-            Ok(items) => all.extend(items),
-            Err(e) => eprintln!("  [warn] mistral failed: {e}"),
-        }
-        match run_spider(MistralHtmlSpider).await {
-            Ok(items) => all.extend(items),
-            Err(e) => eprintln!("  [warn] mistral-html failed: {e}"),
-        }
-    }
-    if run_all || matches!(provider, Provider::OpenAi) {
-        println!("  Scraping openai...");
-        match run_spider(OpenAiSpider).await {
-            Ok(items) => all.extend(items),
-            Err(e) => eprintln!("  [warn] openai failed: {e}"),
-        }
-    }
-    if run_all || matches!(provider, Provider::Cohere) {
-        println!("  Scraping cohere...");
-        match run_spider(CohereSpider).await {
-            Ok(items) => all.extend(items),
-            Err(e) => eprintln!("  [warn] cohere failed: {e}"),
-        }
-    }
-    if run_all || matches!(provider, Provider::DeepSeek) {
-        println!("  Scraping deepseek...");
-        match run_spider(DeepSeekSpider).await {
-            Ok(items) => all.extend(items),
-            Err(e) => eprintln!("  [warn] deepseek failed: {e}"),
-        }
-    }
-    if run_all || matches!(provider, Provider::Xai) {
-        println!("  Scraping xai...");
-        match run_spider(XaiSpider).await {
-            Ok(items) => all.extend(items),
-            Err(e) => eprintln!("  [warn] xai failed: {e}"),
-        }
-    }
-    if run_all || matches!(provider, Provider::Alibaba) {
-        println!("  Scraping alibaba...");
-        match run_spider(AlibabaSpider).await {
-            Ok(items) => all.extend(items),
-            Err(e) => eprintln!("  [warn] alibaba failed: {e}"),
-        }
-    }
-    if run_all || matches!(provider, Provider::Moonshot) {
-        println!("  Scraping moonshot...");
-        match run_spider(MoonshotSpider).await {
-            Ok(items) => all.extend(items),
-            Err(e) => eprintln!("  [warn] moonshot failed: {e}"),
-        }
-    }
-    if run_all || matches!(provider, Provider::Meta) {
-        println!("  Scraping meta...");
-        match run_spider(MetaSpider).await {
-            Ok(items) => all.extend(items),
-            Err(e) => eprintln!("  [warn] meta failed: {e}"),
-        }
-    }
-    if run_all || matches!(provider, Provider::Perplexity) {
-        println!("  Scraping perplexity...");
-        match run_spider(PerplexitySpider).await {
-            Ok(items) => all.extend(items),
-            Err(e) => eprintln!("  [warn] perplexity failed: {e}"),
-        }
-    }
-    if run_all || matches!(provider, Provider::ElevenLabs) {
-        println!("  Scraping elevenlabs...");
-        match run_spider(ElevenLabsSpider).await {
-            Ok(items) => all.extend(items),
-            Err(e) => eprintln!("  [warn] elevenlabs failed: {e}"),
+
+    if !run_all && all.is_empty() {
+        let known: Vec<&str> = CUSTOM_PROVIDERS
+            .iter()
+            .copied()
+            .chain(SIMPLE_PROVIDERS.iter().map(|(name, _)| *name))
+            .collect();
+        if !known.contains(&provider) {
+            eprintln!(
+                "Unknown provider '{provider}'. Use 'all' or one of: {}",
+                known.join(", ")
+            );
         }
     }
 

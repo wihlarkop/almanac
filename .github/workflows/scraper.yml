@@ -4,24 +4,75 @@ on:
   workflow_dispatch:
     inputs:
       provider:
-        description: "Provider to scrape (or 'all')"
+        description: "Provider name to scrape, or 'all'"
         required: false
         default: "all"
         type: choice
         options:
           - all
+          - adobe
+          - ai21
           - alibaba
+          - amazon
           - anthropic
+          - assemblyai
+          - baidu
+          - bfl
+          - bytedance
+          - cartesia
           - cohere
-          - deep-seek
-          - eleven-labs
+          - deepgram
+          - deepseek
+          - elevenlabs
+          - fireworks
           - google
+          - heygen
+          - hidream
+          - ibm
+          - ideogram
+          - inception
+          - inflection
+          - inworld
+          - jina
+          - kling
+          - leonardo
+          - lightricks
+          - lmnt
+          - luma
+          - meshy
           - meta
+          - microsoft
+          - minimax
           - mistral
           - moonshot
-          - open-ai
+          - naver
+          - nomic
+          - nvidia
+          - openai
           - perplexity
+          - pika
+          - pixverse
+          - playht
+          - recraft
+          - reka
+          - reve
+          - runway
+          - snowflake
+          - stabilityai
+          - stepfun
+          - suno
+          - synthesia
+          - tencent
+          - tripo
+          - udio
+          - upstage
+          - vidu
+          - voyageai
+          - writer
           - xai
+          - xiaomi
+          - yi
+          - zai
       write:
         description: "Write new model YAMLs to models/ (does not commit)"
         required: false
