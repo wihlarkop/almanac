@@ -3,8 +3,10 @@ use almanac_scraper::diff::{DiffResult, diff};
 use almanac_scraper::engine::run_spider;
 use almanac_scraper::model::ScrapedModel;
 use almanac_scraper::spiders::{
-    anthropic::AnthropicSpider, cohere::CohereSpider, deepseek::DeepSeekSpider,
-    google::GoogleSpider, mistral::MistralSpider, openai::OpenAiSpider,
+    alibaba::AlibabaSpider, anthropic::AnthropicSpider, cohere::CohereSpider,
+    deepseek::DeepSeekSpider, elevenlabs::ElevenLabsSpider, google::GoogleSpider, meta::MetaSpider,
+    mistral::MistralSpider, mistral_html::MistralHtmlSpider, moonshot::MoonshotSpider,
+    openai::OpenAiSpider, perplexity::PerplexitySpider, xai::XaiSpider,
 };
 use almanac_scraper::writer::write_model;
 use anyhow::Result;
@@ -14,19 +16,25 @@ use time::OffsetDateTime;
 
 #[derive(Debug, Clone, ValueEnum)]
 enum Provider {
+    All,
+    Alibaba,
     Anthropic,
     Cohere,
     DeepSeek,
+    ElevenLabs,
     Google,
+    Meta,
     Mistral,
+    Moonshot,
     OpenAi,
-    All,
+    Perplexity,
+    Xai,
 }
 
 #[derive(Parser, Debug)]
 #[command(
     name = "scraper",
-    about = "Scrape AI provider pages and diff against the model catalog"
+    about = "Scrape AI provider docs pages and diff against the model catalog"
 )]
 struct Args {
     #[arg(short, long, default_value = "all")]
@@ -51,7 +59,7 @@ async fn main() -> Result<()> {
     let catalog = load_catalog(&models_dir)?;
     println!("Loaded {} models from catalog.", catalog.len());
 
-    let scraped = run_spiders(&args.provider).await?;
+    let scraped = run_all_spiders(&args.provider).await?;
     println!("Scraped {} models from provider pages.", scraped.len());
 
     let results = diff(&scraped, &catalog);
@@ -98,38 +106,98 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn run_spiders(provider: &Provider) -> Result<Vec<ScrapedModel>> {
+/// Runs all spiders sequentially — one provider at a time, no parallelism.
+/// Each provider is independent so failures don't block the rest.
+async fn run_all_spiders(provider: &Provider) -> Result<Vec<ScrapedModel>> {
     let mut all = Vec::new();
     let run_all = matches!(provider, Provider::All);
 
     if run_all || matches!(provider, Provider::Anthropic) {
-        all.extend(run_spider(AnthropicSpider).await?);
+        println!("  Scraping anthropic...");
+        match run_spider(AnthropicSpider).await {
+            Ok(items) => all.extend(items),
+            Err(e) => eprintln!("  [warn] anthropic failed: {e}"),
+        }
     }
     if run_all || matches!(provider, Provider::Google) {
-        all.extend(run_spider(GoogleSpider).await?);
+        println!("  Scraping google...");
+        match run_spider(GoogleSpider).await {
+            Ok(items) => all.extend(items),
+            Err(e) => eprintln!("  [warn] google failed: {e}"),
+        }
     }
     if run_all || matches!(provider, Provider::Mistral) {
-        all.extend(run_spider(MistralSpider).await?);
+        println!("  Scraping mistral (HTML)...");
+        match run_spider(MistralSpider).await {
+            Ok(items) => all.extend(items),
+            Err(e) => eprintln!("  [warn] mistral failed: {e}"),
+        }
+        match run_spider(MistralHtmlSpider).await {
+            Ok(items) => all.extend(items),
+            Err(e) => eprintln!("  [warn] mistral-html failed: {e}"),
+        }
     }
     if run_all || matches!(provider, Provider::OpenAi) {
-        if let Ok(key) = std::env::var("OPENAI_API_KEY") {
-            all.extend(run_spider(OpenAiSpider::new(key)).await?);
-        } else {
-            tracing::warn!("OPENAI_API_KEY not set — skipping OpenAI spider");
+        println!("  Scraping openai...");
+        match run_spider(OpenAiSpider).await {
+            Ok(items) => all.extend(items),
+            Err(e) => eprintln!("  [warn] openai failed: {e}"),
         }
     }
     if run_all || matches!(provider, Provider::Cohere) {
-        if let Ok(key) = std::env::var("COHERE_API_KEY") {
-            all.extend(run_spider(CohereSpider::new(key)).await?);
-        } else {
-            tracing::warn!("COHERE_API_KEY not set — skipping Cohere spider");
+        println!("  Scraping cohere...");
+        match run_spider(CohereSpider).await {
+            Ok(items) => all.extend(items),
+            Err(e) => eprintln!("  [warn] cohere failed: {e}"),
         }
     }
     if run_all || matches!(provider, Provider::DeepSeek) {
-        if let Ok(key) = std::env::var("DEEPSEEK_API_KEY") {
-            all.extend(run_spider(DeepSeekSpider::new(key)).await?);
-        } else {
-            tracing::warn!("DEEPSEEK_API_KEY not set — skipping DeepSeek spider");
+        println!("  Scraping deepseek...");
+        match run_spider(DeepSeekSpider).await {
+            Ok(items) => all.extend(items),
+            Err(e) => eprintln!("  [warn] deepseek failed: {e}"),
+        }
+    }
+    if run_all || matches!(provider, Provider::Xai) {
+        println!("  Scraping xai...");
+        match run_spider(XaiSpider).await {
+            Ok(items) => all.extend(items),
+            Err(e) => eprintln!("  [warn] xai failed: {e}"),
+        }
+    }
+    if run_all || matches!(provider, Provider::Alibaba) {
+        println!("  Scraping alibaba...");
+        match run_spider(AlibabaSpider).await {
+            Ok(items) => all.extend(items),
+            Err(e) => eprintln!("  [warn] alibaba failed: {e}"),
+        }
+    }
+    if run_all || matches!(provider, Provider::Moonshot) {
+        println!("  Scraping moonshot...");
+        match run_spider(MoonshotSpider).await {
+            Ok(items) => all.extend(items),
+            Err(e) => eprintln!("  [warn] moonshot failed: {e}"),
+        }
+    }
+    if run_all || matches!(provider, Provider::Meta) {
+        println!("  Scraping meta...");
+        match run_spider(MetaSpider).await {
+            Ok(items) => all.extend(items),
+            Err(e) => eprintln!("  [warn] meta failed: {e}"),
+        }
+    }
+    if run_all || matches!(provider, Provider::Perplexity) {
+        println!("  Scraping perplexity...");
+        match run_spider(PerplexitySpider).await {
+            Ok(items) => all.extend(items),
+            Err(e) => eprintln!("  [warn] perplexity failed: {e}"),
+        }
+    }
+    if run_all || matches!(provider, Provider::ElevenLabs) {
+        println!("  Scraping elevenlabs...");
+        match run_spider(ElevenLabsSpider).await {
+            Ok(items) => all.extend(items),
+            Err(e) => eprintln!("  [warn] elevenlabs failed: {e}"),
         }
     }
 
