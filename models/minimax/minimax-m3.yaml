@@ -1,0 +1,33 @@
+id: minimax-m3
+provider: minimax
+display_name: MiniMax M3
+status: active
+release_date: 2026-06-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 1000000
+max_output_tokens: 131072
+modalities:
+  input: [text, image, video]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  streaming: true
+  json_mode: true
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop, response_format, tools]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.60
+  output: 2.40
+  pricing_notes: "Open-weight frontier model with 1M context, native multimodal, MSA architecture (15.6× faster decoding). 59% SWE-bench Pro."
+last_verified: 2026-06-04
+confidence: inferred
+endpoint_family: chat_completions
+sources:
+  - url: https://www.minimaxi.com
+    last_verified: 2026-06-04

@@ -1,11 +1,11 @@
 id: nova-premier-v1
 provider: amazon
 display_name: Amazon Nova Premier
-status: active
+status: deprecating
 release_date: 2025-04-01
-deprecation_date: null
-sunset_date: null
-replacement: null
+deprecation_date: 2026-09-14
+sunset_date: 2026-09-14
+replacement: nova-pro-v1
 context_window: 1000000
 max_output_tokens: 5120
 modalities:
