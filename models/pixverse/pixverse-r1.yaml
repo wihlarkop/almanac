@@ -1,0 +1,34 @@
+id: pixverse-r1
+provider: pixverse
+display_name: PixVerse R1
+status: active
+release_date: 2026-05-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4096
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [video]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, aspect_ratio, duration, seed]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_second: 0.15
+  pricing_notes: "Real-time world model with personalized avatar generation."
+last_verified: 2026-06-04
+confidence: inferred
+endpoint_family: video_generation
+sources:
+  - url: https://pixverse.ai
+    last_verified: 2026-06-04

@@ -1,11 +1,11 @@
 id: o3
 provider: openai
 display_name: o3
-status: active
+status: deprecating
 release_date: 2025-04-16
-deprecation_date: null
-sunset_date: null
-replacement: null
+deprecation_date: 2026-08-26
+sunset_date: 2026-08-26
+replacement: o3-pro
 context_window: 200000
 max_output_tokens: 100000
 modalities:

@@ -1,0 +1,34 @@
+id: mistral-small-4
+provider: mistral
+display_name: Mistral Small 4
+status: active
+release_date: 2026-03-16
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 128000
+max_output_tokens: 16384
+modalities:
+  input: [text, image]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  streaming: true
+  json_mode: true
+  thinking: true
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop, tools, response_format]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.10
+  output: 0.30
+  pricing_notes: "Unified model combining reasoning (Magistral), vision (Pixtral), and coding (Devstral) capabilities."
+last_verified: 2026-06-04
+confidence: inferred
+endpoint_family: chat_completions
+sources:
+  - url: https://mistral.ai/models
+    last_verified: 2026-06-04

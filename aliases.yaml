@@ -9,7 +9,7 @@ aliases:
   gpt-4-turbo-latest: gpt-4-turbo
   gpt-4-latest: gpt-4
   o1-latest: o1
-  o3-latest: o3
+  o3-latest: o3-pro
   o3-mini-latest: o3-mini
   o4-mini-latest: o4-mini
   o3-pro-latest: o3-pro
@@ -176,7 +176,7 @@ aliases:
   nova-micro-latest: nova-micro-v1
   nova-lite-latest: nova-lite-v1
   nova-pro-latest: nova-pro-v1
-  nova-premier-latest: nova-premier-v1
+  nova-premier-latest: nova-pro-v1
 
   # Inception AI shorthand aliases
   mercury-latest: mercury-2

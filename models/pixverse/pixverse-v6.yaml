@@ -1,0 +1,34 @@
+id: pixverse-v6
+provider: pixverse
+display_name: PixVerse V6
+status: active
+release_date: 2026-03-30
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4096
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [video]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, image_url, aspect_ratio, duration, resolution, seed, motion_mode]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_second: 0.20
+  pricing_notes: "20+ cinematic lens controls, multi-shot video, native audio, 1080p/15s."
+last_verified: 2026-06-04
+confidence: inferred
+endpoint_family: video_generation
+sources:
+  - url: https://pixverse.ai
+    last_verified: 2026-06-04

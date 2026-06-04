@@ -1,0 +1,33 @@
+id: lyria-3-pro-preview
+provider: google
+display_name: Lyria 3 Pro Preview
+status: active
+release_date: 2026-06-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 512
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [audio]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, duration_seconds, sample_rate]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  pricing_notes: "Full-length song generation up to ~184s on Vertex AI. Pro preview tier."
+last_verified: 2026-06-04
+confidence: official
+endpoint_family: music_generation
+sources:
+  - url: https://cloud.google.com/blog/products/ai-machine-learning/lyria-3-and-lyria-3-pro-on-vertex-ai
+    last_verified: 2026-06-04

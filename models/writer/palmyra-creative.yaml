@@ -1,11 +1,11 @@
 id: palmyra-creative
 provider: writer
 display_name: Palmyra Creative
-status: active
+status: deprecating
 release_date: null
-deprecation_date: null
-sunset_date: null
-replacement: null
+deprecation_date: 2026-07-13
+sunset_date: 2026-07-13
+replacement: palmyra-x5
 context_window: 131072
 max_output_tokens: 8192
 modalities:
