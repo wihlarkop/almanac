@@ -114,14 +114,17 @@ pub fn extract_model_ids(html: &str, provider: &str, source_url: &str) -> Vec<Sc
 
         let text: String = el.text().collect::<String>();
 
-        if id_attr == "__NEXT_DATA__" || type_attr == "application/json" {
-            // Parse as JSON and walk for model-ID-looking strings
-            if let Ok(json) = serde_json::from_str::<serde_json::Value>(&text) {
+        // Strategy 3 (inline script scanning) is intentionally disabled —
+        // it produces too many false positives from UI framework code.
+        let _ = src_attr;
+
+        let is_json_blob =
+            (id_attr == "__NEXT_DATA__" || type_attr == "application/json") && !text.is_empty();
+        if is_json_blob {
+            let parsed = serde_json::from_str::<serde_json::Value>(&text);
+            if let Ok(json) = parsed {
                 extract_from_json(&json, &mut |s| push(s.to_string()));
             }
-        } else if src_attr.is_none() && !text.is_empty() {
-            // Strategy 3: inline <script> content — scan quoted strings
-            extract_from_script_text(&text, &mut |s| push(s.to_string()));
         }
     }
 
@@ -200,26 +203,15 @@ fn extract_from_json(value: &serde_json::Value, push: &mut impl FnMut(&str)) {
     }
 }
 
-/// Scan raw script text for double-quoted strings that look like model IDs.
-/// Uses simple split-on-quote parsing — fast, no regex needed.
-fn extract_from_script_text(text: &str, push: &mut impl FnMut(&str)) {
-    let mut parts = text.split('"');
-    // Every other part is a quoted string (odd indices)
-    let mut in_string = false;
-    for part in &mut parts {
-        if in_string && looks_like_model_id(part) {
-            push(part);
-        }
-        in_string = !in_string;
-    }
-}
-
-/// Returns true if `s` looks like a model API identifier:
-/// - 5–80 characters
-/// - No spaces or slashes
+/// Returns true if `s` looks like a model API identifier.
+///
+/// Constraints (tuned to minimise false positives from docs page noise):
+/// - 5–80 characters, no spaces/slashes/newlines
 /// - Contains at least one hyphen, dot, or underscore
-/// - All chars are alphanumeric or `-`, `.`, `_`, `:`
-/// - Starts with a letter or digit
+/// - **All characters ASCII lowercase**, digits, or `-` `.` `_` `:`
+///   Uppercase rules out CSS class names, JS constants, React props,
+///   data attributes (`data-assistant-state`), timestamps (`2026-06-04T`)
+/// - Must not start with `data-` (HTML data attribute prefix)
 pub fn looks_like_model_id(s: &str) -> bool {
     if s.len() < 5 || s.len() > 80 {
         return false;
@@ -233,11 +225,14 @@ pub fn looks_like_model_id(s: &str) -> bool {
     if !s
         .chars()
         .next()
-        .map(|c| c.is_alphanumeric())
+        .map(|c| c.is_ascii_lowercase() || c.is_ascii_digit())
         .unwrap_or(false)
     {
         return false;
     }
+    if s.starts_with("data-") {
+        return false;
+    }
     s.chars()
-        .all(|c| c.is_alphanumeric() || matches!(c, '-' | '.' | '_' | ':'))
+        .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || matches!(c, '-' | '.' | '_' | ':'))
 }
