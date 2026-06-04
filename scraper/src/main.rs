@@ -1,28 +1,16 @@
-pub mod catalog;
-pub mod diff;
-pub mod engine;
-pub mod model;
-pub mod spider;
-pub mod spiders;
-pub mod writer;
-
-use anyhow::Result;
-use catalog::load_catalog;
-use clap::{Parser, ValueEnum};
-use diff::{DiffResult, diff};
-use engine::run_spider;
-use model::ScrapedModel;
-use spiders::{
-    anthropic::AnthropicSpider,
-    cohere::CohereSpider,
-    deepseek::DeepSeekSpider,
-    google::GoogleSpider,
-    mistral::MistralSpider,
-    openai::OpenAiSpider,
+use almanac_scraper::catalog::load_catalog;
+use almanac_scraper::diff::{DiffResult, diff};
+use almanac_scraper::engine::run_spider;
+use almanac_scraper::model::ScrapedModel;
+use almanac_scraper::spiders::{
+    anthropic::AnthropicSpider, cohere::CohereSpider, deepseek::DeepSeekSpider,
+    google::GoogleSpider, mistral::MistralSpider, openai::OpenAiSpider,
 };
+use almanac_scraper::writer::write_model;
+use anyhow::Result;
+use clap::{Parser, ValueEnum};
 use std::path::PathBuf;
 use time::OffsetDateTime;
-use writer::write_model;
 
 #[derive(Debug, Clone, ValueEnum)]
 enum Provider {
@@ -36,7 +24,10 @@ enum Provider {
 }
 
 #[derive(Parser, Debug)]
-#[command(name = "scraper", about = "Scrape AI provider pages and diff against the model catalog")]
+#[command(
+    name = "scraper",
+    about = "Scrape AI provider pages and diff against the model catalog"
+)]
 struct Args {
     #[arg(short, long, default_value = "all")]
     provider: Provider,

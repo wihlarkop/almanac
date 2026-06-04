@@ -1,16 +1,15 @@
 use crate::model::ScrapedModel;
-use async_trait::async_trait;
-use kumo::prelude::*;
+use crate::spider::{HtmlResponse, Spider, SpiderOutput};
+use anyhow::Result;
+use scraper::{Html, Selector};
 
 const START_URL: &str = "https://ai.google.dev/gemini-api/docs/models";
 const BASE: &str = "https://ai.google.dev";
 
 pub struct GoogleSpider;
 
-#[async_trait]
+#[async_trait::async_trait]
 impl Spider for GoogleSpider {
-    type Item = ScrapedModel;
-
     fn name(&self) -> &str {
         "google"
     }
@@ -19,115 +18,122 @@ impl Spider for GoogleSpider {
         vec![START_URL.into()]
     }
 
-    fn allowed_domains(&self) -> Vec<&str> {
-        vec!["ai.google.dev"]
-    }
+    async fn scrape(&self, res: &HtmlResponse<'_>) -> Result<SpiderOutput> {
+        let is_detail =
+            res.url.contains("/docs/models/gemini") || res.url.contains("/docs/models/gemma");
 
-    async fn parse(&self, res: &Response) -> Result<Output<Self::Item>, KumoError> {
-        let mut output = Output::new();
-
-        if res.url().contains("/docs/models/gemini") || res.url().contains("/docs/models/gemma") {
-            let id = res
-                .url()
-                .trim_end_matches('/')
-                .rsplit('/')
-                .next()
-                .unwrap_or("")
-                .to_string();
-
-            if !id.is_empty() {
-                let mut context_window = None;
-                let mut max_output_tokens = None;
-
-                for section in res.css("section").iter() {
-                    let label = section
-                        .css("b")
-                        .first()
-                        .map(|b| b.text().to_lowercase())
-                        .unwrap_or_default();
-                    let value = section
-                        .css("p")
-                        .iter()
-                        .nth(1)
-                        .map(|p| p.text())
-                        .unwrap_or_default();
-                    if label.contains("input token limit") {
-                        context_window = parse_token_count(value.trim());
-                    } else if label.contains("output token limit") {
-                        max_output_tokens = parse_token_count(value.trim());
-                    }
-                }
-
-                let model = ScrapedModel {
-                    id,
-                    provider: "google".into(),
-                    display_name: res.css("h1").first().map(|el| el.text().trim().to_string()),
-                    context_window,
-                    max_output_tokens,
-                    input_price: None,
-                    output_price: None,
-                    source_url: res.url().to_string(),
-                };
-                output = output.items(vec![model]);
-            }
+        if is_detail {
+            Ok(SpiderOutput::new().items(extract_model(res)))
         } else {
-            let links: Vec<String> = res
-                .css(r#"a[href*="/gemini-api/docs/models/"]"#)
-                .iter()
-                .filter_map(|el| el.attr("href"))
-                .filter(|href| {
-                    !href.ends_with("/models")
-                        && !href.contains('#')
-                        && (href.contains("/models/gemini") || href.contains("/models/gemma"))
-                })
-                .map(|href| {
-                    if href.starts_with("http") {
-                        href
-                    } else {
-                        format!("{}{}", BASE, href)
-                    }
-                })
-                .collect::<std::collections::HashSet<_>>()
-                .into_iter()
-                .collect();
-
-            for url in links {
-                output = output.follow(url);
-            }
+            Ok(SpiderOutput {
+                items: vec![],
+                follow_urls: extract_links(res),
+            })
         }
-
-        Ok(output)
     }
 }
 
+fn extract_model(res: &HtmlResponse<'_>) -> Vec<ScrapedModel> {
+    let id = res
+        .url
+        .trim_end_matches('/')
+        .rsplit('/')
+        .next()
+        .unwrap_or("")
+        .to_string();
+    if id.is_empty() {
+        return vec![];
+    }
+
+    let doc = Html::parse_document(res.body);
+    let section_sel = Selector::parse("section").unwrap();
+    let b_sel = Selector::parse("b").unwrap();
+    let p_sel = Selector::parse("p").unwrap();
+    let h1_sel = Selector::parse("h1").unwrap();
+
+    let mut context_window = None;
+    let mut max_output_tokens = None;
+
+    for section in doc.select(&section_sel) {
+        let label = section
+            .select(&b_sel)
+            .next()
+            .map(|b| b.text().collect::<String>().to_lowercase())
+            .unwrap_or_default();
+        let value = section
+            .select(&p_sel)
+            .nth(1)
+            .map(|p| p.text().collect::<String>())
+            .unwrap_or_default();
+
+        if label.contains("input token limit") {
+            context_window = parse_token_count(value.trim());
+        } else if label.contains("output token limit") {
+            max_output_tokens = parse_token_count(value.trim());
+        }
+    }
+
+    let display_name = doc
+        .select(&h1_sel)
+        .next()
+        .map(|el| el.text().collect::<String>().trim().to_string());
+
+    vec![ScrapedModel {
+        id,
+        provider: "google".into(),
+        display_name,
+        context_window,
+        max_output_tokens,
+        input_price: None,
+        output_price: None,
+        source_url: res.url.to_string(),
+    }]
+}
+
+fn extract_links(res: &HtmlResponse<'_>) -> Vec<String> {
+    let doc = Html::parse_document(res.body);
+    let sel = Selector::parse(r#"a[href*="/gemini-api/docs/models/"]"#).unwrap();
+    let mut seen = std::collections::HashSet::new();
+    let mut links = Vec::new();
+
+    for el in doc.select(&sel) {
+        if let Some(href) = el.value().attr("href") {
+            if href.contains('#') || href.ends_with("/models") {
+                continue;
+            }
+            let url = if href.starts_with("http") {
+                href.to_string()
+            } else {
+                format!("{BASE}{href}")
+            };
+            if seen.insert(url.clone()) {
+                links.push(url);
+            }
+        }
+    }
+    links
+}
+
 fn parse_token_count(text: &str) -> Option<u64> {
-    let trimmed = text.trim();
-    // Plain comma-separated integer: "1,048,576"
-    if let Ok(n) = trimmed.replace(',', "").parse::<u64>() {
+    if let Ok(n) = text.replace(',', "").parse::<u64>() {
         return Some(n);
     }
-    let lower = trimmed.to_lowercase();
-    // "1M", "1 million"
-    if let Some(m_pos) = lower.find('m') {
-        let before = lower[..m_pos].trim();
-        if let Some(n) = before
+    let lower = text.to_lowercase();
+    if let Some(n) = lower.find('m').and_then(|pos| {
+        lower[..pos]
             .split_whitespace()
             .last()
             .and_then(|s| s.replace(',', "").parse::<f64>().ok())
-        {
-            return Some((n * 1_000_000.0) as u64);
-        }
+    }) {
+        return Some((n * 1_000_000.0) as u64);
     }
-    // "128k"
-    if let Some(k_pos) = lower.find('k') {
-        let before = lower[..k_pos].trim();
-        if let Some(n) = before
+    if let Some(n) = lower.find('k').and_then(|pos| {
+        lower[..pos]
             .split_whitespace()
             .last()
             .and_then(|s| s.replace(',', "").parse::<f64>().ok())
-        {
-            return Some((n * 1_000.0) as u64);
-        }
+    }) {
+        return Some((n * 1_000.0) as u64);
     }
     None
 }
