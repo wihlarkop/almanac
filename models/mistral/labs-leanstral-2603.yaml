@@ -1,0 +1,33 @@
+id: labs-leanstral-2603
+provider: mistral
+display_name: Leanstral 2603
+status: active
+release_date: 2026-03-16
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 131072
+max_output_tokens: 131072
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: true
+  vision: false
+  streaming: true
+  json_mode: true
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop, tools, response_format]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  pricing_notes: "Available via Mistral Labs API (labs.mistral.ai). Specialized for Lean 4 formal proof generation and verification."
+last_verified: 2026-05-23
+confidence: community
+endpoint_family: chat_completions
+sources:
+  - url: https://docs.mistral.ai/models/model-cards/leanstral-26-03
+    last_verified: 2026-05-23

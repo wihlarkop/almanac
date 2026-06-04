@@ -1,0 +1,33 @@
+id: image-01
+provider: minimax
+display_name: Image-01
+status: active
+release_date: 2025-02-15
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 512
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [image]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, model, aspect_ratio, n, subject_reference]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_image: 0.06
+last_verified: 2026-05-23
+confidence: official
+endpoint_family: image_generation
+sources:
+  - url: https://platform.minimax.io/docs
+    last_verified: 2026-05-23

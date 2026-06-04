@@ -1,0 +1,34 @@
+id: minimax-hailuo-02
+provider: minimax
+display_name: MiniMax Hailuo-02
+status: active
+release_date: 2025-06-18
+deprecation_date: null
+sunset_date: null
+replacement: minimax-hailuo-2.3
+context_window: 2048
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [video]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [model, prompt, prompt_optimizer, first_frame_image, duration, resolution]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_second: 0.09
+  pricing_notes: "1080p, up to 10s video generation."
+last_verified: 2026-05-23
+confidence: official
+endpoint_family: video_generation
+sources:
+  - url: https://platform.minimax.io/docs
+    last_verified: 2026-05-23

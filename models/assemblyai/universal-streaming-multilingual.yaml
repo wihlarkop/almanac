@@ -1,0 +1,33 @@
+id: universal-streaming-multilingual
+provider: assemblyai
+display_name: Universal Streaming Multilingual
+status: active
+release_date: null
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 30
+max_output_tokens: 1
+modalities:
+  input: [audio]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+parameters:
+  supported: [speech_model, language_code, word_boost, encoding, sample_rate]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  pricing_notes: "Real-time streaming STT (English, Spanish, French, German, Italian, Portuguese)."
+last_verified: 2026-05-23
+confidence: official
+endpoint_family: transcription
+sources:
+  - url: https://www.assemblyai.com/docs/api-reference/streaming-api
+    last_verified: 2026-05-23

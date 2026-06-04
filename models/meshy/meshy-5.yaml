@@ -1,0 +1,33 @@
+id: meshy-5
+provider: meshy
+display_name: Meshy-5
+status: active
+release_date: null
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 512
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [image]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, negative_prompt, art_style, ai_model]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  pricing_notes: "3D model generation. Use ai_model: meshy-5 in API requests."
+last_verified: 2026-05-23
+confidence: official
+endpoint_family: mesh_generation
+sources:
+  - url: https://docs.meshy.ai
+    last_verified: 2026-05-23

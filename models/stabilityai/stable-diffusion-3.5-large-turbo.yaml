@@ -1,0 +1,37 @@
+id: stable-diffusion-3.5-large-turbo
+provider: stabilityai
+display_name: Stable Diffusion 3.5 Large Turbo
+status: active
+release_date: 2024-10-29
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 512
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [image]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+  inpainting: false
+parameters:
+  supported: [prompt, negative_prompt, image, strength, aspect_ratio, seed, output_format, model]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_image: 0.04
+  pricing_notes: "4-step distilled turbo variant. API param: sd3.5-large-turbo"
+last_verified: 2026-05-23
+confidence: official
+endpoint_family: image_generation
+sources:
+  - url: https://platform.stability.ai/docs/api-reference
+    last_verified: 2026-05-23
+  - url: https://stability.ai/core-models
+    last_verified: 2026-05-23

@@ -1,0 +1,33 @@
+id: solar-embedding-1-large-passage
+provider: upstage
+display_name: Solar Embedding 1 Large (Passage)
+status: active
+release_date: null
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4096
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [input, model]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.10
+  output: 0.00
+  pricing_notes: "Embedding model optimized for passage/document encoding in retrieval pipelines."
+last_verified: 2026-05-23
+confidence: official
+endpoint_family: embeddings
+sources:
+  - url: https://console.upstage.ai/docs/capabilities/embed
+    last_verified: 2026-05-23

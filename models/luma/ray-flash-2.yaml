@@ -1,12 +1,12 @@
-id: haiper-video-2
-provider: haiper
-display_name: Haiper Video 2
+id: ray-flash-2
+provider: luma
+display_name: Ray Flash 2
 status: active
-release_date: 2024-10-01
+release_date: null
 deprecation_date: null
 sunset_date: null
 replacement: null
-context_window: 2048
+context_window: 4096
 max_output_tokens: 1
 modalities:
   input: [text, image]
@@ -17,7 +17,7 @@ capabilities:
   streaming: false
   json_mode: false
 parameters:
-  supported: [prompt, image_url, duration, aspect_ratio, seed, resolution]
+  supported: [prompt, aspect_ratio, duration, keyframes, loop, callback_url]
   rejected: []
   deprecated_for_this_model: []
 pricing:
@@ -25,10 +25,10 @@ pricing:
   input: 0.00
   output: 0.00
   per_second: 0.05
-  pricing_notes: "Platform shut down February 2025 following acquisition. API no longer available."
-last_verified: 2026-05-11
-confidence: inferred
+  pricing_notes: "Faster, cheaper variant of Ray 2."
+last_verified: 2026-05-23
+confidence: official
 endpoint_family: video_generation
 sources:
-  - url: https://haiper.ai/api
-    last_verified: 2026-05-11
+  - url: https://docs.lumalabs.ai/docs/video-generation
+    last_verified: 2026-05-23

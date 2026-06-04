@@ -1,0 +1,34 @@
+id: flux-kontext-max
+provider: bfl
+display_name: FLUX Kontext Max
+status: active
+release_date: null
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4096
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [image]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, image, width, height, steps, guidance, seed, output_format]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_image: 0.08
+  pricing_notes: "Higher quality variant of Kontext with stronger image editing fidelity."
+last_verified: 2026-05-23
+confidence: official
+endpoint_family: image_generation
+sources:
+  - url: https://docs.bfl.ml
+    last_verified: 2026-05-23

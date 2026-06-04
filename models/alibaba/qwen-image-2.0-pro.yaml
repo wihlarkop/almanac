@@ -1,0 +1,34 @@
+id: qwen-image-2.0-pro
+provider: alibaba
+display_name: Qwen Image 2.0 Pro
+status: active
+release_date: 2026-04-23
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 512
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [image]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, negative_prompt, size, n, style]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_image: 0.04
+  pricing_notes: "Text-to-image generation via DashScope."
+last_verified: 2026-05-23
+confidence: community
+endpoint_family: image_generation
+sources:
+  - url: https://www.alibabacloud.com/help/en/model-studio/models
+    last_verified: 2026-05-23

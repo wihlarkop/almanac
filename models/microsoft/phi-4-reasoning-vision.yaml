@@ -1,0 +1,35 @@
+id: phi-4-reasoning-vision
+provider: microsoft
+display_name: Phi-4 Reasoning Vision
+status: active
+release_date: 2026-03-04
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 32768
+max_output_tokens: 32768
+modalities:
+  input: [text, image]
+  output: [text]
+capabilities:
+  tools: false
+  vision: true
+  streaming: true
+  json_mode: true
+  thinking: true
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 1.50
+  output: 4.00
+last_verified: 2026-05-23
+confidence: inferred
+endpoint_family: chat_completions
+sources:
+  - url: https://www.microsoft.com/en-us/research/blog/phi-4-reasoning-vision-and-the-lessons-of-training-a-multimodal-reasoning-model/
+    last_verified: 2026-05-23
+  - url: https://huggingface.co/microsoft/Phi-4-reasoning-vision-15B
+    last_verified: 2026-05-23

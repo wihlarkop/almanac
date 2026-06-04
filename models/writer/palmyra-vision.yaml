@@ -1,0 +1,33 @@
+id: palmyra-vision
+provider: writer
+display_name: Palmyra Vision
+status: active
+release_date: null
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 131072
+max_output_tokens: 8192
+modalities:
+  input: [text, image]
+  output: [text]
+capabilities:
+  tools: true
+  vision: true
+  streaming: true
+  json_mode: true
+parameters:
+  supported: [temperature, top_p, max_tokens, stream, stop, tools, response_format]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.80
+  output: 2.40
+  pricing_notes: "Vision-capable Palmyra model for document and image understanding."
+last_verified: 2026-05-24
+confidence: inferred
+endpoint_family: chat_completions
+sources:
+  - url: https://dev.writer.com/api-guides/models
+    last_verified: 2026-05-24

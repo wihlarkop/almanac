@@ -1,0 +1,35 @@
+id: gemini-2.5-pro-preview-tts
+provider: google
+display_name: Gemini 2.5 Pro Text-to-Speech
+status: active
+release_date: null
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 8192
+max_output_tokens: 16384
+modalities:
+  input: [text]
+  output: [audio]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+  prompt_caching: false
+  thinking: false
+parameters:
+  supported: []
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  pricing_notes: "Pricing not yet published. Check https://ai.google.dev/gemini-api/pricing"
+last_verified: 2026-05-23
+confidence: community
+endpoint_family: speech
+sources:
+  - url: https://ai.google.dev/gemini-api/docs/models/gemini-2.5-pro-preview-tts
+    last_verified: 2026-05-23

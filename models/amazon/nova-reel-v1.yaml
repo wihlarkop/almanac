@@ -1,0 +1,35 @@
+id: nova-reel-v1
+provider: amazon
+display_name: Amazon Nova Reel
+status: active
+release_date: 2024-12-03
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 512
+max_output_tokens: 1
+modalities:
+  input: [text, image]
+  output: [video]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, seed, duration, dimension]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  pricing_notes: "$0.72 per 6-second clip (1280x720). Bedrock model ID: amazon.nova-reel-v1:0"
+last_verified: 2026-05-23
+confidence: official
+endpoint_family: video_generation
+sources:
+  - url: https://aws.amazon.com/nova/
+    last_verified: 2026-05-23
+  - url: https://aws.amazon.com/nova/pricing/
+    last_verified: 2026-05-23

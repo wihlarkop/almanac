@@ -1,0 +1,34 @@
+id: ideogram-2a
+provider: ideogram
+display_name: Ideogram 2a
+status: active
+release_date: 2024-10-30
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 512
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [image]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [prompt, aspect_ratio, model, magic_prompt_option, negative_prompt, seed, style_type]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_image: 0.04
+  pricing_notes: "Lighter, faster variant of Ideogram 2.0. API model ID: V_2A"
+last_verified: 2026-05-23
+confidence: official
+endpoint_family: image_generation
+sources:
+  - url: https://docs.ideogram.ai/using-ideogram/generation-settings/available-models
+    last_verified: 2026-05-23

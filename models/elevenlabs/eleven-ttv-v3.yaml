@@ -1,0 +1,33 @@
+id: eleven-ttv-v3
+provider: elevenlabs
+display_name: Eleven Text-to-Voice v3
+status: active
+release_date: null
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 5000
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [audio]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [text, voice_description]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  pricing_notes: "Voice design/generation model — creates new voice profiles from text descriptions."
+last_verified: 2026-05-23
+confidence: official
+endpoint_family: speech
+sources:
+  - url: https://elevenlabs.io/docs/api-reference
+    last_verified: 2026-05-23

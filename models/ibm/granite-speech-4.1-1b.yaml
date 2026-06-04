@@ -1,0 +1,33 @@
+id: granite-speech-4.1-1b
+provider: ibm
+display_name: Granite Speech 4.1 1B
+status: active
+release_date: 2026-04-01
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 30
+max_output_tokens: 1
+modalities:
+  input: [audio]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+parameters:
+  supported: [audio, language]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  pricing_notes: "Available via IBM watsonx.ai. Apache 2.0 open weights. Speech-to-text transcription model."
+last_verified: 2026-05-23
+confidence: inferred
+endpoint_family: transcription
+sources:
+  - url: https://www.ibm.com/granite/docs/models/granite4-1
+    last_verified: 2026-05-23

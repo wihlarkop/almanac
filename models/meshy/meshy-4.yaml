@@ -1,11 +1,11 @@
 id: meshy-4
 provider: meshy
 display_name: Meshy 4
-status: active
+status: deprecated
 release_date: 2025-01-01
-deprecation_date: null
+deprecation_date: 2026-04-01
 sunset_date: null
-replacement: null
+replacement: meshy-5
 context_window: 2048
 max_output_tokens: 1
 modalities:

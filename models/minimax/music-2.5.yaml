@@ -1,0 +1,33 @@
+id: music-2.5
+provider: minimax
+display_name: Music-2.5
+status: active
+release_date: 2026-01-16
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 512
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [audio]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [model, prompt, lyrics, genre, duration]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  pricing_notes: "Latest MiniMax music generation model."
+last_verified: 2026-05-23
+confidence: official
+endpoint_family: music_generation
+sources:
+  - url: https://platform.minimax.io/docs
+    last_verified: 2026-05-23
