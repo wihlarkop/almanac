@@ -10,8 +10,13 @@ name = "scraper"
 path = "src/main.rs"
 
 [dependencies]
-# Scraping framework
-kumo = { version = "0.3.2", features = ["derive"] }
+# HTTP client
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json"] }
+
+# HTML parsing
+scraper = "0.23"
+
+# Async trait support (mirrors kumo's interface for easy future migration)
 async-trait = "0.1"
 
 # CLI
