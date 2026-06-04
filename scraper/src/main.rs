@@ -3,34 +3,149 @@ use almanac_scraper::diff::{DiffResult, diff};
 use almanac_scraper::engine::run_spider;
 use almanac_scraper::model::ScrapedModel;
 use almanac_scraper::spiders::{
-    anthropic::AnthropicSpider, cohere::CohereSpider, deepseek::DeepSeekSpider,
-    google::GoogleSpider, mistral::MistralSpider, openai::OpenAiSpider,
+    alibaba::AlibabaSpider, anthropic::AnthropicSpider, cohere::CohereSpider,
+    deepseek::DeepSeekSpider, doc_page::DocPageSpider, elevenlabs::ElevenLabsSpider,
+    google::GoogleSpider, meta::MetaSpider, mistral::MistralSpider,
+    mistral_html::MistralHtmlSpider, moonshot::MoonshotSpider, openai::OpenAiSpider,
+    perplexity::PerplexitySpider, xai::XaiSpider,
 };
 use almanac_scraper::writer::write_model;
 use anyhow::Result;
-use clap::{Parser, ValueEnum};
+use clap::Parser;
 use std::path::PathBuf;
 use time::OffsetDateTime;
 
-#[derive(Debug, Clone, ValueEnum)]
-enum Provider {
-    Anthropic,
-    Cohere,
-    DeepSeek,
-    Google,
-    Mistral,
-    OpenAi,
-    All,
-}
+/// Providers with custom HTML spiders (need filtering or multi-page crawl).
+/// All others are handled automatically by SIMPLE_PROVIDERS below.
+const CUSTOM_PROVIDERS: &[&str] = &[
+    "anthropic",
+    "google",
+    "mistral",
+    "openai",
+    "cohere",
+    "deepseek",
+    "xai",
+    "alibaba",
+    "moonshot",
+    "meta",
+    "perplexity",
+    "elevenlabs",
+];
+
+/// Simple providers: scraped with a single public docs URL, no custom logic.
+/// Model IDs are extracted from <code> elements via the generic heuristic.
+const SIMPLE_PROVIDERS: &[(&str, &str)] = &[
+    (
+        "adobe",
+        "https://developer.adobe.com/firefly-api/docs/guides/models/",
+    ),
+    ("ai21", "https://docs.ai21.com/docs/overview"),
+    (
+        "amazon",
+        "https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html",
+    ),
+    ("assemblyai", "https://www.assemblyai.com/docs/models"),
+    (
+        "baidu",
+        "https://qianfan.cloud.baidu.com/doc/WENXINWORKSHOP/s/Nlks5zkzu",
+    ),
+    ("bfl", "https://docs.bfl.ml/"),
+    ("bytedance", "https://www.volcengine.com/docs/82379/1382513"),
+    (
+        "cartesia",
+        "https://docs.cartesia.ai/build-with-cartesia/tts-models/api-changes",
+    ),
+    (
+        "deepgram",
+        "https://developers.deepgram.com/docs/models-languages-overview",
+    ),
+    ("fireworks", "https://fireworks.ai/models"),
+    (
+        "heygen",
+        "https://docs.heygen.com/reference/list-avatars-v2",
+    ),
+    ("hidream", "https://www.hidream.ai/"),
+    (
+        "ibm",
+        "https://www.ibm.com/products/watsonx-ai/foundation-models",
+    ),
+    (
+        "ideogram",
+        "https://developer.ideogram.ai/api-reference/api-reference/generate",
+    ),
+    ("inception", "https://docs.inceptionlabs.ai/"),
+    (
+        "inflection",
+        "https://developers.inflection.ai/docs/introduction",
+    ),
+    ("inworld", "https://docs.inworld.ai/docs/tutorial-text/v2/"),
+    ("jina", "https://jina.ai/models/"),
+    ("kling", "https://klingai.com/"),
+    ("leonardo", "https://docs.leonardo.ai/"),
+    ("lightricks", "https://docs.ltx.video/"),
+    ("lmnt", "https://docs.lmnt.com/"),
+    ("luma", "https://docs.lumalabs.ai/"),
+    ("meshy", "https://docs.meshy.ai/"),
+    (
+        "microsoft",
+        "https://azure.microsoft.com/en-us/products/phi/",
+    ),
+    (
+        "minimax",
+        "https://platform.minimaxi.com/document/model-introduction",
+    ),
+    ("naver", "https://clovastudio.stream.naver.com/docs"),
+    ("nomic", "https://www.nomic.ai/atlas"),
+    ("nvidia", "https://build.nvidia.com/explore/discover"),
+    ("pika", "https://pika.art/"),
+    ("pixverse", "https://pixverse.ai/"),
+    ("playht", "https://docs.play.ai/documentation/rest-api"),
+    ("recraft", "https://www.recraft.ai/docs"),
+    ("reka", "https://docs.reka.ai/"),
+    ("reve", "https://reveai.com/"),
+    ("runway", "https://docs.runwayml.com/"),
+    (
+        "snowflake",
+        "https://docs.snowflake.com/en/user-guide/snowflake-cortex/llm-functions",
+    ),
+    (
+        "stabilityai",
+        "https://platform.stability.ai/docs/api-reference",
+    ),
+    (
+        "stepfun",
+        "https://platform.stepfun.com/docs/overview/concept",
+    ),
+    ("suno", "https://suno.com/"),
+    ("synthesia", "https://docs.synthesia.io/"),
+    (
+        "tencent",
+        "https://cloud.tencent.com/document/product/1729/104753",
+    ),
+    ("tripo", "https://platform.tripo3d.ai/docs"),
+    ("udio", "https://www.udio.com/"),
+    (
+        "upstage",
+        "https://developers.upstage.ai/docs/apis/model-overview",
+    ),
+    ("vidu", "https://platform.vidu.studio/docs"),
+    ("voyageai", "https://docs.voyageai.com/docs/embeddings"),
+    ("writer", "https://dev.writer.com/api-guides/models"),
+    ("xiaomi", "https://github.com/MiMo-ai"),
+    ("yi", "https://platform.lingyiwanwu.com/docs"),
+    ("zai", "https://docs.z.ai/"),
+];
 
 #[derive(Parser, Debug)]
 #[command(
     name = "scraper",
-    about = "Scrape AI provider pages and diff against the model catalog"
+    about = "Scrape AI provider docs pages and diff against the model catalog"
 )]
 struct Args {
+    /// Provider name to scrape, or "all" to run every provider sequentially.
+    /// Examples: anthropic, openai, google, mistral, all
     #[arg(short, long, default_value = "all")]
-    provider: Provider,
+    provider: String,
 
     #[arg(short, long, default_value = ".")]
     root: PathBuf,
@@ -51,7 +166,7 @@ async fn main() -> Result<()> {
     let catalog = load_catalog(&models_dir)?;
     println!("Loaded {} models from catalog.", catalog.len());
 
-    let scraped = run_spiders(&args.provider).await?;
+    let scraped = run_all_spiders(&args.provider).await?;
     println!("Scraped {} models from provider pages.", scraped.len());
 
     let results = diff(&scraped, &catalog);
@@ -98,38 +213,66 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn run_spiders(provider: &Provider) -> Result<Vec<ScrapedModel>> {
+/// Runs spiders sequentially — one provider at a time, no parallelism.
+/// Each provider is isolated: failures are logged but never block the rest.
+async fn run_all_spiders(provider: &str) -> Result<Vec<ScrapedModel>> {
     let mut all = Vec::new();
-    let run_all = matches!(provider, Provider::All);
+    let run_all = provider == "all";
 
-    if run_all || matches!(provider, Provider::Anthropic) {
-        all.extend(run_spider(AnthropicSpider).await?);
+    // ── Custom spiders ────────────────────────────────────────────────────────
+    macro_rules! run_custom {
+        ($name:expr, $spider:expr) => {
+            if run_all || provider == $name {
+                println!("  Scraping {}...", $name);
+                match run_spider($spider).await {
+                    Ok(items) => all.extend(items),
+                    Err(e) => eprintln!("  [warn] {} failed: {e}", $name),
+                }
+            }
+        };
     }
-    if run_all || matches!(provider, Provider::Google) {
-        all.extend(run_spider(GoogleSpider).await?);
-    }
-    if run_all || matches!(provider, Provider::Mistral) {
-        all.extend(run_spider(MistralSpider).await?);
-    }
-    if run_all || matches!(provider, Provider::OpenAi) {
-        if let Ok(key) = std::env::var("OPENAI_API_KEY") {
-            all.extend(run_spider(OpenAiSpider::new(key)).await?);
-        } else {
-            tracing::warn!("OPENAI_API_KEY not set — skipping OpenAI spider");
+
+    run_custom!("anthropic", AnthropicSpider);
+    run_custom!("google", GoogleSpider);
+    run_custom!("mistral", MistralSpider);
+    run_custom!("mistral", MistralHtmlSpider); // multi-page model-cards variant
+    run_custom!("openai", OpenAiSpider);
+    run_custom!("cohere", CohereSpider);
+    run_custom!("deepseek", DeepSeekSpider);
+    run_custom!("xai", XaiSpider);
+    run_custom!("alibaba", AlibabaSpider);
+    run_custom!("moonshot", MoonshotSpider);
+    run_custom!("meta", MetaSpider);
+    run_custom!("perplexity", PerplexitySpider);
+    run_custom!("elevenlabs", ElevenLabsSpider);
+
+    // ── Simple providers (DocPageSpider) ──────────────────────────────────────
+    for &(name, url) in SIMPLE_PROVIDERS {
+        if run_all || provider == name {
+            println!("  Scraping {name}...");
+            match run_spider(DocPageSpider {
+                provider: name,
+                start_url: url,
+            })
+            .await
+            {
+                Ok(items) => all.extend(items),
+                Err(e) => eprintln!("  [warn] {name} failed: {e}"),
+            }
         }
     }
-    if run_all || matches!(provider, Provider::Cohere) {
-        if let Ok(key) = std::env::var("COHERE_API_KEY") {
-            all.extend(run_spider(CohereSpider::new(key)).await?);
-        } else {
-            tracing::warn!("COHERE_API_KEY not set — skipping Cohere spider");
-        }
-    }
-    if run_all || matches!(provider, Provider::DeepSeek) {
-        if let Ok(key) = std::env::var("DEEPSEEK_API_KEY") {
-            all.extend(run_spider(DeepSeekSpider::new(key)).await?);
-        } else {
-            tracing::warn!("DEEPSEEK_API_KEY not set — skipping DeepSeek spider");
+
+    if !run_all && all.is_empty() {
+        let known: Vec<&str> = CUSTOM_PROVIDERS
+            .iter()
+            .copied()
+            .chain(SIMPLE_PROVIDERS.iter().map(|(name, _)| *name))
+            .collect();
+        if !known.contains(&provider) {
+            eprintln!(
+                "Unknown provider '{provider}'. Use 'all' or one of: {}",
+                known.join(", ")
+            );
         }
     }
 

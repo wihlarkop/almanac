@@ -2,19 +2,19 @@ use crate::spider::{HtmlResponse, Spider, SpiderOutput};
 use crate::spiders::doc_page::extract_model_ids;
 use anyhow::Result;
 
-pub struct DeepSeekSpider;
+pub struct PerplexitySpider;
 
 #[async_trait::async_trait]
-impl Spider for DeepSeekSpider {
+impl Spider for PerplexitySpider {
     fn name(&self) -> &str {
-        "deepseek"
+        "perplexity"
     }
 
     fn start_urls(&self) -> Vec<String> {
-        vec!["https://api-docs.deepseek.com/quick_start/pricing".into()]
+        vec!["https://docs.perplexity.ai/guides/model-cards".into()]
     }
 
     async fn scrape(&self, res: &HtmlResponse<'_>) -> Result<SpiderOutput> {
-        Ok(SpiderOutput::new().items(extract_model_ids(res.body, "deepseek", res.url)))
+        Ok(SpiderOutput::new().items(extract_model_ids(res.body, "perplexity", res.url)))
     }
 }

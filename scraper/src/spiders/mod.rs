@@ -1,6 +1,14 @@
+pub mod alibaba;
 pub mod anthropic;
 pub mod cohere;
 pub mod deepseek;
+pub mod doc_page;
+pub mod elevenlabs;
 pub mod google;
+pub mod meta;
 pub mod mistral;
+pub mod mistral_html;
+pub mod moonshot;
 pub mod openai;
+pub mod perplexity;
+pub mod xai;

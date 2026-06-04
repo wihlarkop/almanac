@@ -4,23 +4,75 @@ on:
   workflow_dispatch:
     inputs:
       provider:
-        description: "Provider to scrape (or 'all')"
+        description: "Provider name to scrape, or 'all'"
         required: false
         default: "all"
         type: choice
         options:
           - all
+          - adobe
+          - ai21
+          - alibaba
+          - amazon
           - anthropic
-          - google
-          - mistral
-          - open-ai
+          - assemblyai
+          - baidu
+          - bfl
+          - bytedance
+          - cartesia
           - cohere
-          - deep-seek
-      write:
-        description: "Write new model YAMLs to models/ (does not commit)"
-        required: false
-        default: "true"
-        type: boolean
+          - deepgram
+          - deepseek
+          - elevenlabs
+          - fireworks
+          - google
+          - heygen
+          - hidream
+          - ibm
+          - ideogram
+          - inception
+          - inflection
+          - inworld
+          - jina
+          - kling
+          - leonardo
+          - lightricks
+          - lmnt
+          - luma
+          - meshy
+          - meta
+          - microsoft
+          - minimax
+          - mistral
+          - moonshot
+          - naver
+          - nomic
+          - nvidia
+          - openai
+          - perplexity
+          - pika
+          - pixverse
+          - playht
+          - recraft
+          - reka
+          - reve
+          - runway
+          - snowflake
+          - stabilityai
+          - stepfun
+          - suno
+          - synthesia
+          - tencent
+          - tripo
+          - udio
+          - upstage
+          - vidu
+          - voyageai
+          - writer
+          - xai
+          - xiaomi
+          - yi
+          - zai
 
 concurrency:
   group: scraper
@@ -29,11 +81,17 @@ concurrency:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   scrape:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - uses: dtolnay/rust-toolchain@1.95.0
 
@@ -43,29 +101,66 @@ jobs:
         run: cargo build -p almanac-scraper --release
 
       - name: Run scraper
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
-          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: |
-          WRITE_FLAG=""
-          if [ "${{ inputs.write }}" = "true" ]; then
-            WRITE_FLAG="--write"
-          fi
           ./target/release/scraper \
             --provider ${{ inputs.provider }} \
             --root . \
-            $WRITE_FLAG
+            --write
 
-      - name: Show changed files
+      - name: Validate new files
+        run: cargo run -p almanac-validator
+
+      - name: Check for new model files
+        id: check_changes
         run: |
-          echo "=== New/modified model files ==="
-          git status --short models/ || true
+          NEW_FILES=$(git status --short models/ | grep "^?" | wc -l | tr -d ' ')
+          MODIFIED=$(git status --short models/ aliases.yaml | grep -v "^?" | wc -l | tr -d ' ')
+          echo "new_files=$NEW_FILES" >> $GITHUB_OUTPUT
+          echo "modified=$MODIFIED" >> $GITHUB_OUTPUT
+          echo "has_changes=$(( NEW_FILES + MODIFIED > 0 ))" >> $GITHUB_OUTPUT
+          echo "New: $NEW_FILES, Modified: $MODIFIED"
 
-      - name: Upload new models as artifact
-        if: ${{ inputs.write == 'true' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: new-models-${{ github.run_id }}
-          path: models/
-          if-no-files-found: warn
+      - name: Create branch, commit, and open PR
+        if: steps.check_changes.outputs.has_changes == '1'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          DATE=$(date +%Y-%m-%d)
+          BRANCH="chore/scraper-${{ inputs.provider }}-${DATE}"
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout -b "$BRANCH"
+          git add models/ aliases.yaml 2>/dev/null || git add models/
+          git commit -m "chore(catalog): scraper run — ${{ inputs.provider }} ${DATE}"
+
+          git push origin "$BRANCH"
+
+          NEW_COUNT=${{ steps.check_changes.outputs.new_files }}
+          MOD_COUNT=${{ steps.check_changes.outputs.modified }}
+
+          gh pr create \
+            --title "chore(catalog): scraper run — ${{ inputs.provider }} ${DATE}" \
+            --body "## Scraper auto-PR
+
+          Triggered by \`workflow_dispatch\` on **${{ inputs.provider }}** — ${DATE}.
+
+          | | Count |
+          |---|---|
+          | New model stubs | ${NEW_COUNT} |
+          | Updated entries | ${MOD_COUNT} |
+
+          ### Review checklist
+          - [ ] Spot-check a few new model IDs look correct
+          - [ ] Validator passed (confirmed by CI step above)
+          - [ ] Merge when happy
+
+          > Generated by the almanac scraper. All files passed \`almanac-validator\` before this PR was opened." \
+            --draft \
+            --base main \
+            --head "$BRANCH"
+
+      - name: No changes found
+        if: steps.check_changes.outputs.has_changes == '0'
+        run: echo "No new or modified model files found — catalog is already up to date."
