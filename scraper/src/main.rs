@@ -35,104 +35,156 @@ const CUSTOM_PROVIDERS: &[&str] = &[
 /// Simple providers: scraped with a single public docs URL, no custom logic.
 /// Model IDs are extracted from <code> elements via the generic heuristic.
 const SIMPLE_PROVIDERS: &[(&str, &str)] = &[
+    // Adobe Firefly — static HTML docs
     (
         "adobe",
         "https://developer.adobe.com/firefly-api/docs/guides/models/",
     ),
+    // AI21 Labs — Mintlify static docs
     ("ai21", "https://docs.ai21.com/docs/overview"),
+    // Amazon Bedrock — AWS static docs page with full model table
     (
         "amazon",
         "https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html",
     ),
+    // AssemblyAI — static docs
     ("assemblyai", "https://www.assemblyai.com/docs/models"),
+    // Baidu ERNIE — Qianfan platform docs
     (
         "baidu",
         "https://qianfan.cloud.baidu.com/doc/WENXINWORKSHOP/s/Nlks5zkzu",
     ),
+    // Black Forest Labs — FLUX model docs
     ("bfl", "https://docs.bfl.ml/"),
+    // ByteDance Doubao — Volcengine model list
     ("bytedance", "https://www.volcengine.com/docs/82379/1382513"),
+    // Cartesia — static Mintlify docs
     (
         "cartesia",
         "https://docs.cartesia.ai/build-with-cartesia/tts-models/api-changes",
     ),
+    // Deepgram — static docs with model table
     (
         "deepgram",
         "https://developers.deepgram.com/docs/models-languages-overview",
     ),
     ("fireworks", "https://fireworks.ai/models"),
-    (
-        "heygen",
-        "https://docs.heygen.com/reference/list-avatars-v2",
-    ),
+    ("heygen", "https://docs.heygen.com/reference/list-voices-v2"),
+    // HiDream — homepage (docs not yet public)
     ("hidream", "https://www.hidream.ai/"),
+    // IBM Granite — Watson X docs with model list
     (
         "ibm",
-        "https://www.ibm.com/products/watsonx-ai/foundation-models",
+        "https://www.ibm.com/docs/en/watsonx/saas?topic=solutions-supported-foundation-models",
     ),
+    // Ideogram — developer API reference
     (
         "ideogram",
         "https://developer.ideogram.ai/api-reference/api-reference/generate",
     ),
+    // Inception Labs — static docs
     ("inception", "https://docs.inceptionlabs.ai/"),
+    // Inflection — developer portal (Mintlify)
     (
         "inflection",
         "https://developers.inflection.ai/docs/introduction",
     ),
+    // Inworld — static docs
     ("inworld", "https://docs.inworld.ai/docs/tutorial-text/v2/"),
+    // Jina AI — models landing page
     ("jina", "https://jina.ai/models/"),
+    // Kling — model docs (Kuaishou)
     ("kling", "https://klingai.com/"),
+    // Leonardo — static developer docs
     ("leonardo", "https://docs.leonardo.ai/"),
+    // Lightricks LTX — static docs
     ("lightricks", "https://docs.ltx.video/"),
+    // LMNT — static developer docs
     ("lmnt", "https://docs.lmnt.com/"),
+    // Luma AI — static docs
     ("luma", "https://docs.lumalabs.ai/"),
+    // Meshy — 3D model static docs
     ("meshy", "https://docs.meshy.ai/"),
+    // Microsoft — Azure AI model catalog (static HTML)
     (
         "microsoft",
-        "https://azure.microsoft.com/en-us/products/phi/",
+        "https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models",
     ),
+    // MiniMax — platform docs
     (
         "minimax",
         "https://platform.minimaxi.com/document/model-introduction",
     ),
+    // Naver HyperCLOVA — CLOVA Studio docs
     ("naver", "https://clovastudio.stream.naver.com/docs"),
-    ("nomic", "https://www.nomic.ai/atlas"),
-    ("nvidia", "https://build.nvidia.com/explore/discover"),
+    // Nomic — static docs (embed models)
+    (
+        "nomic",
+        "https://docs.nomic.ai/reference/endpoints/nomic-embed-text",
+    ),
+    // NVIDIA NIM — supported models static page
+    (
+        "nvidia",
+        "https://docs.nvidia.com/nim/large-language-models/latest/supported-models.html",
+    ),
+    // Pika Labs — model info page
     ("pika", "https://pika.art/"),
-    ("pixverse", "https://pixverse.ai/"),
+    // PixVerse — API docs
+    ("pixverse", "https://docs.pixverse.ai/"),
+    // PlayHT — static API docs (Mintlify)
     ("playht", "https://docs.play.ai/documentation/rest-api"),
+    // Recraft — static developer docs
     ("recraft", "https://www.recraft.ai/docs"),
+    // Reka — static docs
     ("reka", "https://docs.reka.ai/"),
+    // Reve AI — docs
     ("reve", "https://reveai.com/"),
+    // Runway — static developer docs
     ("runway", "https://docs.runwayml.com/"),
+    // Snowflake Cortex — static AWS-style docs
     (
         "snowflake",
         "https://docs.snowflake.com/en/user-guide/snowflake-cortex/llm-functions",
     ),
+    // Stability AI — static API reference
     (
         "stabilityai",
         "https://platform.stability.ai/docs/api-reference",
     ),
+    // StepFun — platform docs
     (
         "stepfun",
         "https://platform.stepfun.com/docs/overview/concept",
     ),
+    // Suno — AI music (no public API docs yet)
     ("suno", "https://suno.com/"),
+    // Synthesia — static docs
     ("synthesia", "https://docs.synthesia.io/"),
+    // Tencent Hunyuan — cloud docs
     (
         "tencent",
         "https://cloud.tencent.com/document/product/1729/104753",
     ),
+    // Tripo 3D — static docs
     ("tripo", "https://platform.tripo3d.ai/docs"),
+    // Udio — AI music (no public API docs yet)
     ("udio", "https://www.udio.com/"),
+    // Upstage Solar — Mintlify static docs
     (
         "upstage",
         "https://developers.upstage.ai/docs/apis/model-overview",
     ),
+    // Vidu — video gen docs
     ("vidu", "https://platform.vidu.studio/docs"),
+    // Voyage AI — static Mintlify docs
     ("voyageai", "https://docs.voyageai.com/docs/embeddings"),
+    // Writer Palmyra — static dev docs
     ("writer", "https://dev.writer.com/api-guides/models"),
-    ("xiaomi", "https://github.com/MiMo-ai"),
+    // Xiaomi MiMo — GitHub page (model cards in README)
+    ("xiaomi", "https://github.com/MiMo-ai/MiMo"),
+    // Yi / 01.AI — developer platform docs
     ("yi", "https://platform.lingyiwanwu.com/docs"),
+    // Z.AI GLM — static docs
     ("zai", "https://docs.z.ai/"),
 ];
 

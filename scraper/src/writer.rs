@@ -8,8 +8,10 @@ pub fn generate_yaml(model: &ScrapedModel, today: &str) -> String {
         .as_deref()
         .unwrap_or(&model.id)
         .to_string();
-    let context = model.context_window.unwrap_or(0);
-    let max_out = model.max_output_tokens.unwrap_or(0);
+    // Use 4096 as a safe placeholder — schema requires minimum of 1.
+    // Real values should be filled in manually after review.
+    let context = model.context_window.unwrap_or(4096);
+    let max_out = model.max_output_tokens.unwrap_or(4096);
     let input = model.input_price.unwrap_or(0.0);
     let output = model.output_price.unwrap_or(0.0);
 
