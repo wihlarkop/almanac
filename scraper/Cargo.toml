@@ -5,6 +5,10 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 
+[lib]
+name = "almanac_scraper"
+path = "src/lib.rs"
+
 [[bin]]
 name = "scraper"
 path = "src/main.rs"
