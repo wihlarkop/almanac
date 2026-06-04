@@ -43,8 +43,8 @@ pricing:
   input: {input}
   output: {output}
 last_verified: {today}
-confidence: scraped
-endpoint_family: unknown
+confidence: inferred
+endpoint_family: chat_completions
 sources:
   - url: {source_url}
     last_verified: {today}

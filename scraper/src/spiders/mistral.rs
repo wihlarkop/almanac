@@ -1,16 +1,15 @@
 use crate::model::ScrapedModel;
-use async_trait::async_trait;
-use kumo::prelude::*;
+use crate::spider::{HtmlResponse, Spider, SpiderOutput};
+use anyhow::Result;
+use scraper::{Html, Selector};
 
 const START_URL: &str = "https://docs.mistral.ai/getting-started/models/models_overview/";
 const BASE: &str = "https://docs.mistral.ai";
 
 pub struct MistralSpider;
 
-#[async_trait]
+#[async_trait::async_trait]
 impl Spider for MistralSpider {
-    type Item = ScrapedModel;
-
     fn name(&self) -> &str {
         "mistral"
     }
@@ -19,63 +18,69 @@ impl Spider for MistralSpider {
         vec![START_URL.into()]
     }
 
-    fn allowed_domains(&self) -> Vec<&str> {
-        vec!["docs.mistral.ai"]
+    async fn scrape(&self, res: &HtmlResponse<'_>) -> Result<SpiderOutput> {
+        if res.url.contains("/model-cards/") {
+            Ok(SpiderOutput::new().items(extract_model(res)))
+        } else {
+            Ok(SpiderOutput {
+                items: vec![],
+                follow_urls: extract_links(res),
+            })
+        }
+    }
+}
+
+fn extract_model(res: &HtmlResponse<'_>) -> Vec<ScrapedModel> {
+    let id = res
+        .url
+        .trim_end_matches('/')
+        .rsplit('/')
+        .next()
+        .unwrap_or("")
+        .to_string();
+    if id.is_empty() {
+        return vec![];
     }
 
-    async fn parse(&self, res: &Response) -> Result<Output<Self::Item>, KumoError> {
-        let mut output = Output::new();
+    let doc = Html::parse_document(res.body);
+    let h1_sel = Selector::parse("h1").unwrap();
+    let display_name = doc
+        .select(&h1_sel)
+        .next()
+        .map(|el| el.text().collect::<String>().trim().to_string());
 
-        if res.url().contains("/model-cards/") {
-            let id = res
-                .url()
-                .trim_end_matches('/')
-                .rsplit('/')
-                .next()
-                .unwrap_or("")
-                .to_string();
+    vec![ScrapedModel {
+        id,
+        provider: "mistral".into(),
+        display_name,
+        context_window: None,
+        max_output_tokens: None,
+        input_price: None,
+        output_price: None,
+        source_url: res.url.to_string(),
+    }]
+}
 
-            if id.is_empty() {
-                return Ok(output);
+fn extract_links(res: &HtmlResponse<'_>) -> Vec<String> {
+    let doc = Html::parse_document(res.body);
+    let sel = Selector::parse(r#"a[href*="/model-cards/"]"#).unwrap();
+    let mut seen = std::collections::HashSet::new();
+    let mut links = Vec::new();
+
+    for el in doc.select(&sel) {
+        if let Some(href) = el.value().attr("href") {
+            if href.contains('#') {
+                continue;
             }
-
-            let display_name = res.css("h1").first().map(|el| el.text().trim().to_string());
-            // Mistral docs are Next.js SSR — context/pricing extraction not yet supported
-            let context_window = None;
-            let (input_price, output_price) = (None, None);
-
-            output = output.items(vec![ScrapedModel {
-                id,
-                provider: "mistral".into(),
-                display_name,
-                context_window,
-                max_output_tokens: None,
-                input_price,
-                output_price,
-                source_url: res.url().to_string(),
-            }]);
-        } else {
-            let links: Vec<String> = res
-                .css(r#"a[href*="/model-cards/"]"#)
-                .iter()
-                .filter_map(|el| el.attr("href"))
-                .filter(|href| !href.contains('#'))
-                .map(|href| {
-                    if href.starts_with("http") {
-                        href
-                    } else {
-                        format!("{}{}", BASE, href)
-                    }
-                })
-                .collect::<std::collections::HashSet<_>>()
-                .into_iter()
-                .collect();
-
-            for url in links {
-                output = output.follow(url);
+            let url = if href.starts_with("http") {
+                href.to_string()
+            } else {
+                format!("{BASE}{href}")
+            };
+            if seen.insert(url.clone()) {
+                links.push(url);
             }
         }
-
-        Ok(output)
     }
+    links
 }

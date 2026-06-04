@@ -1,25 +1,25 @@
-pub mod catalog;
-pub mod diff;
-pub mod model;
-pub mod spiders;
-pub mod writer;
-
+use almanac_scraper::catalog::load_catalog;
+use almanac_scraper::diff::{DiffResult, diff};
+use almanac_scraper::engine::run_spider;
+use almanac_scraper::model::ScrapedModel;
+use almanac_scraper::spiders::{
+    anthropic::AnthropicSpider, cohere::CohereSpider, deepseek::DeepSeekSpider,
+    google::GoogleSpider, mistral::MistralSpider, openai::OpenAiSpider,
+};
+use almanac_scraper::writer::write_model;
 use anyhow::Result;
-use catalog::load_catalog;
 use clap::{Parser, ValueEnum};
-use diff::{DiffResult, diff};
-use kumo::prelude::*;
-use model::ScrapedModel;
-use spiders::{anthropic::AnthropicSpider, google::GoogleSpider, mistral::MistralSpider};
 use std::path::PathBuf;
 use time::OffsetDateTime;
-use writer::write_model;
 
 #[derive(Debug, Clone, ValueEnum)]
 enum Provider {
-    Google,
     Anthropic,
+    Cohere,
+    DeepSeek,
+    Google,
     Mistral,
+    OpenAi,
     All,
 }
 
@@ -35,18 +35,18 @@ struct Args {
     #[arg(short, long, default_value = ".")]
     root: PathBuf,
 
+    /// Write new model YAMLs to models/<provider>/ (does not commit).
     #[arg(short, long)]
     write: bool,
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    tracing_subscriber::fmt()
-        .with_env_filter("kumo=warn")
-        .init();
+    tracing_subscriber::fmt().with_env_filter("warn").init();
 
     let args = Args::parse();
     let models_dir = args.root.join("models");
+    let today = today_str();
 
     let catalog = load_catalog(&models_dir)?;
     println!("Loaded {} models from catalog.", catalog.len());
@@ -76,7 +76,6 @@ async fn main() -> Result<()> {
                     m.source_url,
                 );
                 if args.write {
-                    let today = today_str();
                     match write_model(m, &models_dir, &today) {
                         Ok(path) => println!("  -> wrote {}", path.display()),
                         Err(e) => println!("  -> skipped: {e}"),
@@ -89,14 +88,8 @@ async fn main() -> Result<()> {
                 old_output,
             } => {
                 println!(
-                    "\n[PRICE CHANGE] {}/{}\n  input:  {:?} -> {:?}\n  output: {:?} -> {:?}\n  source: {}",
-                    m.provider,
-                    m.id,
-                    old_input,
-                    m.input_price,
-                    old_output,
-                    m.output_price,
-                    m.source_url,
+                    "\n[PRICE CHANGE] {}/{}\n  input:  {:?} -> {:?}\n  output: {:?} -> {:?}",
+                    m.provider, m.id, old_input, m.input_price, old_output, m.output_price,
                 );
             }
         }
@@ -107,37 +100,40 @@ async fn main() -> Result<()> {
 
 async fn run_spiders(provider: &Provider) -> Result<Vec<ScrapedModel>> {
     let mut all = Vec::new();
-    if matches!(provider, Provider::Google | Provider::All) {
-        all.extend(run_spider(GoogleSpider).await?);
-    }
-    if matches!(provider, Provider::Anthropic | Provider::All) {
+    let run_all = matches!(provider, Provider::All);
+
+    if run_all || matches!(provider, Provider::Anthropic) {
         all.extend(run_spider(AnthropicSpider).await?);
     }
-    if matches!(provider, Provider::Mistral | Provider::All) {
+    if run_all || matches!(provider, Provider::Google) {
+        all.extend(run_spider(GoogleSpider).await?);
+    }
+    if run_all || matches!(provider, Provider::Mistral) {
         all.extend(run_spider(MistralSpider).await?);
     }
-    Ok(all)
-}
-
-async fn run_spider<S>(spider: S) -> Result<Vec<ScrapedModel>>
-where
-    S: Spider + 'static,
-{
-    let mut items = Vec::new();
-    let mut stream = CrawlEngine::builder()
-        .concurrency(3)
-        .middleware(DefaultHeaders::new().user_agent("almanac-scraper/0.1"))
-        .stream(spider)
-        .await?;
-
-    while let Some(value) = stream.next().await {
-        match serde_json::from_value::<ScrapedModel>(value) {
-            Ok(model) => items.push(model),
-            Err(e) => tracing::warn!("failed to deserialize scraped item: {e}"),
+    if run_all || matches!(provider, Provider::OpenAi) {
+        if let Ok(key) = std::env::var("OPENAI_API_KEY") {
+            all.extend(run_spider(OpenAiSpider::new(key)).await?);
+        } else {
+            tracing::warn!("OPENAI_API_KEY not set — skipping OpenAI spider");
+        }
+    }
+    if run_all || matches!(provider, Provider::Cohere) {
+        if let Ok(key) = std::env::var("COHERE_API_KEY") {
+            all.extend(run_spider(CohereSpider::new(key)).await?);
+        } else {
+            tracing::warn!("COHERE_API_KEY not set — skipping Cohere spider");
+        }
+    }
+    if run_all || matches!(provider, Provider::DeepSeek) {
+        if let Ok(key) = std::env::var("DEEPSEEK_API_KEY") {
+            all.extend(run_spider(DeepSeekSpider::new(key)).await?);
+        } else {
+            tracing::warn!("DEEPSEEK_API_KEY not set — skipping DeepSeek spider");
         }
     }
 
-    Ok(items)
+    Ok(all)
 }
 
 fn today_str() -> String {

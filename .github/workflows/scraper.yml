@@ -1,0 +1,71 @@
+name: Scraper
+
+on:
+  workflow_dispatch:
+    inputs:
+      provider:
+        description: "Provider to scrape (or 'all')"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - all
+          - anthropic
+          - google
+          - mistral
+          - open-ai
+          - cohere
+          - deep-seek
+      write:
+        description: "Write new model YAMLs to models/ (does not commit)"
+        required: false
+        default: "true"
+        type: boolean
+
+concurrency:
+  group: scraper
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dtolnay/rust-toolchain@1.95.0
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build scraper
+        run: cargo build -p almanac-scraper --release
+
+      - name: Run scraper
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          WRITE_FLAG=""
+          if [ "${{ inputs.write }}" = "true" ]; then
+            WRITE_FLAG="--write"
+          fi
+          ./target/release/scraper \
+            --provider ${{ inputs.provider }} \
+            --root . \
+            $WRITE_FLAG
+
+      - name: Show changed files
+        run: |
+          echo "=== New/modified model files ==="
+          git status --short models/ || true
+
+      - name: Upload new models as artifact
+        if: ${{ inputs.write == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: new-models-${{ github.run_id }}
+          path: models/
+          if-no-files-found: warn
