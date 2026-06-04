@@ -5,9 +5,9 @@ use almanac_scraper::model::ScrapedModel;
 use almanac_scraper::spiders::{
     alibaba::AlibabaSpider, anthropic::AnthropicSpider, cohere::CohereSpider,
     deepseek::DeepSeekSpider, doc_page::DocPageSpider, elevenlabs::ElevenLabsSpider,
-    google::GoogleSpider, meta::MetaSpider, mistral::MistralSpider,
-    mistral_html::MistralHtmlSpider, moonshot::MoonshotSpider, openai::OpenAiSpider,
-    perplexity::PerplexitySpider, xai::XaiSpider,
+    google::GoogleSpider, leonardo::LeonardoSpider, luma::LumaSpider, meta::MetaSpider,
+    mistral::MistralSpider, mistral_html::MistralHtmlSpider, moonshot::MoonshotSpider,
+    openai::OpenAiSpider, perplexity::PerplexitySpider, xai::XaiSpider,
 };
 use almanac_scraper::writer::write_model;
 use anyhow::Result;
@@ -30,6 +30,8 @@ const CUSTOM_PROVIDERS: &[&str] = &[
     "meta",
     "perplexity",
     "elevenlabs",
+    "luma",
+    "leonardo",
 ];
 
 /// Simple providers: scraped with a single public docs URL, no custom logic.
@@ -95,14 +97,10 @@ const SIMPLE_PROVIDERS: &[(&str, &str)] = &[
     ("jina", "https://jina.ai/models/"),
     // Kling — model docs (Kuaishou)
     ("kling", "https://klingai.com/"),
-    // Leonardo — static developer docs
-    ("leonardo", "https://docs.leonardo.ai/"),
     // Lightricks LTX — static docs
     ("lightricks", "https://docs.ltx.video/"),
     // LMNT — static developer docs
     ("lmnt", "https://docs.lmnt.com/"),
-    // Luma AI — static docs
-    ("luma", "https://docs.lumalabs.ai/"),
     // Meshy — 3D model static docs
     ("meshy", "https://docs.meshy.ai/"),
     // Microsoft — Azure AI model catalog (static HTML)
@@ -297,6 +295,8 @@ async fn run_all_spiders(provider: &str) -> Result<Vec<ScrapedModel>> {
     run_custom!("meta", MetaSpider);
     run_custom!("perplexity", PerplexitySpider);
     run_custom!("elevenlabs", ElevenLabsSpider);
+    run_custom!("luma", LumaSpider);
+    run_custom!("leonardo", LeonardoSpider);
 
     // ── Simple providers (DocPageSpider) ──────────────────────────────────────
     for &(name, url) in SIMPLE_PROVIDERS {

@@ -5,6 +5,8 @@ pub mod deepseek;
 pub mod doc_page;
 pub mod elevenlabs;
 pub mod google;
+pub mod leonardo;
+pub mod luma;
 pub mod meta;
 pub mod mistral;
 pub mod mistral_html;
