@@ -15,6 +15,7 @@ use std::sync::Arc;
 use tokio::sync::RwLock;
 
 const DEFAULT_LIMIT: usize = 100;
+const MAX_LIMIT: usize = 200;
 
 #[derive(Deserialize, utoipa::IntoParams)]
 pub struct AliasFilter {
@@ -99,7 +100,11 @@ pub async fn list_aliases(
 
     let total = all_aliases.len();
     let offset = filter.offset.unwrap_or(0).min(total);
-    let limit = filter.limit.filter(|l| *l > 0).unwrap_or(DEFAULT_LIMIT);
+    let limit = filter
+        .limit
+        .filter(|l| *l > 0)
+        .map(|limit| limit.min(MAX_LIMIT))
+        .unwrap_or(DEFAULT_LIMIT);
     let data: Vec<AliasMapping> = all_aliases.into_iter().skip(offset).take(limit).collect();
 
     (

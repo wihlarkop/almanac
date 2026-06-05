@@ -47,8 +47,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/almanac-server:latest
-            ghcr.io/${{ github.repository_owner }}/almanac-server:${{ github.ref_name }}
+            ghcr.io/${{ github.repository_owner }}/almanac:latest
+            ghcr.io/${{ github.repository_owner }}/almanac:${{ github.ref_name }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

@@ -2,7 +2,7 @@
 
 A free, open-source model catalog and REST API for LLM developers.
 
-488 models · 68 providers · 274 aliases — all queryable, filterable, and comparable via a single HTTP API.
+646 models · 64 providers · 273 aliases — all queryable, filterable, and comparable via a single HTTP API.
 
 [![CI](https://github.com/wihlarkop/almanac/actions/workflows/validate.yml/badge.svg)](https://github.com/wihlarkop/almanac/actions/workflows/validate.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -88,7 +88,7 @@ All responses use a consistent JSON envelope:
 }
 ```
 
-Paginated responses add `limit`, `offset`, and `total_data` to `meta`. Error responses set `success: false`, `data: null`, and include an `error.code` string.
+Paginated responses add `limit`, `offset`, and `total_data` to `meta`. Public list/search endpoints cap page size to protect the API from oversized responses. Error responses set `success: false`, `data: null`, and include an `error.code` string.
 
 Every response includes an `x-request-id` header. Responses are gzip-compressed when the client sends `Accept-Encoding: gzip`. List endpoints support `ETag` / `If-None-Match` for conditional requests. When caching is enabled, responses include `x-cache: HIT/MISS`. When rate limiting is enabled, responses include `x-ratelimit-remaining`; requests exceeding the limit get a `429` with a `retry-after` header.
 
@@ -152,6 +152,7 @@ Copy `.env.example` to `.env` for local development — all variables are option
 | `REDIS_URL` | _(unset)_ | Redis connection string (`rediss://...`). Required for redis-backed rate limiting and caching |
 | `RATE_LIMIT_RPS` | _(unset)_ | Max requests/sec per IP. Unset = disabled |
 | `RATE_LIMIT_BACKEND` | `memory` | `memory` or `redis`. Falls back to memory if `REDIS_URL` is absent |
+| `TRUST_PROXY_HEADERS` | _(unset)_ | Set to `true` only behind a trusted proxy/load balancer so rate limiting uses forwarded client IPs |
 | `CACHE_BACKEND` | `none` | `none`, `memory`, or `redis`. Caches all `GET /api/v1/*` responses |
 | `CACHE_TTL_SECS` | `300` | Cache time-to-live in seconds |
 | `RUST_LOG` | `almanac_server=info` | Log level filter |

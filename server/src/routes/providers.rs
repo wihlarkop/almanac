@@ -16,6 +16,7 @@ use std::sync::Arc;
 use tokio::sync::RwLock;
 
 const DEFAULT_LIMIT: usize = 50;
+const MAX_LIMIT: usize = 100;
 
 #[derive(Deserialize, utoipa::IntoParams)]
 pub struct ProviderFilter {
@@ -88,7 +89,11 @@ pub async fn list_providers(
 
     let total = state.providers.len();
     let offset = filter.offset.unwrap_or(0).min(total);
-    let limit = filter.limit.filter(|l| *l > 0).unwrap_or(DEFAULT_LIMIT);
+    let limit = filter
+        .limit
+        .filter(|l| *l > 0)
+        .map(|limit| limit.min(MAX_LIMIT))
+        .unwrap_or(DEFAULT_LIMIT);
     let data: Vec<Provider> = state
         .providers
         .iter()
