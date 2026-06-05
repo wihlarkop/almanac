@@ -203,29 +203,53 @@ fn extract_from_json(value: &serde_json::Value, push: &mut impl FnMut(&str)) {
     }
 }
 
+/// Strings that appear on ReadMe.io-hosted doc pages and look like model IDs
+/// but are actually platform infrastructure identifiers.
+const BLOCKLIST: &[&str] = &[
+    "get-started",
+    "execute-request",
+    "list-endpoints",
+    "list-specs",
+    "get-endpoint",
+    "search-endpoints",
+    "get-server-variables",
+    "readme.io",
+    "readmessl.com",
+    "dash.readme.com",
+    "ssl.readmessl.com",
+    "readme_search_v2",
+    "landing_page",
+    "top-left",
+    "image-generation",
+    "client.chat.completions.create",
+    "reasoning_effort",
+];
+
 /// Returns true if `s` looks like a model API identifier.
 ///
 /// Constraints (tuned to minimise false positives from docs page noise):
-/// - 5–80 characters, no spaces/slashes/newlines
+/// - 5–80 characters, no spaces/slashes/newlines/colons
 /// - Contains at least one hyphen, dot, or underscore
-/// - **All characters ASCII lowercase**, digits, or `-` `.` `_` `:`
-///   Uppercase rules out CSS class names, JS constants, React props,
-///   data attributes (`data-assistant-state`), timestamps (`2026-06-04T`)
+/// - Must contain at least one ASCII letter (rejects pure version numbers like `0.00206815`)
+/// - All characters ASCII lowercase, digits, or `-` `.` `_`
 /// - Must not start with `data-` (HTML data attribute prefix)
+/// - Not in the platform identifier blocklist
 pub fn looks_like_model_id(s: &str) -> bool {
     if s.len() < 5 || s.len() > 80 {
         return false;
     }
-    if s.contains(' ') || s.contains('/') || s.contains('\n') || s.contains('\\') {
+    if s.contains(' ') || s.contains('/') || s.contains('\n') || s.contains('\\') || s.contains(':')
+    {
         return false;
     }
     if !s.contains('-') && !s.contains('.') && !s.contains('_') {
         return false;
     }
+    // Must start with a lowercase letter (not a digit) — rejects `0.00206815`, `5.760.1`
     if !s
         .chars()
         .next()
-        .map(|c| c.is_ascii_lowercase() || c.is_ascii_digit())
+        .map(|c| c.is_ascii_lowercase())
         .unwrap_or(false)
     {
         return false;
@@ -233,6 +257,13 @@ pub fn looks_like_model_id(s: &str) -> bool {
     if s.starts_with("data-") {
         return false;
     }
+    // Must contain at least one letter (extra guard against pure numeric strings)
+    if !s.chars().any(|c| c.is_ascii_lowercase()) {
+        return false;
+    }
+    if BLOCKLIST.contains(&s) {
+        return false;
+    }
     s.chars()
-        .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || matches!(c, '-' | '.' | '_' | ':'))
+        .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || matches!(c, '-' | '.' | '_'))
 }

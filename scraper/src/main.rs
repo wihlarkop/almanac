@@ -5,9 +5,10 @@ use almanac_scraper::model::ScrapedModel;
 use almanac_scraper::spiders::{
     alibaba::AlibabaSpider, anthropic::AnthropicSpider, cohere::CohereSpider,
     deepseek::DeepSeekSpider, doc_page::DocPageSpider, elevenlabs::ElevenLabsSpider,
-    google::GoogleSpider, leonardo::LeonardoSpider, luma::LumaSpider, meta::MetaSpider,
-    mistral::MistralSpider, mistral_html::MistralHtmlSpider, moonshot::MoonshotSpider,
-    openai::OpenAiSpider, perplexity::PerplexitySpider, xai::XaiSpider,
+    google::GoogleSpider, inception::InceptionSpider, leonardo::LeonardoSpider, luma::LumaSpider,
+    meta::MetaSpider, microsoft::MicrosoftSpider, mistral::MistralSpider,
+    mistral_html::MistralHtmlSpider, moonshot::MoonshotSpider, openai::OpenAiSpider,
+    perplexity::PerplexitySpider, voyageai::VoyageAiSpider, xai::XaiSpider, zai::ZaiSpider,
 };
 use almanac_scraper::writer::write_model;
 use anyhow::Result;
@@ -32,6 +33,10 @@ const CUSTOM_PROVIDERS: &[&str] = &[
     "elevenlabs",
     "luma",
     "leonardo",
+    "voyageai",
+    "zai",
+    "microsoft",
+    "inception",
 ];
 
 /// Simple providers: scraped with a single public docs URL, no custom logic.
@@ -84,8 +89,6 @@ const SIMPLE_PROVIDERS: &[(&str, &str)] = &[
         "ideogram",
         "https://developer.ideogram.ai/api-reference/api-reference/generate",
     ),
-    // Inception Labs — static docs
-    ("inception", "https://docs.inceptionlabs.ai/"),
     // Inflection — developer portal (Mintlify)
     (
         "inflection",
@@ -103,11 +106,6 @@ const SIMPLE_PROVIDERS: &[(&str, &str)] = &[
     ("lmnt", "https://docs.lmnt.com/"),
     // Meshy — 3D model static docs
     ("meshy", "https://docs.meshy.ai/"),
-    // Microsoft — Azure AI model catalog (static HTML)
-    (
-        "microsoft",
-        "https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models",
-    ),
     // MiniMax — platform docs
     (
         "minimax",
@@ -156,8 +154,6 @@ const SIMPLE_PROVIDERS: &[(&str, &str)] = &[
     ),
     // Suno — AI music (no public API docs yet)
     ("suno", "https://suno.com/"),
-    // Synthesia — static docs
-    ("synthesia", "https://docs.synthesia.io/"),
     // Tencent Hunyuan — cloud docs
     (
         "tencent",
@@ -174,16 +170,12 @@ const SIMPLE_PROVIDERS: &[(&str, &str)] = &[
     ),
     // Vidu — video gen docs
     ("vidu", "https://platform.vidu.studio/docs"),
-    // Voyage AI — static Mintlify docs
-    ("voyageai", "https://docs.voyageai.com/docs/embeddings"),
     // Writer Palmyra — static dev docs
     ("writer", "https://dev.writer.com/api-guides/models"),
     // Xiaomi MiMo — GitHub page (model cards in README)
     ("xiaomi", "https://github.com/MiMo-ai/MiMo"),
     // Yi / 01.AI — developer platform docs
     ("yi", "https://platform.lingyiwanwu.com/docs"),
-    // Z.AI GLM — static docs
-    ("zai", "https://docs.z.ai/"),
 ];
 
 #[derive(Parser, Debug)]
@@ -297,6 +289,10 @@ async fn run_all_spiders(provider: &str) -> Result<Vec<ScrapedModel>> {
     run_custom!("elevenlabs", ElevenLabsSpider);
     run_custom!("luma", LumaSpider);
     run_custom!("leonardo", LeonardoSpider);
+    run_custom!("voyageai", VoyageAiSpider);
+    run_custom!("zai", ZaiSpider);
+    run_custom!("microsoft", MicrosoftSpider);
+    run_custom!("inception", InceptionSpider);
 
     // ── Simple providers (DocPageSpider) ──────────────────────────────────────
     for &(name, url) in SIMPLE_PROVIDERS {
