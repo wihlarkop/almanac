@@ -173,7 +173,7 @@ docker compose up -d
 
 ## Build from Source
 
-Requires Rust 1.88+.
+Requires Rust 1.96+.
 
 ```bash
 git clone https://github.com/wihlarkop/almanac.git
