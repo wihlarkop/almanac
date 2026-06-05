@@ -1,0 +1,34 @@
+id: mistral-7b-0-3
+provider: mistral
+display_name: Mistral 7B
+status: active
+release_date: null
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 4096
+max_output_tokens: 4096
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+  prompt_caching: false
+  thinking: false
+parameters:
+  supported: []
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0
+  output: 0
+last_verified: 2026-06-05
+confidence: inferred
+endpoint_family: chat_completions
+sources:
+  - url: https://docs.mistral.ai/models/model-cards/mistral-7b-0-3
+    last_verified: 2026-06-05
