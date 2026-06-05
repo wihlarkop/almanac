@@ -1,31 +1,32 @@
 id: qwen3-vl-flash-us
 provider: alibaba
-display_name: qwen3-vl-flash-us
+display_name: Qwen3-VL-Flash (US)
 status: active
 release_date: null
 deprecation_date: null
 sunset_date: null
 replacement: null
-context_window: 4096
-max_output_tokens: 4096
+context_window: 32768
+max_output_tokens: 8192
 modalities:
-  input: [text]
+  input: [text, image]
   output: [text]
 capabilities:
-  tools: false
-  vision: false
+  tools: true
+  vision: true
   streaming: true
   json_mode: false
   prompt_caching: false
   thinking: false
 parameters:
-  supported: []
+  supported: [messages, temperature, top_p, max_tokens, stream]
   rejected: []
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 0
-  output: 0
+  input: 0.00
+  output: 0.00
+  pricing_notes: "US-region variant of Qwen3-VL-Flash. Pricing in CNY via Alibaba Cloud."
 last_verified: 2026-06-05
 confidence: inferred
 endpoint_family: chat_completions

@@ -1,31 +1,32 @@
 id: command-nightly
 provider: cohere
-display_name: command-nightly
+display_name: Command (Nightly)
 status: active
 release_date: null
 deprecation_date: null
 sunset_date: null
 replacement: null
-context_window: 4096
+context_window: 128000
 max_output_tokens: 4096
 modalities:
   input: [text]
   output: [text]
 capabilities:
-  tools: false
+  tools: true
   vision: false
   streaming: true
   json_mode: false
   prompt_caching: false
   thinking: false
 parameters:
-  supported: []
+  supported: [message, chat_history, temperature, p, k, max_tokens, stream, tools]
   rejected: []
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 0
-  output: 0
+  input: 0.00
+  output: 0.00
+  pricing_notes: "Pre-release nightly build. Pricing not published."
 last_verified: 2026-06-05
 confidence: inferred
 endpoint_family: chat_completions

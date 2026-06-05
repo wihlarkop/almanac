@@ -1,16 +1,16 @@
 id: sonic-multilingual
 provider: cartesia
-display_name: sonic-multilingual
-status: active
+display_name: Sonic (Multilingual)
+status: deprecated
 release_date: null
 deprecation_date: null
 sunset_date: null
-replacement: null
-context_window: 4096
-max_output_tokens: 4096
+replacement: sonic-2
+context_window: 8192
+max_output_tokens: 1
 modalities:
   input: [text]
-  output: [text]
+  output: [audio]
 capabilities:
   tools: false
   vision: false
@@ -19,16 +19,18 @@ capabilities:
   prompt_caching: false
   thinking: false
 parameters:
-  supported: []
+  supported: [voice, language, output_format, speed]
   rejected: []
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 0
-  output: 0
+  input: 0.00
+  output: 0.00
+  per_million_chars: 30.00
+  pricing_notes: "Legacy Sonic 1 multilingual alias. Superseded by Sonic 2."
 last_verified: 2026-06-05
 confidence: inferred
-endpoint_family: chat_completions
+endpoint_family: speech
 sources:
   - url: https://docs.cartesia.ai/build-with-cartesia/tts-models/api-changes
     last_verified: 2026-06-05

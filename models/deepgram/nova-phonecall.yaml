@@ -1,34 +1,34 @@
 id: nova-phonecall
 provider: deepgram
-display_name: nova-phonecall
-status: active
+display_name: Nova (Phonecall)
+status: deprecated
 release_date: null
 deprecation_date: null
 sunset_date: null
-replacement: null
-context_window: 4096
-max_output_tokens: 4096
+replacement: nova-2-phonecall
+context_window: 1
+max_output_tokens: 1
 modalities:
-  input: [text]
+  input: [audio]
   output: [text]
 capabilities:
   tools: false
   vision: false
   streaming: true
   json_mode: false
-  prompt_caching: false
-  thinking: false
 parameters:
-  supported: []
+  supported: [language, model, punctuate, diarize, smart_format, utterances]
   rejected: []
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 0
-  output: 0
+  input: 0.00
+  output: 0.00
+  per_minute: 0.0043
+  pricing_notes: "Nova v1. Superseded by Nova-2."
 last_verified: 2026-06-05
 confidence: inferred
-endpoint_family: chat_completions
+endpoint_family: transcription
 sources:
   - url: https://developers.deepgram.com/docs/models-languages-overview
     last_verified: 2026-06-05

@@ -1,31 +1,32 @@
 id: qwen-vl-plus-2025-01-25
 provider: alibaba
-display_name: qwen-vl-plus-2025-01-25
+display_name: Qwen-VL-Plus (2025-01-25)
 status: active
-release_date: null
+release_date: 2025-01-25
 deprecation_date: null
 sunset_date: null
-replacement: null
-context_window: 4096
-max_output_tokens: 4096
+replacement: qwen-vl-plus
+context_window: 131072
+max_output_tokens: 8192
 modalities:
-  input: [text]
+  input: [text, image]
   output: [text]
 capabilities:
-  tools: false
-  vision: false
+  tools: true
+  vision: true
   streaming: true
   json_mode: false
   prompt_caching: false
   thinking: false
 parameters:
-  supported: []
+  supported: [messages, temperature, top_p, max_tokens, stream]
   rejected: []
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 0
-  output: 0
+  input: 0.00
+  output: 0.00
+  pricing_notes: "Pricing in CNY via Alibaba Cloud; see docs for current rates."
 last_verified: 2026-06-05
 confidence: inferred
 endpoint_family: chat_completions

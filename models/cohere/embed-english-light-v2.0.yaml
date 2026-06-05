@@ -1,34 +1,34 @@
 id: embed-english-light-v2.0
 provider: cohere
-display_name: embed-english-light-v2.0
-status: active
+display_name: Embed English Light v2.0
+status: deprecated
 release_date: null
 deprecation_date: null
 sunset_date: null
-replacement: null
-context_window: 4096
-max_output_tokens: 4096
+replacement: embed-english-light-v3.0
+context_window: 2048
+max_output_tokens: 1
 modalities:
   input: [text]
-  output: [text]
+  output: [embedding]
 capabilities:
   tools: false
   vision: false
-  streaming: true
+  streaming: false
   json_mode: false
   prompt_caching: false
   thinking: false
 parameters:
-  supported: []
+  supported: [texts, truncate]
   rejected: []
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 0
-  output: 0
+  input: 0.10
+  output: 0.00
 last_verified: 2026-06-05
 confidence: inferred
-endpoint_family: chat_completions
+endpoint_family: embeddings
 sources:
   - url: https://docs.cohere.com/v2/docs/models
     last_verified: 2026-06-05

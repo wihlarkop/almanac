@@ -1,15 +1,15 @@
-id: sonic-2-2025-03-07
-provider: cartesia
-display_name: Sonic 2 (2025-03-07)
-status: active
-release_date: 2025-03-07
+id: eleven-english-sts-v1
+provider: elevenlabs
+display_name: Eleven English STS v1
+status: deprecated
+release_date: null
 deprecation_date: null
 sunset_date: null
-replacement: sonic-2
-context_window: 8192
+replacement: eleven-english-sts-v2
+context_window: 5000
 max_output_tokens: 1
 modalities:
-  input: [text]
+  input: [audio]
   output: [audio]
 capabilities:
   tools: false
@@ -19,18 +19,17 @@ capabilities:
   prompt_caching: false
   thinking: false
 parameters:
-  supported: [voice, language, output_format, speed, emotion]
+  supported: [voice_id, model_id]
   rejected: []
   deprecated_for_this_model: []
 pricing:
   currency: USD
   input: 0.00
   output: 0.00
-  per_million_chars: 30.00
-  pricing_notes: "Pinned snapshot of Sonic 2. ~$0.03/min."
+  pricing_notes: "Legacy speech-to-speech model. Superseded by v2."
 last_verified: 2026-06-05
 confidence: inferred
 endpoint_family: speech
 sources:
-  - url: https://docs.cartesia.ai/build-with-cartesia/tts-models/api-changes
+  - url: https://elevenlabs.io/docs/api-reference/speech-to-speech
     last_verified: 2026-06-05
