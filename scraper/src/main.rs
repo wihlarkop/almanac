@@ -8,7 +8,8 @@ use almanac_scraper::spiders::{
     google::GoogleSpider, inception::InceptionSpider, leonardo::LeonardoSpider, luma::LumaSpider,
     meta::MetaSpider, microsoft::MicrosoftSpider, mistral::MistralSpider,
     mistral_html::MistralHtmlSpider, moonshot::MoonshotSpider, openai::OpenAiSpider,
-    perplexity::PerplexitySpider, voyageai::VoyageAiSpider, xai::XaiSpider, zai::ZaiSpider,
+    perplexity::PerplexitySpider, voyageai::VoyageAiSpider, xai::XaiSpider, xiaomi::XiaomiSpider,
+    zai::ZaiSpider,
 };
 use almanac_scraper::writer::write_model;
 use anyhow::Result;
@@ -37,6 +38,7 @@ const CUSTOM_PROVIDERS: &[&str] = &[
     "zai",
     "microsoft",
     "inception",
+    "xiaomi",
 ];
 
 /// Simple providers: scraped with a single public docs URL, no custom logic.
@@ -172,8 +174,6 @@ const SIMPLE_PROVIDERS: &[(&str, &str)] = &[
     ("vidu", "https://platform.vidu.studio/docs"),
     // Writer Palmyra — static dev docs
     ("writer", "https://dev.writer.com/api-guides/models"),
-    // Xiaomi MiMo — GitHub page (model cards in README)
-    ("xiaomi", "https://github.com/MiMo-ai/MiMo"),
     // Yi / 01.AI — developer platform docs
     ("yi", "https://platform.lingyiwanwu.com/docs"),
 ];
@@ -293,6 +293,7 @@ async fn run_all_spiders(provider: &str) -> Result<Vec<ScrapedModel>> {
     run_custom!("zai", ZaiSpider);
     run_custom!("microsoft", MicrosoftSpider);
     run_custom!("inception", InceptionSpider);
+    run_custom!("xiaomi", XiaomiSpider);
 
     // ── Simple providers (DocPageSpider) ──────────────────────────────────────
     for &(name, url) in SIMPLE_PROVIDERS {

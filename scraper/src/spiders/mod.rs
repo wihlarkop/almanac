@@ -17,4 +17,5 @@ pub mod openai;
 pub mod perplexity;
 pub mod voyageai;
 pub mod xai;
+pub mod xiaomi;
 pub mod zai;

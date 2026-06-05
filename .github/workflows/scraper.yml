@@ -126,7 +126,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           DATE=$(date +%Y-%m-%d)
-          BRANCH="chore/scraper-${{ inputs.provider }}-${DATE}"
+          BRANCH="chore/scraper-${{ inputs.provider }}-${DATE}-${{ github.run_id }}"
 
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -148,7 +148,7 @@ jobs:
           cp -r "$TMPDIR/models" .
 
           git add models/
-          git commit -m "chore(catalog): scraper run — ${{ inputs.provider }} ${DATE}"
+          git commit -m "chore(catalog): scraper run — ${{ inputs.provider }} ${DATE} (#${{ github.run_id }})"
 
           git push origin "$BRANCH"
 
