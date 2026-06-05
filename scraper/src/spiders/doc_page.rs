@@ -223,6 +223,12 @@ const BLOCKLIST: &[&str] = &[
     "image-generation",
     "client.chat.completions.create",
     "reasoning_effort",
+    "request_id",
+    "response_id",
+    "error_code",
+    "status_code",
+    "created_at",
+    "updated_at",
 ];
 
 /// Returns true if `s` looks like a model API identifier.
