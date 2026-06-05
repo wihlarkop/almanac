@@ -131,8 +131,23 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git checkout -b "$BRANCH"
-          git add models/ aliases.yaml 2>/dev/null || git add models/
+          # Collect new/modified model files into a temp dir so we can apply
+          # them on top of main — prevents the auto-PR from including unrelated
+          # commits from whichever branch triggered this workflow.
+          TMPDIR=$(mktemp -d)
+          git status --short models/ | awk '{print $2}' | while read f; do
+            mkdir -p "$TMPDIR/$(dirname $f)"
+            cp "$f" "$TMPDIR/$f"
+          done
+
+          # Create branch from main, not from the workflow's current branch
+          git fetch origin main
+          git checkout -b "$BRANCH" origin/main
+
+          # Apply new files
+          cp -r "$TMPDIR/models" .
+
+          git add models/
           git commit -m "chore(catalog): scraper run — ${{ inputs.provider }} ${DATE}"
 
           git push origin "$BRANCH"
