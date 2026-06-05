@@ -340,8 +340,8 @@ pub async fn enforce_rate_limit(
 }
 
 fn extract_client_ip(request: &Request) -> IpAddr {
-    if trust_proxy_headers() {
-        if let Some(ip) = request
+    if trust_proxy_headers()
+        && let Some(ip) = request
             .headers()
             .get("x-forwarded-for")
             .and_then(|v| v.to_str().ok())
@@ -354,9 +354,8 @@ fn extract_client_ip(request: &Request) -> IpAddr {
                     .and_then(|v| v.to_str().ok())
                     .and_then(|s| s.trim().parse::<IpAddr>().ok())
             })
-        {
-            return ip;
-        }
+    {
+        return ip;
     }
 
     request
