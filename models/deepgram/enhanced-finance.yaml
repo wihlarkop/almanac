@@ -1,0 +1,34 @@
+id: enhanced-finance
+provider: deepgram
+display_name: Enhanced (Finance)
+status: deprecated
+release_date: null
+deprecation_date: null
+sunset_date: null
+replacement: nova-2-finance
+context_window: 1
+max_output_tokens: 1
+modalities:
+  input: [audio]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+parameters:
+  supported: [language, model, punctuate, diarize, smart_format]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_minute: 0.0079
+  pricing_notes: "Legacy Enhanced tier. Superseded by Nova-2."
+last_verified: 2026-06-05
+confidence: inferred
+endpoint_family: transcription
+sources:
+  - url: https://developers.deepgram.com/docs/models-languages-overview
+    last_verified: 2026-06-05

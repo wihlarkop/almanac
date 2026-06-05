@@ -1,0 +1,35 @@
+id: eleven-english-sts-v1
+provider: elevenlabs
+display_name: Eleven English STS v1
+status: deprecated
+release_date: null
+deprecation_date: null
+sunset_date: null
+replacement: eleven-english-sts-v2
+context_window: 5000
+max_output_tokens: 1
+modalities:
+  input: [audio]
+  output: [audio]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+  prompt_caching: false
+  thinking: false
+parameters:
+  supported: [voice_id, model_id]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  pricing_notes: "Legacy speech-to-speech model. Superseded by v2."
+last_verified: 2026-06-05
+confidence: inferred
+endpoint_family: speech
+sources:
+  - url: https://elevenlabs.io/docs/api-reference/speech-to-speech
+    last_verified: 2026-06-05

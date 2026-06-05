@@ -340,26 +340,33 @@ pub async fn enforce_rate_limit(
 }
 
 fn extract_client_ip(request: &Request) -> IpAddr {
+    if trust_proxy_headers()
+        && let Some(ip) = request
+            .headers()
+            .get("x-forwarded-for")
+            .and_then(|v| v.to_str().ok())
+            .and_then(|s| s.split(',').next())
+            .and_then(|s| s.trim().parse::<IpAddr>().ok())
+            .or_else(|| {
+                request
+                    .headers()
+                    .get("x-real-ip")
+                    .and_then(|v| v.to_str().ok())
+                    .and_then(|s| s.trim().parse::<IpAddr>().ok())
+            })
+    {
+        return ip;
+    }
+
     request
-        .headers()
-        .get("x-forwarded-for")
-        .and_then(|v| v.to_str().ok())
-        .and_then(|s| s.split(',').next())
-        .and_then(|s| s.trim().parse::<IpAddr>().ok())
-        .or_else(|| {
-            request
-                .headers()
-                .get("x-real-ip")
-                .and_then(|v| v.to_str().ok())
-                .and_then(|s| s.trim().parse::<IpAddr>().ok())
-        })
-        .or_else(|| {
-            request
-                .extensions()
-                .get::<ConnectInfo<SocketAddr>>()
-                .map(|ci| ci.0.ip())
-        })
+        .extensions()
+        .get::<ConnectInfo<SocketAddr>>()
+        .map(|ci| ci.0.ip())
         .unwrap_or(IpAddr::V4(Ipv4Addr::UNSPECIFIED))
+}
+
+fn trust_proxy_headers() -> bool {
+    std::env::var("TRUST_PROXY_HEADERS").is_ok_and(|value| value.eq_ignore_ascii_case("true"))
 }
 
 pub async fn handle_method_not_allowed(response: Response) -> Response {

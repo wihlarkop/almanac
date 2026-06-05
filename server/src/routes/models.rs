@@ -16,6 +16,7 @@ use std::sync::Arc;
 use tokio::sync::RwLock;
 
 const DEFAULT_LIMIT: usize = 20;
+pub(crate) const MAX_LIMIT: usize = 100;
 
 #[derive(Deserialize, utoipa::IntoParams)]
 pub struct ModelFilter {
@@ -104,7 +105,7 @@ impl ModelFilter {
     }
 
     pub(crate) fn limit(&self) -> Option<usize> {
-        self.limit.filter(|limit| *limit > 0)
+        self.limit.filter(|limit| *limit > 0).map(clamp_limit)
     }
 
     pub(crate) fn offset(&self) -> Option<usize> {
@@ -118,6 +119,10 @@ impl ModelFilter {
     pub(crate) fn query(&self) -> Option<&str> {
         non_empty(self.query.as_deref())
     }
+}
+
+pub(crate) fn clamp_limit(limit: usize) -> usize {
+    limit.min(MAX_LIMIT)
 }
 
 #[utoipa::path(

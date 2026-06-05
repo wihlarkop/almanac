@@ -1,0 +1,34 @@
+id: whisper-medium
+provider: deepgram
+display_name: Whisper Medium
+status: active
+release_date: null
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 1
+max_output_tokens: 1
+modalities:
+  input: [audio]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [language, model, punctuate, diarize]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_minute: 0.0048
+  pricing_notes: "Deepgram-hosted OpenAI Whisper Medium. $0.0048/min."
+last_verified: 2026-06-05
+confidence: inferred
+endpoint_family: transcription
+sources:
+  - url: https://developers.deepgram.com/docs/models-languages-overview
+    last_verified: 2026-06-05

@@ -1,0 +1,36 @@
+id: sonic-2-2025-03-07
+provider: cartesia
+display_name: Sonic 2 (2025-03-07)
+status: active
+release_date: 2025-03-07
+deprecation_date: null
+sunset_date: null
+replacement: sonic-2
+context_window: 8192
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [audio]
+capabilities:
+  tools: false
+  vision: false
+  streaming: true
+  json_mode: false
+  prompt_caching: false
+  thinking: false
+parameters:
+  supported: [voice, language, output_format, speed, emotion]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  per_million_chars: 30.00
+  pricing_notes: "Pinned snapshot of Sonic 2. ~$0.03/min."
+last_verified: 2026-06-05
+confidence: inferred
+endpoint_family: speech
+sources:
+  - url: https://docs.cartesia.ai/build-with-cartesia/tts-models/api-changes
+    last_verified: 2026-06-05

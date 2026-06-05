@@ -17,6 +17,11 @@ Almanac ships as a single static binary and a pre-built Docker image. The catalo
 | `RUST_LOG` | `almanac_server=info,tower_http=info` | Log level filter (uses `tracing` syntax) |
 | `LOG_FORMAT` | _(unset)_ | Set to `json` for structured JSON logs (recommended in production) |
 | `RATE_LIMIT_RPS` | _(unset)_ | Max requests per second per IP. Unset = rate limiting disabled |
+| `RATE_LIMIT_BACKEND` | `memory` | `memory` or `redis`. Falls back to memory if Redis is not configured |
+| `REDIS_URL` | _(unset)_ | Redis connection string for redis-backed rate limiting and caching |
+| `TRUST_PROXY_HEADERS` | _(unset)_ | Set to `true` only behind a trusted proxy/load balancer |
+| `CACHE_BACKEND` | `none` | `none`, `memory`, or `redis` |
+| `CACHE_TTL_SECS` | `300` | Cache time-to-live in seconds |
 | `CATALOG_INCLUDE_PROVIDERS` | _(unset)_ | Comma-separated provider IDs to include (e.g. `openai,anthropic`) |
 | `CATALOG_EXCLUDE_PROVIDERS` | _(unset)_ | Comma-separated provider IDs to exclude |
 | `CATALOG_INCLUDE_MODELS` | _(unset)_ | Comma-separated model IDs to include |
@@ -47,6 +52,8 @@ Render is the reference deployment platform. The live instance runs here.
 ```
 LOG_FORMAT=json
 RUST_LOG=almanac_server=info,tower_http=info,server=info
+RATE_LIMIT_RPS=10
+TRUST_PROXY_HEADERS=true
 ```
 
 5. Click **Deploy**
@@ -72,6 +79,7 @@ fly launch --image ghcr.io/wihlarkop/almanac:latest --name almanac --port 8080
 
 # Set env vars
 fly secrets set LOG_FORMAT=json
+fly secrets set RATE_LIMIT_RPS=10 TRUST_PROXY_HEADERS=true
 
 # Deploy
 fly deploy --image ghcr.io/wihlarkop/almanac:latest
@@ -80,7 +88,7 @@ fly deploy --image ghcr.io/wihlarkop/almanac:latest
 Update to a new release:
 
 ```bash
-fly deploy --image ghcr.io/wihlarkop/almanac:v0.3.0
+fly deploy --image ghcr.io/wihlarkop/almanac:v0.1.0
 ```
 
 ---
@@ -94,6 +102,8 @@ fly deploy --image ghcr.io/wihlarkop/almanac:v0.3.0
 ```
 PORT=8080
 LOG_FORMAT=json
+RATE_LIMIT_RPS=10
+TRUST_PROXY_HEADERS=true
 ```
 
 4. Railway auto-detects port `8080` from the `EXPOSE` directive
@@ -109,7 +119,7 @@ gcloud run deploy almanac \
   --region us-central1 \
   --port 8080 \
   --allow-unauthenticated \
-  --set-env-vars LOG_FORMAT=json
+  --set-env-vars LOG_FORMAT=json,RATE_LIMIT_RPS=10,TRUST_PROXY_HEADERS=true
 ```
 
 Cloud Run scales to zero by default. To keep one instance warm:
@@ -130,6 +140,7 @@ docker run -d \
   -p 8080:8080 \
   -e LOG_FORMAT=json \
   -e RUST_LOG=almanac_server=info,tower_http=info,server=info \
+  -e RATE_LIMIT_RPS=10 \
   --restart unless-stopped \
   ghcr.io/wihlarkop/almanac:latest
 ```
@@ -145,6 +156,7 @@ services:
     environment:
       LOG_FORMAT: json
       RUST_LOG: almanac_server=info,tower_http=info,server=info
+      RATE_LIMIT_RPS: "10"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/v1/health"]
@@ -188,10 +200,10 @@ Expected response:
   "message": "OK",
   "data": {
     "status": "ok",
-    "version": "0.3.0",
-    "total_models": 488,
-    "total_providers": 68,
-    "total_aliases": 274
+    "version": "0.1.0",
+    "total_models": 646,
+    "total_providers": 64,
+    "total_aliases": 273
   }
 }
 ```
@@ -203,4 +215,5 @@ Expected response:
 - [ ] `LOG_FORMAT=json` set (structured logs for log aggregators)
 - [ ] Health check path configured (`/api/v1/health`)
 - [ ] `RATE_LIMIT_RPS` set if the instance is public-facing
+- [ ] `TRUST_PROXY_HEADERS=true` set only when the service is behind a trusted proxy/load balancer
 - [ ] Deploy triggered by `v*` tags only, not every push to main

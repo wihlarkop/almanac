@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
 use std::{cmp::Ordering, sync::Arc};
 use tokio::sync::RwLock;
 
-use super::models::{ModelFilter, model_matches_filter, sort_models};
+use super::models::{ModelFilter, clamp_limit, model_matches_filter, sort_models};
 
 const DEFAULT_LIMIT: usize = 20;
 
@@ -234,7 +234,7 @@ pub async fn search(
 
     let total = results.len();
     let offset = filter.offset().unwrap_or(0).min(total);
-    let limit = filter.limit().unwrap_or(DEFAULT_LIMIT);
+    let limit = filter.limit().map(clamp_limit).unwrap_or(DEFAULT_LIMIT);
     let data: Vec<_> = results.into_iter().skip(offset).take(limit).collect();
 
     Ok((

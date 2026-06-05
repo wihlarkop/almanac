@@ -304,6 +304,14 @@ async fn providers_returns_array_with_cache_headers() {
 }
 
 #[tokio::test]
+async fn providers_large_limit_is_capped() {
+    let json = get_json("/api/v1/providers?limit=1000").await;
+    assert_success_envelope(&json);
+    assert_eq!(json["meta"]["limit"], 100);
+    assert!(json["data"].as_array().unwrap().len() <= 100);
+}
+
+#[tokio::test]
 async fn providers_etag_returns_304() {
     let app = app().await;
 
@@ -468,6 +476,14 @@ async fn aliases_returns_sorted_aliases() {
         alias["alias"].as_str() == Some("claude-opus-4")
             && alias["canonical_id"].as_str() == Some("claude-opus-4-7")
     }));
+}
+
+#[tokio::test]
+async fn aliases_large_limit_is_capped() {
+    let json = get_json("/api/v1/aliases?limit=1000").await;
+    assert_success_envelope(&json);
+    assert_eq!(json["meta"]["limit"], 200);
+    assert!(json["data"].as_array().unwrap().len() <= 200);
 }
 
 #[tokio::test]
@@ -865,6 +881,7 @@ async fn models_large_limit_reports_actual_remaining_window() {
     let all = get_json("/api/v1/models?provider=openai&limit=1000").await;
     let total = all["meta"]["total_data"].as_u64().unwrap();
     assert!(total > 2);
+    assert_eq!(all["meta"]["limit"], 100);
 
     let offset = total - 2;
     let json = get_json(&format!(
@@ -876,8 +893,16 @@ async fn models_large_limit_reports_actual_remaining_window() {
     assert_eq!(json["data"].as_array().unwrap().len(), 2);
     assert_eq!(json["meta"]["total_data"].as_u64().unwrap(), total);
     assert_eq!(json["meta"]["offset"].as_u64().unwrap(), offset);
-    // meta.limit reflects the requested limit, not the remaining item count
-    assert_eq!(json["meta"]["limit"], 1000);
+    // meta.limit reflects the effective capped limit, not the remaining item count
+    assert_eq!(json["meta"]["limit"], 100);
+}
+
+#[tokio::test]
+async fn models_large_limit_is_capped() {
+    let json = get_json("/api/v1/models?limit=1000").await;
+    assert_success_envelope(&json);
+    assert_eq!(json["meta"]["limit"], 100);
+    assert_eq!(json["data"].as_array().unwrap().len(), 100);
 }
 
 #[tokio::test]
@@ -1777,6 +1802,14 @@ async fn search_supports_pagination_and_provider_filter() {
     }));
     assert_eq!(json["meta"]["limit"], 2);
     assert_eq!(json["meta"]["offset"], 1);
+}
+
+#[tokio::test]
+async fn search_large_limit_is_capped() {
+    let json = get_json("/api/v1/search?limit=1000").await;
+    assert_success_envelope(&json);
+    assert_eq!(json["meta"]["limit"], 100);
+    assert_eq!(json["data"].as_array().unwrap().len(), 100);
 }
 
 // --- Cache middleware behavior ---
