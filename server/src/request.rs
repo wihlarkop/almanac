@@ -1,6 +1,6 @@
-use crate::response::ApiResponse;
+use crate::{response::ApiResponse, state::AppState};
 use axum::{
-    extract::{ConnectInfo, Request},
+    extract::{ConnectInfo, Request, State},
     http::{HeaderName, HeaderValue, StatusCode, header},
     middleware::Next,
     response::{IntoResponse, Json, Response},
@@ -14,6 +14,8 @@ use std::{
     },
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
+use time::OffsetDateTime;
+use tokio::sync::RwLock;
 
 pub const MAX_REQUEST_BODY_BYTES: u64 = 64 * 1024;
 
@@ -381,6 +383,77 @@ pub async fn handle_method_not_allowed(response: Response) -> Response {
             .into_response();
     }
     response
+}
+
+// --- Cache headers middleware ---
+
+pub async fn inject_cache_headers(
+    State(state): State<Arc<RwLock<AppState>>>,
+    request: Request,
+    next: Next,
+) -> Response {
+    let method = request.method().clone();
+    let mut response = next.run(request).await;
+
+    if method != axum::http::Method::GET || !response.status().is_success() {
+        return response;
+    }
+
+    let (etag, loaded_at) = {
+        let s = state.read().await;
+        (s.etag.clone(), s.loaded_at)
+    };
+
+    let headers = response.headers_mut();
+    headers.insert(
+        header::CACHE_CONTROL,
+        HeaderValue::from_static("public, max-age=300, stale-while-revalidate=60"),
+    );
+    if let Ok(value) = HeaderValue::from_str(&etag) {
+        headers.insert(header::ETAG, value);
+    }
+    if let Ok(value) = HeaderValue::from_str(&format_http_date(loaded_at)) {
+        headers.insert(header::LAST_MODIFIED, value);
+    }
+    headers.insert(header::VARY, HeaderValue::from_static("Accept-Encoding"));
+
+    response
+}
+
+fn format_http_date(dt: OffsetDateTime) -> String {
+    let weekday = match dt.weekday() {
+        time::Weekday::Monday => "Mon",
+        time::Weekday::Tuesday => "Tue",
+        time::Weekday::Wednesday => "Wed",
+        time::Weekday::Thursday => "Thu",
+        time::Weekday::Friday => "Fri",
+        time::Weekday::Saturday => "Sat",
+        time::Weekday::Sunday => "Sun",
+    };
+    let month = match dt.month() {
+        time::Month::January => "Jan",
+        time::Month::February => "Feb",
+        time::Month::March => "Mar",
+        time::Month::April => "Apr",
+        time::Month::May => "May",
+        time::Month::June => "Jun",
+        time::Month::July => "Jul",
+        time::Month::August => "Aug",
+        time::Month::September => "Sep",
+        time::Month::October => "Oct",
+        time::Month::November => "Nov",
+        time::Month::December => "Dec",
+    };
+    format!(
+        "{}, {:02} {} {} {:02}:{:02}:{:02} GMT",
+        weekday,
+        dt.day(),
+        month,
+        dt.year(),
+        dt.hour(),
+        dt.minute(),
+        dt.second(),
+    )
 }
 
 // --- Security headers ---
