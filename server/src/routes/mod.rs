@@ -84,7 +84,10 @@ pub fn router(state: Arc<RwLock<AppState>>, cache: Arc<crate::cache::Cache>) -> 
             async move { crate::cache::cache_request(c, s, req, next).await }
         }
     }))
-    .layer(middleware::from_fn_with_state(Arc::clone(&state), inject_cache_headers))
+    .layer(middleware::from_fn_with_state(
+        Arc::clone(&state),
+        inject_cache_headers,
+    ))
     .layer(CompressionLayer::new())
     .layer(middleware::from_fn(reject_oversized_payload))
     .layer(

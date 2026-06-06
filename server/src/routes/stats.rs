@@ -1,4 +1,6 @@
-use crate::{catalog::CatalogStats, request::RequestContext, response::ApiResponse, state::AppState};
+use crate::{
+    catalog::CatalogStats, request::RequestContext, response::ApiResponse, state::AppState,
+};
 use axum::response::Json;
 use axum::{Extension, extract::State};
 use std::sync::Arc;

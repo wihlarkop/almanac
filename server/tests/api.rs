@@ -46,7 +46,10 @@ fn assert_error_envelope(json: &serde_json::Value, code: &str) {
 }
 
 fn assert_catalog_cache_headers(headers: &axum::http::HeaderMap) {
-    assert_eq!(headers.get("cache-control").unwrap(), "public, max-age=300, stale-while-revalidate=60");
+    assert_eq!(
+        headers.get("cache-control").unwrap(),
+        "public, max-age=300, stale-while-revalidate=60"
+    );
     assert!(headers.contains_key("etag"));
 }
 

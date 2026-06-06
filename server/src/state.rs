@@ -81,7 +81,11 @@ fn build_state(
     })
 }
 
-fn compute_stats(models: &[Model], providers: &[Provider], loaded_at: OffsetDateTime) -> CatalogStats {
+fn compute_stats(
+    models: &[Model],
+    providers: &[Provider],
+    loaded_at: OffsetDateTime,
+) -> CatalogStats {
     let mut models_by_status: HashMap<String, usize> = HashMap::new();
     let mut models_by_provider: HashMap<String, usize> = HashMap::new();
     let mut models_by_endpoint_family: HashMap<String, usize> = HashMap::new();
@@ -95,9 +99,15 @@ fn compute_stats(models: &[Model], providers: &[Provider], loaded_at: OffsetDate
     let mut most_expensive_output: Option<ModelPriceStat> = None;
 
     for model in models {
-        *models_by_status.entry(model.status.as_str().to_string()).or_insert(0) += 1;
-        *models_by_provider.entry(model.provider.clone()).or_insert(0) += 1;
-        *models_by_endpoint_family.entry(model.endpoint_family.as_str().to_string()).or_insert(0) += 1;
+        *models_by_status
+            .entry(model.status.as_str().to_string())
+            .or_insert(0) += 1;
+        *models_by_provider
+            .entry(model.provider.clone())
+            .or_insert(0) += 1;
+        *models_by_endpoint_family
+            .entry(model.endpoint_family.as_str().to_string())
+            .or_insert(0) += 1;
         for m in &model.modalities.input {
             *models_by_input_modality.entry(m.clone()).or_insert(0) += 1;
         }
@@ -118,11 +128,27 @@ fn compute_stats(models: &[Model], providers: &[Provider], loaded_at: OffsetDate
                 };
                 cheapest_input = Some(match cheapest_input.take() {
                     None => stat_in.clone(),
-                    Some(prev) => if p.input < prev.price { stat_in.clone() } else { prev },
+                    Some(prev) => {
+                        if p.input < prev.price {
+                            stat_in.clone()
+                        } else {
+                            prev
+                        }
+                    }
                 });
                 most_expensive_input = Some(match most_expensive_input.take() {
                     None => stat_in,
-                    Some(prev) => if p.input > prev.price { ModelPriceStat { model_id: model.id.clone(), provider: model.provider.clone(), price: p.input } } else { prev },
+                    Some(prev) => {
+                        if p.input > prev.price {
+                            ModelPriceStat {
+                                model_id: model.id.clone(),
+                                provider: model.provider.clone(),
+                                price: p.input,
+                            }
+                        } else {
+                            prev
+                        }
+                    }
                 });
                 let stat_out = ModelPriceStat {
                     model_id: model.id.clone(),
@@ -131,11 +157,27 @@ fn compute_stats(models: &[Model], providers: &[Provider], loaded_at: OffsetDate
                 };
                 cheapest_output = Some(match cheapest_output.take() {
                     None => stat_out.clone(),
-                    Some(prev) => if p.output < prev.price { stat_out.clone() } else { prev },
+                    Some(prev) => {
+                        if p.output < prev.price {
+                            stat_out.clone()
+                        } else {
+                            prev
+                        }
+                    }
                 });
                 most_expensive_output = Some(match most_expensive_output.take() {
                     None => stat_out,
-                    Some(prev) => if p.output > prev.price { ModelPriceStat { model_id: model.id.clone(), provider: model.provider.clone(), price: p.output } } else { prev },
+                    Some(prev) => {
+                        if p.output > prev.price {
+                            ModelPriceStat {
+                                model_id: model.id.clone(),
+                                provider: model.provider.clone(),
+                                price: p.output,
+                            }
+                        } else {
+                            prev
+                        }
+                    }
                 });
             }
         }
@@ -272,7 +314,12 @@ mod tests {
         }
     }
 
-    fn make_model(id: &str, provider: &str, status: ModelStatus, pricing: Option<Pricing>) -> Model {
+    fn make_model(
+        id: &str,
+        provider: &str,
+        status: ModelStatus,
+        pricing: Option<Pricing>,
+    ) -> Model {
         Model {
             id: id.to_string(),
             provider: provider.to_string(),
@@ -306,40 +353,50 @@ mod tests {
     fn compute_stats_counts_correctly() {
         let providers = vec![make_provider("p1"), make_provider("p2")];
         let models = vec![
-            make_model("m1", "p1", ModelStatus::Active, Some(Pricing {
-                currency: "USD".to_string(),
-                input: 1.0,
-                output: 2.0,
-                cached_input: None,
-                batch_input: None,
-                batch_output: None,
-                request_fee: None,
-                search_fee: None,
-                reasoning: None,
-                per_image: None,
-                per_second: None,
-                per_minute: None,
-                per_million_chars: None,
-                per_page: None,
-                pricing_notes: None,
-            })),
-            make_model("m2", "p2", ModelStatus::Active, Some(Pricing {
-                currency: "USD".to_string(),
-                input: 5.0,
-                output: 10.0,
-                cached_input: None,
-                batch_input: None,
-                batch_output: None,
-                request_fee: None,
-                search_fee: None,
-                reasoning: None,
-                per_image: None,
-                per_second: None,
-                per_minute: None,
-                per_million_chars: None,
-                per_page: None,
-                pricing_notes: None,
-            })),
+            make_model(
+                "m1",
+                "p1",
+                ModelStatus::Active,
+                Some(Pricing {
+                    currency: "USD".to_string(),
+                    input: 1.0,
+                    output: 2.0,
+                    cached_input: None,
+                    batch_input: None,
+                    batch_output: None,
+                    request_fee: None,
+                    search_fee: None,
+                    reasoning: None,
+                    per_image: None,
+                    per_second: None,
+                    per_minute: None,
+                    per_million_chars: None,
+                    per_page: None,
+                    pricing_notes: None,
+                }),
+            ),
+            make_model(
+                "m2",
+                "p2",
+                ModelStatus::Active,
+                Some(Pricing {
+                    currency: "USD".to_string(),
+                    input: 5.0,
+                    output: 10.0,
+                    cached_input: None,
+                    batch_input: None,
+                    batch_output: None,
+                    request_fee: None,
+                    search_fee: None,
+                    reasoning: None,
+                    per_image: None,
+                    per_second: None,
+                    per_minute: None,
+                    per_million_chars: None,
+                    per_page: None,
+                    pricing_notes: None,
+                }),
+            ),
             make_model("m3", "p1", ModelStatus::Deprecated, None),
         ];
 

@@ -1,9 +1,4 @@
-use crate::{
-    error::ApiError,
-    request::RequestContext,
-    response::ApiResponse,
-    state::AppState,
-};
+use crate::{error::ApiError, request::RequestContext, response::ApiResponse, state::AppState};
 use axum::{
     Extension,
     extract::{Path, Query, State, rejection::QueryRejection},

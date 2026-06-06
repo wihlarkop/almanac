@@ -1,8 +1,5 @@
 use crate::{
-    catalog::Model,
-    error::ApiError,
-    request::RequestContext,
-    response::ApiResponse,
+    catalog::Model, error::ApiError, request::RequestContext, response::ApiResponse,
     state::AppState,
 };
 use axum::{

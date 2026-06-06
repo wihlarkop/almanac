@@ -1,9 +1,4 @@
-use crate::{
-    catalog::Model,
-    request::RequestContext,
-    response::ApiResponse,
-    state::AppState,
-};
+use crate::{catalog::Model, request::RequestContext, response::ApiResponse, state::AppState};
 use axum::{
     Extension,
     extract::State,
