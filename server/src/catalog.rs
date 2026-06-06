@@ -157,3 +157,28 @@ pub struct Source {
     pub url: String,
     pub last_verified: String,
 }
+
+#[derive(Clone, Debug, Serialize, utoipa::ToSchema)]
+pub struct ModelPriceStat {
+    pub model_id: String,
+    pub provider: String,
+    pub price: f64,
+}
+
+#[derive(Clone, Debug, Serialize, utoipa::ToSchema)]
+pub struct CatalogStats {
+    pub total_models: usize,
+    pub total_providers: usize,
+    pub models_by_status: std::collections::HashMap<String, usize>,
+    pub models_by_provider: std::collections::HashMap<String, usize>,
+    pub models_by_endpoint_family: std::collections::HashMap<String, usize>,
+    pub models_by_input_modality: std::collections::HashMap<String, usize>,
+    pub models_by_output_modality: std::collections::HashMap<String, usize>,
+    pub free_models: usize,
+    pub models_without_pricing: usize,
+    pub cheapest_input: Option<ModelPriceStat>,
+    pub most_expensive_input: Option<ModelPriceStat>,
+    pub cheapest_output: Option<ModelPriceStat>,
+    pub most_expensive_output: Option<ModelPriceStat>,
+    pub last_updated: String,
+}
