@@ -1,9 +1,4 @@
-use crate::{
-    catalog::Model,
-    request::RequestContext,
-    response::{ApiResponse, catalog_headers},
-    state::AppState,
-};
+use crate::{catalog::Model, request::RequestContext, response::ApiResponse, state::AppState};
 use axum::{
     Extension,
     extract::State,
@@ -134,24 +129,21 @@ pub async fn health(
         }
     }
 
-    (
-        catalog_headers(&state.etag),
-        Json(ApiResponse::ok_with_context(
-            CatalogHealth {
-                total_models: state.models.len(),
-                total_providers: state.providers.len(),
-                total_aliases: state.aliases.len(),
-                status_counts,
-                missing_pricing_count,
-                stale_verification_count,
-                oldest_last_verified: oldest_last_verified.map(|date| date.to_string()),
-                newest_last_verified: newest_last_verified.map(|date| date.to_string()),
-                etag: state.etag.clone(),
-            },
-            &context,
-        )),
-    )
-        .into_response()
+    Json(ApiResponse::ok_with_context(
+        CatalogHealth {
+            total_models: state.models.len(),
+            total_providers: state.providers.len(),
+            total_aliases: state.aliases.len(),
+            status_counts,
+            missing_pricing_count,
+            stale_verification_count,
+            oldest_last_verified: oldest_last_verified.map(|date| date.to_string()),
+            newest_last_verified: newest_last_verified.map(|date| date.to_string()),
+            etag: state.etag.clone(),
+        },
+        &context,
+    ))
+    .into_response()
 }
 
 #[utoipa::path(
@@ -241,11 +233,7 @@ pub async fn issues(
         replacement_gaps,
     };
 
-    (
-        catalog_headers(&state.etag),
-        Json(ApiResponse::ok_with_context(data, &context)),
-    )
-        .into_response()
+    Json(ApiResponse::ok_with_context(data, &context)).into_response()
 }
 
 fn model_issue(model: &Model) -> ModelIssue {

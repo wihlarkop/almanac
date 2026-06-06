@@ -1,9 +1,5 @@
 use crate::{
-    catalog::Model,
-    error::ApiError,
-    fuzzy,
-    request::RequestContext,
-    response::{ApiResponse, catalog_headers},
+    catalog::Model, error::ApiError, fuzzy, request::RequestContext, response::ApiResponse,
     state::AppState,
 };
 use axum::{
@@ -248,13 +244,10 @@ pub async fn search(
     let limit = filter.limit().map(clamp_limit).unwrap_or(DEFAULT_LIMIT);
     let data: Vec<_> = results.into_iter().skip(offset).take(limit).collect();
 
-    Ok((
-        catalog_headers(&state.etag),
-        Json(ApiResponse::paginated_with_context(
-            data, limit, offset, total, &context,
-        )),
-    )
-        .into_response())
+    Ok(Json(ApiResponse::paginated_with_context(
+        data, limit, offset, total, &context,
+    ))
+    .into_response())
 }
 
 fn match_type_name(match_type: fuzzy::MatchType) -> &'static str {

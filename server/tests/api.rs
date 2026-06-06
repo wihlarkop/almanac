@@ -46,7 +46,10 @@ fn assert_error_envelope(json: &serde_json::Value, code: &str) {
 }
 
 fn assert_catalog_cache_headers(headers: &axum::http::HeaderMap) {
-    assert_eq!(headers.get("cache-control").unwrap(), "public, max-age=300");
+    assert_eq!(
+        headers.get("cache-control").unwrap(),
+        "public, max-age=300, stale-while-revalidate=60"
+    );
     assert!(headers.contains_key("etag"));
 }
 
@@ -291,7 +294,7 @@ async fn providers_returns_array_with_cache_headers() {
     assert_eq!(response.status(), StatusCode::OK);
     assert_eq!(
         response.headers().get("cache-control").unwrap(),
-        "public, max-age=300"
+        "public, max-age=300, stale-while-revalidate=60"
     );
     assert!(response.headers().contains_key("etag"));
 
@@ -649,7 +652,7 @@ async fn models_returns_all_with_cache_headers() {
     assert_eq!(response.status(), StatusCode::OK);
     assert_eq!(
         response.headers().get("cache-control").unwrap(),
-        "public, max-age=300"
+        "public, max-age=300, stale-while-revalidate=60"
     );
     assert!(response.headers().contains_key("etag"));
 
@@ -1005,7 +1008,7 @@ async fn get_model_found() {
     assert_eq!(response.status(), StatusCode::OK);
     assert_eq!(
         response.headers().get("cache-control").unwrap(),
-        "public, max-age=300"
+        "public, max-age=300, stale-while-revalidate=60"
     );
 
     let body = axum::body::to_bytes(response.into_body(), usize::MAX)

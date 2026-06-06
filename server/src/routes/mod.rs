@@ -2,7 +2,7 @@ use crate::{
     error::ApiError,
     request::{
         MAX_REQUEST_BODY_BYTES, attach_request_context, enforce_request_timeout,
-        handle_method_not_allowed, reject_oversized_payload,
+        handle_method_not_allowed, inject_cache_headers, reject_oversized_payload,
     },
     state::AppState,
 };
@@ -34,6 +34,7 @@ mod models;
 mod providers;
 mod root;
 mod search;
+mod stats;
 mod suggest;
 mod validate;
 
@@ -83,6 +84,10 @@ pub fn router(state: Arc<RwLock<AppState>>, cache: Arc<crate::cache::Cache>) -> 
             async move { crate::cache::cache_request(c, s, req, next).await }
         }
     }))
+    .layer(middleware::from_fn_with_state(
+        Arc::clone(&state),
+        inject_cache_headers,
+    ))
     .layer(CompressionLayer::new())
     .layer(middleware::from_fn(reject_oversized_payload))
     .layer(
@@ -119,6 +124,7 @@ pub fn api_router() -> OpenApiRouter<Arc<RwLock<AppState>>> {
         .routes(routes!(models::get_model))
         .routes(routes!(validate::validate))
         .routes(routes!(search::search))
+        .routes(routes!(stats::catalog_stats))
         .routes(routes!(suggest::suggest))
 }
 

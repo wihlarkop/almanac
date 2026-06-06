@@ -1,8 +1,5 @@
 use crate::{
-    catalog::Model,
-    error::ApiError,
-    request::RequestContext,
-    response::{ApiResponse, catalog_headers},
+    catalog::Model, error::ApiError, request::RequestContext, response::ApiResponse,
     state::AppState,
 };
 use axum::{
@@ -257,14 +254,11 @@ pub async fn compare(
         pricing_breakdown: build_pricing_breakdown(&models),
     };
 
-    Ok((
-        catalog_headers(&state.etag),
-        Json(ApiResponse::ok_with_context(
-            CompareResponse { models, summary },
-            &context,
-        )),
-    )
-        .into_response())
+    Ok(Json(ApiResponse::ok_with_context(
+        CompareResponse { models, summary },
+        &context,
+    ))
+    .into_response())
 }
 
 fn comparable_cost(pricing: &crate::catalog::Pricing) -> Option<f64> {

@@ -1,19 +1,6 @@
 use crate::request::RequestContext;
-use axum::http::{HeaderMap, HeaderValue};
 use serde::Serialize;
 use time::{OffsetDateTime, format_description::well_known::Rfc3339};
-
-pub fn catalog_headers(etag: &str) -> HeaderMap {
-    let mut headers = HeaderMap::new();
-    headers.insert(
-        "cache-control",
-        HeaderValue::from_static("public, max-age=300"),
-    );
-    if let Ok(etag) = HeaderValue::from_str(etag) {
-        headers.insert("etag", etag);
-    }
-    headers
-}
 
 #[derive(Serialize, utoipa::ToSchema)]
 pub struct EmptyData {}
