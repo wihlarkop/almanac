@@ -2,7 +2,7 @@ use crate::{
     catalog::Model,
     error::ApiError,
     request::RequestContext,
-    response::{ApiResponse, catalog_headers},
+    response::ApiResponse,
     state::AppState,
 };
 use axum::{
@@ -240,13 +240,10 @@ pub async fn list_models(
     let limit = filter.limit().unwrap_or(DEFAULT_LIMIT);
     let data: Vec<_> = models.into_iter().skip(offset).take(limit).collect();
 
-    (
-        catalog_headers(&state.etag),
-        Json(ApiResponse::paginated_with_context(
-            data, limit, offset, total, &context,
-        )),
-    )
-        .into_response()
+    Json(ApiResponse::paginated_with_context(
+        data, limit, offset, total, &context,
+    ))
+    .into_response()
 }
 
 #[utoipa::path(
@@ -334,11 +331,7 @@ pub async fn get_model(
             {
                 return StatusCode::NOT_MODIFIED.into_response();
             }
-            (
-                catalog_headers(&state.etag),
-                Json(ApiResponse::ok_with_context(m.clone(), &context)),
-            )
-                .into_response()
+            Json(ApiResponse::ok_with_context(m.clone(), &context)).into_response()
         }
     }
 }

@@ -1,7 +1,7 @@
 use crate::{
     error::ApiError,
     request::RequestContext,
-    response::{ApiResponse, catalog_headers},
+    response::ApiResponse,
     state::AppState,
 };
 use axum::{
@@ -107,13 +107,10 @@ pub async fn list_aliases(
         .unwrap_or(DEFAULT_LIMIT);
     let data: Vec<AliasMapping> = all_aliases.into_iter().skip(offset).take(limit).collect();
 
-    (
-        catalog_headers(&state.etag),
-        Json(ApiResponse::paginated_with_context(
-            data, limit, offset, total, &context,
-        )),
-    )
-        .into_response()
+    Json(ApiResponse::paginated_with_context(
+        data, limit, offset, total, &context,
+    ))
+    .into_response()
 }
 
 #[utoipa::path(
@@ -183,14 +180,11 @@ pub async fn get_alias(
         return StatusCode::NOT_MODIFIED.into_response();
     }
 
-    (
-        catalog_headers(&state.etag),
-        Json(ApiResponse::ok_with_context(
-            alias_mapping(&state, &alias, canonical_id),
-            &context,
-        )),
-    )
-        .into_response()
+    Json(ApiResponse::ok_with_context(
+        alias_mapping(&state, &alias, canonical_id),
+        &context,
+    ))
+    .into_response()
 }
 
 fn alias_mapping(state: &AppState, alias: &str, canonical_id: &str) -> AliasMapping {

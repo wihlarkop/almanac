@@ -2,7 +2,7 @@ use crate::{
     catalog::Provider,
     error::ApiError,
     request::RequestContext,
-    response::{ApiResponse, catalog_headers},
+    response::ApiResponse,
     state::AppState,
 };
 use axum::{
@@ -102,13 +102,10 @@ pub async fn list_providers(
         .cloned()
         .collect();
 
-    (
-        catalog_headers(&state.etag),
-        Json(ApiResponse::paginated_with_context(
-            data, limit, offset, total, &context,
-        )),
-    )
-        .into_response()
+    Json(ApiResponse::paginated_with_context(
+        data, limit, offset, total, &context,
+    ))
+    .into_response()
 }
 
 #[utoipa::path(
@@ -179,11 +176,7 @@ pub async fn get_provider(
             {
                 return StatusCode::NOT_MODIFIED.into_response();
             }
-            (
-                catalog_headers(&state.etag),
-                Json(ApiResponse::ok_with_context(provider.clone(), &context)),
-            )
-                .into_response()
+            Json(ApiResponse::ok_with_context(provider.clone(), &context)).into_response()
         }
     }
 }
