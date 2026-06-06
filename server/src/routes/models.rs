@@ -53,6 +53,12 @@ pub struct ModelFilter {
     /// Maximum input price per million tokens in USD
     #[param(example = 1.0)]
     pub(crate) max_input_price: Option<f64>,
+    /// Maximum output price per million tokens in USD
+    #[param(example = 5.0)]
+    pub(crate) max_output_price: Option<f64>,
+    /// Filter by pricing availability: available, unavailable, free, paid
+    #[param(example = "paid")]
+    pub(crate) pricing: Option<String>,
     /// Filter by endpoint family (e.g. chat_completions, responses)
     #[param(example = "chat_completions")]
     pub(crate) endpoint_family: Option<String>,
@@ -114,6 +120,10 @@ impl ModelFilter {
 
     pub(crate) fn endpoint_family(&self) -> Option<&str> {
         non_empty(self.endpoint_family.as_deref())
+    }
+
+    pub(crate) fn pricing(&self) -> Option<&str> {
+        non_empty(self.pricing.as_deref())
     }
 
     pub(crate) fn query(&self) -> Option<&str> {
@@ -394,6 +404,61 @@ pub(crate) fn model_matches_filter(model: &Model, filter: &ModelFilter) -> bool 
             > max_input_price
     {
         return false;
+    }
+    if let Some(max_output_price) = filter.max_output_price
+        && model
+            .pricing
+            .as_ref()
+            .map(|pricing| pricing.output)
+            .unwrap_or(f64::MAX)
+            > max_output_price
+    {
+        return false;
+    }
+    if let Some(pricing_filter) = filter.pricing() {
+        match pricing_filter {
+            "available" => {
+                if model.pricing.is_none() {
+                    return false;
+                }
+            }
+            "unavailable" => {
+                if model.pricing.is_some() {
+                    return false;
+                }
+            }
+            "free" => match &model.pricing {
+                None => return false,
+                Some(p) => {
+                    let is_free = p.input == 0.0
+                        && p.output == 0.0
+                        && p.per_image.unwrap_or(0.0) == 0.0
+                        && p.per_second.unwrap_or(0.0) == 0.0
+                        && p.per_minute.unwrap_or(0.0) == 0.0
+                        && p.per_million_chars.unwrap_or(0.0) == 0.0
+                        && p.per_page.unwrap_or(0.0) == 0.0;
+                    if !is_free {
+                        return false;
+                    }
+                }
+            },
+            "paid" => match &model.pricing {
+                None => return false,
+                Some(p) => {
+                    let is_paid = p.input > 0.0
+                        || p.output > 0.0
+                        || p.per_image.unwrap_or(0.0) > 0.0
+                        || p.per_second.unwrap_or(0.0) > 0.0
+                        || p.per_minute.unwrap_or(0.0) > 0.0
+                        || p.per_million_chars.unwrap_or(0.0) > 0.0
+                        || p.per_page.unwrap_or(0.0) > 0.0;
+                    if !is_paid {
+                        return false;
+                    }
+                }
+            },
+            _ => {}
+        }
     }
     if let Some(ef) = filter.endpoint_family()
         && model.endpoint_family.as_str() != ef

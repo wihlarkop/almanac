@@ -58,6 +58,15 @@ pub struct SearchQuery {
     /// Maximum input price per million tokens in USD
     #[param(example = 1.0)]
     max_input_price: Option<f64>,
+    /// Maximum output price per million tokens in USD
+    #[param(example = 5.0)]
+    max_output_price: Option<f64>,
+    /// Filter by pricing availability: available, unavailable, free, paid
+    #[param(example = "paid")]
+    pricing: Option<String>,
+    /// Filter by endpoint family (e.g. chat_completions, responses)
+    #[param(example = "chat_completions")]
+    endpoint_family: Option<String>,
 }
 
 impl SearchQuery {
@@ -78,7 +87,9 @@ impl SearchQuery {
             modality_output: self.modality_output.clone(),
             min_context: self.min_context,
             max_input_price: self.max_input_price,
-            endpoint_family: None,
+            max_output_price: self.max_output_price,
+            pricing: self.pricing.clone(),
+            endpoint_family: self.endpoint_family.clone(),
             query: None,
         }
     }
