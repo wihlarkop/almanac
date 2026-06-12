@@ -402,9 +402,6 @@ aliases:
   granite-latest: granite-3.3-8b-instruct
   granite-mini-latest: granite-3.3-2b-instruct
 
-  # Snowflake aliases
-  arctic-latest: arctic-instruct
-
   # PixVerse aliases
   pixverse-latest: pixverse-v4
 
@@ -415,9 +412,6 @@ aliases:
   # Stability AI audio aliases
   stable-audio-latest: stable-audio-2-5
   stable-audio-2-latest: stable-audio-2-5
-
-  # Fireworks AI aliases
-  firefunction-latest: firefunction-v2
 
   # Microsoft Phi-4 reasoning aliases
   phi-4-reasoning-latest: phi-4-reasoning-plus
