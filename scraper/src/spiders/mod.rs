@@ -1,5 +1,6 @@
 pub mod alibaba;
 pub mod anthropic;
+pub mod bytedance;
 pub mod cohere;
 pub mod deepseek;
 pub mod doc_page;

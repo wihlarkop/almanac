@@ -263,6 +263,19 @@ pub fn looks_like_model_id(s: &str) -> bool {
     if s.starts_with("data-") {
         return false;
     }
+    // Reject file extensions (.js, .ts, .css, etc.) — catches JS bundle artifacts
+    const FILE_EXTS: &[&str] = &[".js", ".ts", ".jsx", ".tsx", ".css", ".vue", ".py", ".go"];
+    if FILE_EXTS.iter().any(|ext| s.ends_with(ext)) {
+        return false;
+    }
+    // Reject semver-like version strings: v1.2.3, v1.16.0, etc.
+    if s.starts_with('v')
+        && s[1..]
+            .split('.')
+            .all(|p| p.chars().all(|c| c.is_ascii_digit()))
+    {
+        return false;
+    }
     // Must contain at least one letter (extra guard against pure numeric strings)
     if !s.chars().any(|c| c.is_ascii_lowercase()) {
         return false;
