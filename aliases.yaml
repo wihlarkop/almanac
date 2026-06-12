@@ -81,8 +81,11 @@ aliases:
 
   # xAI shorthand aliases
   grok-latest: grok-4.3
+  grok-4-latest: grok-4.3
+  grok-4.1-latest: grok-4.1
   grok-4.3-latest: grok-4.3
   grok-4.20-latest: grok-4.20-reasoning
+  composer-latest: composer-2.5
 
   # Alibaba shorthand aliases
   qwen-latest: qwen3-max
@@ -228,7 +231,12 @@ aliases:
   # Stability AI aliases
   sdxl-ultra-latest: stable-image-ultra
   sdxl-core-latest: stable-image-core
+  stable-image-ultra-latest: stable-image-ultra
+  stable-image-core-latest: stable-image-core
   sd-3.5-latest: stable-diffusion-3.5-large
+  stable-diffusion-3.5-latest: stable-diffusion-3.5-large
+  stable-diffusion-3.5-turbo-latest: stable-diffusion-3.5-large-turbo
+  stable-diffusion-3.5-medium-latest: stable-diffusion-3.5-medium
 
   # Black Forest Labs aliases
   flux-latest: flux-2-max
@@ -372,6 +380,16 @@ aliases:
   # Voyage reranker aliases
   voyage-rerank-latest: rerank-2.5
   voyage-rerank-lite-latest: rerank-lite-2.5
+  voyage-rerank-2.5-latest: rerank-2.5
+  voyage-rerank-lite-2.5-latest: rerank-lite-2.5
+
+  # Voyage specialized model aliases
+  voyage-code-latest: voyage-code-3
+  voyage-multimodal-latest: voyage-multimodal-3
+  voyage-finance-latest: voyage-finance-2
+  voyage-law-latest: voyage-law-2
+  voyage-3.5-latest: voyage-3.5
+  voyage-3.5-lite-latest: voyage-3.5-lite
 
   # Jina reranker aliases
   jina-reranker-latest: jina-reranker-v3
@@ -413,9 +431,16 @@ aliases:
   stable-audio-latest: stable-audio-2-5
   stable-audio-2-latest: stable-audio-2-5
 
+  # Microsoft MAI aliases
+  mai-image-latest: mai-image-2
+  mai-transcribe-latest: mai-transcribe-1
+  mai-voice-latest: mai-voice-1
+
   # Microsoft Phi-4 reasoning aliases
   phi-4-reasoning-latest: phi-4-reasoning-plus
+  phi-4-reasoning-vision-latest: phi-4-reasoning-vision
   phi-4-mini-reasoning-latest: phi-4-mini-reasoning
+  phi-4-mini-flash-reasoning-latest: phi-4-mini-flash-reasoning
 
   # DeepSeek versioned aliases
   deepseek-r1-0528-latest: deepseek-r1-0528

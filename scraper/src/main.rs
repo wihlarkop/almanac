@@ -75,8 +75,7 @@ const SIMPLE_PROVIDERS: &[(&str, &str)] = &[
         "deepgram",
         "https://developers.deepgram.com/docs/models-languages-overview",
     ),
-    // HiDream — homepage (docs not yet public)
-    ("hidream", "https://www.hidream.ai/"),
+
     // IBM Granite — Watson X docs with model list
     (
         "ibm",
@@ -91,8 +90,7 @@ const SIMPLE_PROVIDERS: &[(&str, &str)] = &[
     ("inworld", "https://docs.inworld.ai/docs/tutorial-text/v2/"),
     // Jina AI — models landing page
     ("jina", "https://jina.ai/models/"),
-    // Kling — model docs (Kuaishou)
-    ("kling", "https://klingai.com/"),
+
     // Lightricks LTX — static docs
     ("lightricks", "https://docs.ltx.video/"),
     // LMNT — static developer docs
@@ -116,8 +114,7 @@ const SIMPLE_PROVIDERS: &[(&str, &str)] = &[
         "nvidia",
         "https://docs.nvidia.com/nim/large-language-models/latest/supported-models.html",
     ),
-    // Pika Labs — model info page
-    ("pika", "https://pika.art/"),
+
     // PixVerse — API docs
     ("pixverse", "https://docs.pixverse.ai/"),
     // PlayHT — static API docs (Mintlify)
@@ -126,8 +123,7 @@ const SIMPLE_PROVIDERS: &[(&str, &str)] = &[
     ("recraft", "https://www.recraft.ai/docs"),
     // Reka — static docs
     ("reka", "https://docs.reka.ai/"),
-    // Reve AI — docs
-    ("reve", "https://reveai.com/"),
+
     // Runway — static developer docs
     ("runway", "https://docs.runwayml.com/"),
     // Stability AI — static API reference
@@ -140,8 +136,7 @@ const SIMPLE_PROVIDERS: &[(&str, &str)] = &[
         "stepfun",
         "https://platform.stepfun.com/docs/overview/concept",
     ),
-    // Suno — AI music (no public API docs yet)
-    ("suno", "https://suno.com/"),
+
     // Tencent Hunyuan — cloud docs
     (
         "tencent",
@@ -149,8 +144,7 @@ const SIMPLE_PROVIDERS: &[(&str, &str)] = &[
     ),
     // Tripo 3D — static docs
     ("tripo", "https://platform.tripo3d.ai/docs"),
-    // Udio — AI music (no public API docs yet)
-    ("udio", "https://www.udio.com/"),
+
     // Upstage Solar — Mintlify static docs
     (
         "upstage",
