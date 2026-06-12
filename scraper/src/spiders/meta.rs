@@ -24,7 +24,13 @@ impl Spider for MetaSpider {
                 follow_urls,
             });
         }
-        models.retain(|m| m.id.starts_with("llama") || m.id.starts_with("meta-llama"));
+        models.retain(|m| {
+            m.id.starts_with("llama-")
+                || m.id.starts_with("llama3")
+                || m.id.starts_with("llama4")
+                || m.id.starts_with("codellama-")
+                || m.id.starts_with("meta-llama-")
+        });
         Ok(SpiderOutput::new().items(models))
     }
 }

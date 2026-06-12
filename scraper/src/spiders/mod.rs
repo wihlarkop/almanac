@@ -1,6 +1,9 @@
 pub mod alibaba;
 pub mod anthropic;
 pub mod bytedance;
+pub mod cartesia;
+pub mod heygen;
+pub mod ideogram;
 pub mod cohere;
 pub mod deepseek;
 pub mod doc_page;

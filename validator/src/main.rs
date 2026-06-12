@@ -601,6 +601,16 @@ fn print_catalog_summary(
         .iter()
         .filter(|m| m["last_verified"].as_str().is_none())
         .count();
+    // Stub: scraper-generated entry with placeholder context/token values,
+    // indicating no human verification of the model's real specs yet.
+    let stubs = models
+        .iter()
+        .filter(|m| {
+            m["confidence"].as_str() == Some("inferred")
+                && m["context_window"].as_u64() == Some(4096)
+                && m["max_output_tokens"].as_u64() == Some(4096)
+        })
+        .count();
 
     println!("\n{sep}");
     println!("Catalog Summary");
@@ -644,6 +654,12 @@ fn print_catalog_summary(
         "missing last_verified",
         missing_verified,
         pct(missing_verified)
+    );
+    println!(
+        "    {:<24}: {:>4} / {total}  ({:>3}%)",
+        "stubs (need enrichment)",
+        stubs,
+        pct(stubs)
     );
     println!("{sep}");
 }
