@@ -269,7 +269,11 @@ pub fn looks_like_model_id(s: &str) -> bool {
         return false;
     }
     // Reject semver-like version strings: v1.2.3, v1.16.0, etc.
-    if s.starts_with('v') && s[1..].split('.').all(|p| p.chars().all(|c| c.is_ascii_digit())) {
+    if s.starts_with('v')
+        && s[1..]
+            .split('.')
+            .all(|p| p.chars().all(|c| c.is_ascii_digit()))
+    {
         return false;
     }
     // Must contain at least one letter (extra guard against pure numeric strings)
