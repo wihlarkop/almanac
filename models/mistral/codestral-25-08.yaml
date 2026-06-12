@@ -1,12 +1,12 @@
 id: codestral-25-08
 provider: mistral
-display_name: Codestral
+display_name: Codestral (Aug 2025)
 status: active
 release_date: null
 deprecation_date: null
 sunset_date: null
 replacement: null
-context_window: 4096
+context_window: 131072
 max_output_tokens: 4096
 modalities:
   input: [text]
@@ -15,20 +15,20 @@ capabilities:
   tools: false
   vision: false
   streaming: true
-  json_mode: false
+  json_mode: true
   prompt_caching: false
   thinking: false
 parameters:
-  supported: []
+  supported: [temperature, top_p, max_tokens, stream, stop]
   rejected: []
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 0
-  output: 0
-last_verified: 2026-06-05
-confidence: inferred
+  input: 0.30
+  output: 0.90
+last_verified: 2026-06-13
+confidence: official
 endpoint_family: chat_completions
 sources:
-  - url: https://docs.mistral.ai/models/model-cards/codestral-25-08
-    last_verified: 2026-06-05
+  - url: https://docs.mistral.ai/getting-started/models/models_overview/
+    last_verified: 2026-06-13

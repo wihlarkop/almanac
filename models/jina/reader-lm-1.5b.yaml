@@ -1,13 +1,13 @@
 id: reader-lm-1.5b
 provider: jina
-display_name: reader-lm-1.5b
+display_name: Reader-LM 1.5B
 status: active
 release_date: null
 deprecation_date: null
 sunset_date: null
 replacement: null
-context_window: 4096
-max_output_tokens: 4096
+context_window: 256000
+max_output_tokens: 8192
 modalities:
   input: [text]
   output: [text]
@@ -16,19 +16,17 @@ capabilities:
   vision: false
   streaming: true
   json_mode: false
-  prompt_caching: false
-  thinking: false
 parameters:
   supported: []
   rejected: []
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 0
-  output: 0
-last_verified: 2026-06-05
+  input: 0.02
+  output: 0.00
+last_verified: 2026-06-13
 confidence: inferred
 endpoint_family: chat_completions
 sources:
   - url: https://jina.ai/models/
-    last_verified: 2026-06-05
+    last_verified: 2026-06-13

@@ -1,34 +1,33 @@
 id: voxtral-mini-transcribe-25-07
 provider: mistral
-display_name: Voxtral Mini Transcribe
+display_name: Voxtral Mini Transcribe (Jul 2025)
 status: active
 release_date: null
 deprecation_date: null
 sunset_date: null
 replacement: null
-context_window: 4096
+context_window: 32768
 max_output_tokens: 4096
 modalities:
-  input: [text]
+  input: [audio, text]
   output: [text]
 capabilities:
   tools: false
   vision: false
-  streaming: true
+  streaming: false
   json_mode: false
-  prompt_caching: false
-  thinking: false
 parameters:
   supported: []
   rejected: []
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 0
-  output: 0
-last_verified: 2026-06-05
-confidence: inferred
-endpoint_family: chat_completions
+  input: 0.00
+  output: 0.00
+  per_minute: 0.003
+last_verified: 2026-06-13
+confidence: official
+endpoint_family: transcription
 sources:
-  - url: https://docs.mistral.ai/models/model-cards/voxtral-mini-transcribe-25-07
-    last_verified: 2026-06-05
+  - url: https://docs.mistral.ai/getting-started/models/models_overview/
+    last_verified: 2026-06-13
