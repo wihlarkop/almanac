@@ -1,11 +1,14 @@
 pub mod alibaba;
 pub mod anthropic;
 pub mod bytedance;
+pub mod cartesia;
 pub mod cohere;
 pub mod deepseek;
 pub mod doc_page;
 pub mod elevenlabs;
 pub mod google;
+pub mod heygen;
+pub mod ideogram;
 pub mod inception;
 pub mod leonardo;
 pub mod luma;

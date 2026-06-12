@@ -4,8 +4,9 @@ use almanac_scraper::engine::run_spider;
 use almanac_scraper::model::ScrapedModel;
 use almanac_scraper::spiders::{
     alibaba::AlibabaSpider, anthropic::AnthropicSpider, bytedance::ByteDanceSpider,
-    cohere::CohereSpider, deepseek::DeepSeekSpider, doc_page::DocPageSpider,
-    elevenlabs::ElevenLabsSpider, google::GoogleSpider, inception::InceptionSpider,
+    cartesia::CartesiaSpider, cohere::CohereSpider, deepseek::DeepSeekSpider,
+    doc_page::DocPageSpider, elevenlabs::ElevenLabsSpider, google::GoogleSpider,
+    heygen::HeyGenSpider, ideogram::IdeogramSpider, inception::InceptionSpider,
     leonardo::LeonardoSpider, luma::LumaSpider, meta::MetaSpider, microsoft::MicrosoftSpider,
     mistral::MistralSpider, mistral_html::MistralHtmlSpider, moonshot::MoonshotSpider,
     openai::OpenAiSpider, perplexity::PerplexitySpider, voyageai::VoyageAiSpider, xai::XaiSpider,
@@ -40,6 +41,9 @@ const CUSTOM_PROVIDERS: &[&str] = &[
     "inception",
     "xiaomi",
     "bytedance",
+    "cartesia",
+    "heygen",
+    "ideogram",
 ];
 
 /// Simple providers: scraped with a single public docs URL, no custom logic.
@@ -66,28 +70,17 @@ const SIMPLE_PROVIDERS: &[(&str, &str)] = &[
     ),
     // Black Forest Labs — FLUX model docs
     ("bfl", "https://docs.bfl.ml/"),
-    // Cartesia — static Mintlify docs
-    (
-        "cartesia",
-        "https://docs.cartesia.ai/build-with-cartesia/tts-models/api-changes",
-    ),
     // Deepgram — static docs with model table
     (
         "deepgram",
         "https://developers.deepgram.com/docs/models-languages-overview",
     ),
-    ("heygen", "https://docs.heygen.com/reference/list-voices-v2"),
     // HiDream — homepage (docs not yet public)
     ("hidream", "https://www.hidream.ai/"),
     // IBM Granite — Watson X docs with model list
     (
         "ibm",
         "https://www.ibm.com/docs/en/watsonx/saas?topic=solutions-supported-foundation-models",
-    ),
-    // Ideogram — developer API reference
-    (
-        "ideogram",
-        "https://developer.ideogram.ai/api-reference/api-reference/generate",
     ),
     // Inflection — developer portal (Mintlify)
     (
@@ -288,6 +281,9 @@ async fn run_all_spiders(provider: &str) -> Result<Vec<ScrapedModel>> {
     run_custom!("inception", InceptionSpider);
     run_custom!("xiaomi", XiaomiSpider);
     run_custom!("bytedance", ByteDanceSpider);
+    run_custom!("cartesia", CartesiaSpider);
+    run_custom!("heygen", HeyGenSpider);
+    run_custom!("ideogram", IdeogramSpider);
 
     // ── Simple providers (DocPageSpider) ──────────────────────────────────────
     for &(name, url) in SIMPLE_PROVIDERS {
