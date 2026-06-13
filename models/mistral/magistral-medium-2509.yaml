@@ -1,11 +1,11 @@
 id: magistral-medium-2509
 provider: mistral
 display_name: Magistral Medium
-status: active
+status: deprecated
 release_date: 2025-09-01
 deprecation_date: null
 sunset_date: null
-replacement: null
+replacement: mistral-medium-3-5
 context_window: 40000
 max_output_tokens: 40000
 modalities:

@@ -1,11 +1,11 @@
 id: devstral-medium-1-0-25-07
 provider: mistral
 display_name: Devstral Medium 1.0
-status: active
+status: deprecated
 release_date: null
 deprecation_date: null
 sunset_date: null
-replacement: null
+replacement: devstral-medium-2507
 context_window: 131072
 max_output_tokens: 4096
 modalities:

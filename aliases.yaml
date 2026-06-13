@@ -456,7 +456,7 @@ aliases:
   grok-3-mini-latest: grok-3-mini
 
   # Mistral dev aliases
-  devstral-latest: devstral-small-2505
+  devstral-latest: mistral-medium-3-5
   codestral-mamba-latest: codestral-mamba-2407
 
   # Inworld TTS aliases

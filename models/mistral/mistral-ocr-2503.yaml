@@ -1,11 +1,11 @@
 id: mistral-ocr-2503
 provider: mistral
 display_name: OCR
-status: active
+status: deprecated
 release_date: null
 deprecation_date: null
 sunset_date: null
-replacement: null
+replacement: mistral-ocr-2505
 context_window: 4096
 max_output_tokens: 4096
 modalities:

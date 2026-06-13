@@ -1,11 +1,11 @@
 id: mistral-small-3-2-25-06
 provider: mistral
 display_name: Mistral Small 3.2
-status: active
+status: deprecated
 release_date: null
 deprecation_date: null
 sunset_date: null
-replacement: null
+replacement: mistral-small-2506
 context_window: 131072
 max_output_tokens: 4096
 modalities:
