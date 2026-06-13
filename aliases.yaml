@@ -219,7 +219,7 @@ aliases:
   jina-embed-v3-latest: jina-embeddings-v3
 
   # Cohere embed aliases
-  embed-latest: embed-v4
+  embed-latest: embed-v4.0
 
   # Google embedding aliases
   text-embedding-google-latest: text-embedding-005
@@ -373,9 +373,9 @@ aliases:
   tripo-p1-latest: tripo-p1-0
 
   # Cohere reranker aliases
-  rerank-latest: rerank-v4-fast
-  cohere-rerank-latest: rerank-v4-fast
-  cohere-rerank-pro-latest: rerank-v4-pro
+  rerank-latest: rerank-v4.0-fast
+  cohere-rerank-latest: rerank-v4.0-fast
+  cohere-rerank-pro-latest: rerank-v4.0-pro
 
   # Voyage reranker aliases
   voyage-rerank-latest: rerank-2.5

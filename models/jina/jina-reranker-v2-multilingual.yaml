@@ -1,11 +1,11 @@
 id: jina-reranker-v2-multilingual
 provider: jina
 display_name: Jina Reranker v2 Multilingual
-status: active
+status: deprecated
 release_date: 2024-10-01
-deprecation_date: null
+deprecation_date: 2026-06-13
 sunset_date: null
-replacement: null
+replacement: jina-reranker-v2-base-multilingual
 context_window: 8192
 max_output_tokens: 1
 modalities:

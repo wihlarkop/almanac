@@ -1,6 +1,6 @@
 use crate::catalog::CatalogEntry;
 use crate::model::ScrapedModel;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 #[derive(Debug)]
 pub enum DiffResult {
@@ -10,10 +10,26 @@ pub enum DiffResult {
         old_input: Option<f64>,
         old_output: Option<f64>,
     },
+    /// An active catalog entry for this provider was not found in the current scrape.
+    /// This may mean the model was removed from docs (possibly deprecated upstream).
+    MissingFromDocs {
+        provider: String,
+        id: String,
+    },
 }
 
 pub fn diff(scraped: &[ScrapedModel], catalog: &HashMap<String, CatalogEntry>) -> Vec<DiffResult> {
     let mut results = Vec::new();
+
+    // Collect scraped IDs grouped by provider.
+    let mut scraped_by_provider: HashMap<&str, HashSet<&str>> = HashMap::new();
+    for model in scraped {
+        scraped_by_provider
+            .entry(model.provider.as_str())
+            .or_default()
+            .insert(model.id.as_str());
+    }
+
     for model in scraped {
         match catalog.get(&model.id) {
             None => results.push(DiffResult::New(model.clone())),
@@ -30,6 +46,26 @@ pub fn diff(scraped: &[ScrapedModel], catalog: &HashMap<String, CatalogEntry>) -
             }
         }
     }
+
+    // For each provider that was scraped, flag active catalog entries that are now absent.
+    for (provider, scraped_ids) in &scraped_by_provider {
+        for entry in catalog.values() {
+            if entry.provider != *provider {
+                continue;
+            }
+            // Only flag active models — already-deprecated entries are expected to be absent.
+            if entry.status == "deprecated" {
+                continue;
+            }
+            if !scraped_ids.contains(entry.id.as_str()) {
+                results.push(DiffResult::MissingFromDocs {
+                    provider: provider.to_string(),
+                    id: entry.id.clone(),
+                });
+            }
+        }
+    }
+
     results
 }
 
