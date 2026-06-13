@@ -16,9 +16,9 @@ impl Spider for CohereSpider {
 
     async fn scrape(&self, res: &HtmlResponse<'_>) -> Result<SpiderOutput> {
         let mut models = extract_model_ids(res.body, "cohere", res.url);
-        // Reject AWS Bedrock-style IDs like "cohere.command-r-plus-v1:0"
-        // The ":0" suffix is valid in Bedrock but fails the almanac schema pattern.
-        models.retain(|m| !m.id.contains(':'));
+        // Reject AWS Bedrock-style IDs: "cohere.command-r-plus-v1:0" (colon) and
+        // "cohere.command-r-plus" (dot-prefix namespace) — these are Bedrock handles, not Cohere API IDs.
+        models.retain(|m| !m.id.contains(':') && !m.id.starts_with("cohere."));
         Ok(SpiderOutput::new().items(models))
     }
 }

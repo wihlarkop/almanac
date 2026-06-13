@@ -16,8 +16,11 @@ impl Spider for MicrosoftSpider {
 
     async fn scrape(&self, res: &HtmlResponse<'_>) -> Result<SpiderOutput> {
         let mut models = extract_model_ids(res.body, "microsoft", res.url);
-        // Microsoft model IDs: phi-*, gpt-* (Azure OpenAI)
-        models.retain(|m| m.id.starts_with("phi-") || m.id.starts_with("gpt-"));
+        // Microsoft-developed models only: phi-*, mai-*, trellis-*
+        // Reject gpt-* — those are OpenAI models hosted on Azure, not developed by Microsoft.
+        models.retain(|m| {
+            m.id.starts_with("phi-") || m.id.starts_with("mai-") || m.id.starts_with("trellis-")
+        });
         Ok(SpiderOutput::new().items(models))
     }
 }
