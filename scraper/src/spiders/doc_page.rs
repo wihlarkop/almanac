@@ -275,8 +275,8 @@ pub fn looks_like_model_id(s: &str) -> bool {
     }
     // Reject file extensions — catches bundle artifacts, audio placeholders, config files
     const FILE_EXTS: &[&str] = &[
-        ".js", ".ts", ".jsx", ".tsx", ".css", ".vue", ".py", ".go",
-        ".json", ".yaml", ".yml", ".wav", ".mp3", ".mp4", ".csv",
+        ".js", ".ts", ".jsx", ".tsx", ".css", ".vue", ".py", ".go", ".json", ".yaml", ".yml",
+        ".wav", ".mp3", ".mp4", ".csv",
     ];
     if FILE_EXTS.iter().any(|ext| s.ends_with(ext)) {
         return false;
