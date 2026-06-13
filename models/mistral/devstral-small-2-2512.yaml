@@ -1,11 +1,11 @@
 id: devstral-small-2-2512
 provider: mistral
 display_name: Devstral Small 2 2512
-status: active
+status: deprecated
 release_date: 2025-12-10
 deprecation_date: null
 sunset_date: null
-replacement: null
+replacement: labs-devstral-small-2512
 context_window: 131072
 max_output_tokens: 131072
 modalities:

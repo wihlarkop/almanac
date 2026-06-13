@@ -1,11 +1,11 @@
 id: devstral-small-2505
 provider: mistral
 display_name: Devstral Small 2505
-status: active
+status: deprecated
 release_date: 2025-05-21
 deprecation_date: null
 sunset_date: null
-replacement: null
+replacement: devstral-small-2507
 context_window: 131072
 max_output_tokens: 131072
 modalities:

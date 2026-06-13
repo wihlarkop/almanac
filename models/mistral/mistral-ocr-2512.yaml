@@ -27,8 +27,8 @@ pricing:
   input: 0
   output: 0
 last_verified: 2026-06-13
-confidence: inferred
-endpoint_family: chat_completions
+confidence: official
+endpoint_family: ocr
 sources:
   - url: https://docs.mistral.ai/models/model-cards/ocr-3-25-12
     last_verified: 2026-06-13

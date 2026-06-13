@@ -10,7 +10,7 @@ context_window: 4096
 max_output_tokens: 4096
 modalities:
   input: [text]
-  output: [text]
+  output: [audio]
 capabilities:
   tools: false
   vision: false
@@ -27,8 +27,8 @@ pricing:
   input: 0
   output: 0
 last_verified: 2026-06-13
-confidence: inferred
-endpoint_family: chat_completions
+confidence: official
+endpoint_family: speech
 sources:
   - url: https://docs.mistral.ai/models/model-cards/voxtral-tts-26-03
     last_verified: 2026-06-13

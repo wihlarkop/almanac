@@ -1,11 +1,11 @@
 id: labs-leanstral-2603
 provider: mistral
 display_name: Leanstral 2603
-status: active
+status: deprecated
 release_date: 2026-03-16
 deprecation_date: null
 sunset_date: null
-replacement: null
+replacement: codestral-2508
 context_window: 131072
 max_output_tokens: 131072
 modalities:

@@ -9,7 +9,7 @@ replacement: null
 context_window: 4096
 max_output_tokens: 4096
 modalities:
-  input: [text]
+  input: [audio]
   output: [text]
 capabilities:
   tools: false
@@ -27,8 +27,8 @@ pricing:
   input: 0
   output: 0
 last_verified: 2026-06-13
-confidence: inferred
-endpoint_family: chat_completions
+confidence: official
+endpoint_family: transcription
 sources:
   - url: https://docs.mistral.ai/models/model-cards/voxtral-mini-transcribe-26-02
     last_verified: 2026-06-13
