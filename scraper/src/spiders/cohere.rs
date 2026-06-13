@@ -16,9 +16,12 @@ impl Spider for CohereSpider {
 
     async fn scrape(&self, res: &HtmlResponse<'_>) -> Result<SpiderOutput> {
         let mut models = extract_model_ids(res.body, "cohere", res.url);
-        // Reject AWS Bedrock-style IDs: "cohere.command-r-plus-v1:0" (colon) and
-        // "cohere.command-r-plus" (dot-prefix namespace) — these are Bedrock handles, not Cohere API IDs.
-        models.retain(|m| !m.id.contains(':') && !m.id.starts_with("cohere."));
+        // Reject deployment-namespace IDs:
+        //   "cohere.command-r-plus-v1:0"  — AWS Bedrock (dot-prefixed, colon-versioned)
+        //   "cohere-rerank-v4-pro"         — "Unique per deployment" section in Cohere docs
+        models.retain(|m| {
+            !m.id.contains(':') && !m.id.starts_with("cohere.") && !m.id.starts_with("cohere-")
+        });
         Ok(SpiderOutput::new().items(models))
     }
 }
