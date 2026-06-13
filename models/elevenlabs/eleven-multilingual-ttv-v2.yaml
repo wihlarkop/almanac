@@ -1,32 +1,33 @@
-id: jina-reranker-v1-base-en
-provider: jina
-display_name: Jina Reranker v1 Base EN
+id: eleven-multilingual-ttv-v2
+provider: elevenlabs
+display_name: Eleven Text-to-Voice v2
 status: active
 release_date: null
 deprecation_date: null
 sunset_date: null
 replacement: null
-context_window: 8192
+context_window: 5000
 max_output_tokens: 1
 modalities:
   input: [text]
-  output: [text]
+  output: [audio]
 capabilities:
   tools: false
   vision: false
   streaming: false
   json_mode: false
 parameters:
-  supported: []
+  supported: [voice_id, model_id, voice_settings]
   rejected: []
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 0.02
+  input: 0.00
   output: 0.00
+  pricing_notes: "Voice design/generation model — creates new voice profiles from text descriptions. Superseded by TTV v3."
 last_verified: 2026-06-13
 confidence: official
-endpoint_family: reranking
+endpoint_family: speech
 sources:
-  - url: https://jina.ai/models/
+  - url: https://elevenlabs.io/docs/api-reference
     last_verified: 2026-06-13

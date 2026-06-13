@@ -1,34 +1,32 @@
 id: jina-embeddings-v2-base-en
 provider: jina
-display_name: jina-embeddings-v2-base-en
+display_name: Jina Embeddings v2 Base EN
 status: active
 release_date: null
 deprecation_date: null
 sunset_date: null
 replacement: null
-context_window: 4096
-max_output_tokens: 4096
+context_window: 8192
+max_output_tokens: 768
 modalities:
   input: [text]
-  output: [text]
+  output: [embedding]
 capabilities:
   tools: false
   vision: false
-  streaming: true
+  streaming: false
   json_mode: false
-  prompt_caching: false
-  thinking: false
 parameters:
   supported: []
   rejected: []
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 0
-  output: 0
-last_verified: 2026-06-05
-confidence: inferred
-endpoint_family: chat_completions
+  input: 0.02
+  output: 0.00
+last_verified: 2026-06-13
+confidence: official
+endpoint_family: embeddings
 sources:
   - url: https://jina.ai/models/
-    last_verified: 2026-06-05
+    last_verified: 2026-06-13
