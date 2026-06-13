@@ -19,7 +19,10 @@ impl Spider for MoonshotSpider {
 
     async fn scrape(&self, res: &HtmlResponse<'_>) -> Result<SpiderOutput> {
         let mut models = extract_model_ids(res.body, "moonshot", res.url);
-        models.retain(|m| m.id.starts_with("moonshot-") || m.id.starts_with("kimi-"));
+        models.retain(|m| {
+            (m.id.starts_with("moonshot-") || m.id.starts_with("kimi-"))
+                && !m.id.ends_with("-latest")
+        });
         Ok(SpiderOutput::new().items(models))
     }
 }

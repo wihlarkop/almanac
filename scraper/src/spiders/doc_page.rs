@@ -300,6 +300,10 @@ pub fn looks_like_model_id(s: &str) -> bool {
     if BLOCKLIST.contains(&s) {
         return false;
     }
+    // Routing aliases (e.g. kimi-latest, gpt-4o-latest) are never real model IDs.
+    if s.ends_with("-latest") {
+        return false;
+    }
     // Reject BCP 47 language-region tags that slip through, e.g. "es-419"
     // (ISO 639-1 two-letter code + UN M.49 three-digit region number).
     // No real model ID has exactly 2 lowercase letters followed by an all-digit suffix.
