@@ -1,11 +1,11 @@
 id: open-mistral-7b
 provider: mistral
 display_name: Mistral 7B
-status: active
+status: deprecated
 release_date: null
 deprecation_date: null
 sunset_date: null
-replacement: null
+replacement: ministral-8b-2512
 context_window: 4096
 max_output_tokens: 4096
 modalities:

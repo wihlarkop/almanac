@@ -1,11 +1,11 @@
 id: devstral-2-2512
 provider: mistral
 display_name: Devstral 2 2512
-status: active
+status: deprecated
 release_date: 2025-12-10
 deprecation_date: null
 sunset_date: null
-replacement: null
+replacement: devstral-2512
 context_window: 256000
 max_output_tokens: 131072
 modalities:

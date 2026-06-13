@@ -6,14 +6,14 @@ release_date: null
 deprecation_date: null
 sunset_date: null
 replacement: null
-context_window: 4096
+context_window: 262144
 max_output_tokens: 4096
 modalities:
-  input: [text]
+  input: [text, image]
   output: [text]
 capabilities:
-  tools: false
-  vision: false
+  tools: true
+  vision: true
   streaming: true
   json_mode: false
   prompt_caching: false
@@ -24,10 +24,10 @@ parameters:
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 0
-  output: 0
+  input: 1.5
+  output: 7.5
 last_verified: 2026-06-13
-confidence: inferred
+confidence: official
 endpoint_family: chat_completions
 sources:
   - url: https://docs.mistral.ai/models/model-cards/mistral-medium-3-5-26-04

@@ -6,7 +6,7 @@ release_date: null
 deprecation_date: null
 sunset_date: null
 replacement: null
-context_window: 4096
+context_window: 131072
 max_output_tokens: 4096
 modalities:
   input: [text]
@@ -27,7 +27,7 @@ pricing:
   input: 0
   output: 0
 last_verified: 2026-06-13
-confidence: inferred
+confidence: official
 endpoint_family: chat_completions
 sources:
   - url: https://docs.mistral.ai/models/model-cards/mistral-moderation-26-03

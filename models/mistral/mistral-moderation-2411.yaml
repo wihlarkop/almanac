@@ -1,11 +1,11 @@
 id: mistral-moderation-2411
 provider: mistral
 display_name: Mistral Moderation
-status: active
+status: deprecated
 release_date: null
 deprecation_date: null
 sunset_date: null
-replacement: null
+replacement: mistral-moderation-2603
 context_window: 4096
 max_output_tokens: 4096
 modalities:

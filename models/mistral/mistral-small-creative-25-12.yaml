@@ -1,11 +1,11 @@
 id: mistral-small-creative-25-12
 provider: mistral
 display_name: Mistral Small Creative
-status: active
+status: deprecated
 release_date: null
 deprecation_date: null
 sunset_date: null
-replacement: null
+replacement: labs-mistral-small-creative
 context_window: 32768
 max_output_tokens: 4096
 modalities:

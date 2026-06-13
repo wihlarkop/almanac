@@ -1,11 +1,11 @@
 id: codestral-mamba-7b-0-1
 provider: mistral
 display_name: Codestral Mamba 7B
-status: active
+status: deprecated
 release_date: null
 deprecation_date: null
 sunset_date: null
-replacement: null
+replacement: codestral-2508
 context_window: 4096
 max_output_tokens: 4096
 modalities:
