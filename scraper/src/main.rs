@@ -75,7 +75,6 @@ const SIMPLE_PROVIDERS: &[(&str, &str)] = &[
         "deepgram",
         "https://developers.deepgram.com/docs/models-languages-overview",
     ),
-
     // IBM Granite — Watson X docs with model list
     (
         "ibm",
@@ -90,7 +89,6 @@ const SIMPLE_PROVIDERS: &[(&str, &str)] = &[
     ("inworld", "https://docs.inworld.ai/docs/tutorial-text/v2/"),
     // Jina AI — models landing page
     ("jina", "https://jina.ai/models/"),
-
     // Lightricks LTX — static docs
     ("lightricks", "https://docs.ltx.video/"),
     // LMNT — static developer docs
@@ -114,7 +112,6 @@ const SIMPLE_PROVIDERS: &[(&str, &str)] = &[
         "nvidia",
         "https://docs.nvidia.com/nim/large-language-models/latest/supported-models.html",
     ),
-
     // PixVerse — API docs
     ("pixverse", "https://docs.pixverse.ai/"),
     // PlayHT — static API docs (Mintlify)
@@ -123,7 +120,6 @@ const SIMPLE_PROVIDERS: &[(&str, &str)] = &[
     ("recraft", "https://www.recraft.ai/docs"),
     // Reka — static docs
     ("reka", "https://docs.reka.ai/"),
-
     // Runway — static developer docs
     ("runway", "https://docs.runwayml.com/"),
     // Stability AI — static API reference
@@ -136,7 +132,6 @@ const SIMPLE_PROVIDERS: &[(&str, &str)] = &[
         "stepfun",
         "https://platform.stepfun.com/docs/overview/concept",
     ),
-
     // Tencent Hunyuan — cloud docs
     (
         "tencent",
@@ -144,7 +139,6 @@ const SIMPLE_PROVIDERS: &[(&str, &str)] = &[
     ),
     // Tripo 3D — static docs
     ("tripo", "https://platform.tripo3d.ai/docs"),
-
     // Upstage Solar — Mintlify static docs
     (
         "upstage",
