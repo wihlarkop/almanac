@@ -302,16 +302,15 @@ pub fn looks_like_model_id(s: &str) -> bool {
     }
     // Reject BCP 47 language-region tags that slip through, e.g. "es-419"
     // (ISO 639-1 two-letter code + UN M.49 three-digit region number).
-    // No real model ID has exactly 2 lowercase letters followed by all-digit suffix.
+    // No real model ID has exactly 2 lowercase letters followed by an all-digit suffix.
     {
         let mut parts = s.splitn(2, '-');
-        if let (Some(lang), Some(region)) = (parts.next(), parts.next()) {
-            if lang.len() == 2
-                && lang.chars().all(|c| c.is_ascii_lowercase())
-                && region.chars().all(|c| c.is_ascii_digit())
-            {
-                return false;
-            }
+        if let (Some(lang), Some(region)) = (parts.next(), parts.next())
+            && lang.len() == 2
+            && lang.chars().all(|c| c.is_ascii_lowercase())
+            && region.chars().all(|c| c.is_ascii_digit())
+        {
+            return false;
         }
     }
     s.chars()
