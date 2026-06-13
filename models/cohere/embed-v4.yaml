@@ -1,11 +1,11 @@
 id: embed-v4
 provider: cohere
 display_name: Embed v4
-status: active
+status: deprecated
 release_date: 2025-04-01
-deprecation_date: null
+deprecation_date: 2026-06-13
 sunset_date: null
-replacement: null
+replacement: embed-v4.0
 context_window: 8192
 max_output_tokens: 1536
 modalities:

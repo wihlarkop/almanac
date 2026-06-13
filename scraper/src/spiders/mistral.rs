@@ -93,7 +93,7 @@ fn is_canonical_mistral_id(s: &str) -> bool {
         "ocr-",
     ];
     let hyphen_count = s.chars().filter(|&c| c == '-').count();
-    hyphen_count <= 3 && PREFIXES.iter().any(|p| s.starts_with(p))
+    !s.ends_with("-latest") && hyphen_count <= 3 && PREFIXES.iter().any(|p| s.starts_with(p))
 }
 
 fn extract_links(res: &HtmlResponse<'_>) -> Vec<String> {

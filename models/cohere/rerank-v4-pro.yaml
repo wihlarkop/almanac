@@ -1,11 +1,11 @@
 id: rerank-v4-pro
 provider: cohere
 display_name: Rerank v4 Pro
-status: active
+status: deprecated
 release_date: 2025-12-16
-deprecation_date: null
+deprecation_date: 2026-06-13
 sunset_date: null
-replacement: null
+replacement: rerank-v4.0-pro
 context_window: 32768
 max_output_tokens: 1
 modalities:
