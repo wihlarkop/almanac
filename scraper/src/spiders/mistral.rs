@@ -31,18 +31,31 @@ impl Spider for MistralSpider {
 }
 
 fn extract_model(res: &HtmlResponse<'_>) -> Vec<ScrapedModel> {
-    let id = res
-        .url
-        .trim_end_matches('/')
-        .rsplit('/')
-        .next()
-        .unwrap_or("")
-        .to_string();
+    let doc = Html::parse_document(res.body);
+
+    // Model card pages render the canonical API model ID in a <button> element
+    // (a copy-to-clipboard widget). Extract it rather than using the verbose URL slug
+    // (e.g. "mistral-medium-3-5" from the button vs "mistral-medium-3-5-26-04" from the URL).
+    let btn_sel = Selector::parse("button").unwrap();
+    let model_id = doc
+        .select(&btn_sel)
+        .map(|el| el.text().collect::<String>().trim().to_string())
+        .find(|t| is_canonical_mistral_id(t));
+
+    // Fall back to the URL slug if the button isn't present in the SSR HTML.
+    let id = model_id.unwrap_or_else(|| {
+        res.url
+            .trim_end_matches('/')
+            .rsplit('/')
+            .next()
+            .unwrap_or("")
+            .to_string()
+    });
+
     if id.is_empty() {
         return vec![];
     }
 
-    let doc = Html::parse_document(res.body);
     let h1_sel = Selector::parse("h1").unwrap();
     let display_name = doc
         .select(&h1_sel)
@@ -59,6 +72,28 @@ fn extract_model(res: &HtmlResponse<'_>) -> Vec<ScrapedModel> {
         output_price: None,
         source_url: res.url.to_string(),
     }]
+}
+
+/// Returns true if `s` looks like a compact Mistral API model ID (not a verbose dated URL slug).
+/// Dated slugs like "mistral-medium-3-5-26-04" have 5+ hyphens; compact IDs have ≤3.
+fn is_canonical_mistral_id(s: &str) -> bool {
+    const PREFIXES: &[&str] = &[
+        "mistral-",
+        "codestral-",
+        "mixtral-",
+        "pixtral-",
+        "devstral-",
+        "voxtral-",
+        "magistral-",
+        "ministral-",
+        "leanstral-",
+        "labs-",
+        "open-mistral-",
+        "open-mixtral-",
+        "ocr-",
+    ];
+    let hyphen_count = s.chars().filter(|&c| c == '-').count();
+    hyphen_count <= 3 && PREFIXES.iter().any(|p| s.starts_with(p))
 }
 
 fn extract_links(res: &HtmlResponse<'_>) -> Vec<String> {

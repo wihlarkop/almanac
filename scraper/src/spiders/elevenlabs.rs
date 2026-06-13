@@ -16,8 +16,9 @@ impl Spider for ElevenLabsSpider {
 
     async fn scrape(&self, res: &HtmlResponse<'_>) -> Result<SpiderOutput> {
         let mut models = extract_model_ids(res.body, "elevenlabs", res.url);
-        // ElevenLabs model IDs start with "eleven_"
-        models.retain(|m| m.id.starts_with("eleven_") || m.id.starts_with("eleven-"));
+        // Catalog convention is hyphenated IDs (eleven-multilingual-v2).
+        // Reject underscore variants (eleven_multilingual_v2) — they are duplicates of the canonical entries.
+        models.retain(|m| m.id.starts_with("eleven-"));
         Ok(SpiderOutput::new().items(models))
     }
 }

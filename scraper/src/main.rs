@@ -8,9 +8,9 @@ use almanac_scraper::spiders::{
     doc_page::DocPageSpider, elevenlabs::ElevenLabsSpider, google::GoogleSpider,
     heygen::HeyGenSpider, ideogram::IdeogramSpider, inception::InceptionSpider,
     leonardo::LeonardoSpider, luma::LumaSpider, meta::MetaSpider, microsoft::MicrosoftSpider,
-    mistral::MistralSpider, mistral_html::MistralHtmlSpider, moonshot::MoonshotSpider,
-    openai::OpenAiSpider, perplexity::PerplexitySpider, voyageai::VoyageAiSpider, xai::XaiSpider,
-    xiaomi::XiaomiSpider, zai::ZaiSpider,
+    mistral::MistralSpider, moonshot::MoonshotSpider, openai::OpenAiSpider,
+    perplexity::PerplexitySpider, voyageai::VoyageAiSpider, xai::XaiSpider, xiaomi::XiaomiSpider,
+    zai::ZaiSpider,
 };
 use almanac_scraper::writer::write_model;
 use anyhow::Result;
@@ -251,7 +251,6 @@ async fn run_all_spiders(provider: &str) -> Result<Vec<ScrapedModel>> {
     run_custom!("anthropic", AnthropicSpider);
     run_custom!("google", GoogleSpider);
     run_custom!("mistral", MistralSpider);
-    run_custom!("mistral", MistralHtmlSpider); // multi-page model-cards variant
     run_custom!("openai", OpenAiSpider);
     run_custom!("cohere", CohereSpider);
     run_custom!("deepseek", DeepSeekSpider);

@@ -229,6 +229,16 @@ const BLOCKLIST: &[&str] = &[
     "status_code",
     "created_at",
     "updated_at",
+    // Provider brand names / URL slugs that aren't model IDs
+    "voyage-ai",
+    "model-introduction",
+    "cloud-based",
+    "dream-machine",
+    // API response field names scraped from code examples
+    "image_url",
+    "top_logprobs",
+    "finish_reason",
+    "tool_calls",
 ];
 
 /// Returns true if `s` looks like a model API identifier.
@@ -263,9 +273,16 @@ pub fn looks_like_model_id(s: &str) -> bool {
     if s.starts_with("data-") {
         return false;
     }
-    // Reject file extensions (.js, .ts, .css, etc.) — catches JS bundle artifacts
-    const FILE_EXTS: &[&str] = &[".js", ".ts", ".jsx", ".tsx", ".css", ".vue", ".py", ".go"];
+    // Reject file extensions — catches bundle artifacts, audio placeholders, config files
+    const FILE_EXTS: &[&str] = &[
+        ".js", ".ts", ".jsx", ".tsx", ".css", ".vue", ".py", ".go", ".json", ".yaml", ".yml",
+        ".wav", ".mp3", ".mp4", ".csv",
+    ];
     if FILE_EXTS.iter().any(|ext| s.ends_with(ext)) {
+        return false;
+    }
+    // Reject Python/JS method-call paths: more than 2 dots means chained accessors, not a model ID
+    if s.chars().filter(|&c| c == '.').count() > 2 {
         return false;
     }
     // Reject semver-like version strings: v1.2.3, v1.16.0, etc.
@@ -282,6 +299,19 @@ pub fn looks_like_model_id(s: &str) -> bool {
     }
     if BLOCKLIST.contains(&s) {
         return false;
+    }
+    // Reject BCP 47 language-region tags that slip through, e.g. "es-419"
+    // (ISO 639-1 two-letter code + UN M.49 three-digit region number).
+    // No real model ID has exactly 2 lowercase letters followed by an all-digit suffix.
+    {
+        let mut parts = s.splitn(2, '-');
+        if let (Some(lang), Some(region)) = (parts.next(), parts.next())
+            && lang.len() == 2
+            && lang.chars().all(|c| c.is_ascii_lowercase())
+            && region.chars().all(|c| c.is_ascii_digit())
+        {
+            return false;
+        }
     }
     s.chars()
         .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || matches!(c, '-' | '.' | '_'))

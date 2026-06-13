@@ -11,7 +11,10 @@ impl Spider for MoonshotSpider {
     }
 
     fn start_urls(&self) -> Vec<String> {
-        vec!["https://platform.moonshot.cn/docs/intro".into()]
+        vec![
+            "https://platform.moonshot.cn/docs/intro".into(),
+            "https://platform.kimi.ai/docs/models".into(),
+        ]
     }
 
     async fn scrape(&self, res: &HtmlResponse<'_>) -> Result<SpiderOutput> {
