@@ -8,6 +8,8 @@ use walkdir::WalkDir;
 pub struct CatalogEntry {
     pub id: String,
     pub provider: String,
+    #[serde(default)]
+    pub status: String,
     pub context_window: Option<u64>,
     pub max_output_tokens: Option<u64>,
     #[serde(default)]

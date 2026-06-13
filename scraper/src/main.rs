@@ -187,7 +187,16 @@ async fn main() -> Result<()> {
 
     let results = diff(&scraped, &catalog);
 
-    if results.is_empty() {
+    let new_count = results
+        .iter()
+        .filter(|r| matches!(r, DiffResult::New(_)))
+        .count();
+    let missing_count = results
+        .iter()
+        .filter(|r| matches!(r, DiffResult::MissingFromDocs { .. }))
+        .count();
+
+    if new_count == 0 && missing_count == 0 && results.is_empty() {
         println!("\nAll scraped models are already in the catalog.");
         return Ok(());
     }
@@ -221,6 +230,11 @@ async fn main() -> Result<()> {
                 println!(
                     "\n[PRICE CHANGE] {}/{}\n  input:  {:?} -> {:?}\n  output: {:?} -> {:?}",
                     m.provider, m.id, old_input, m.input_price, old_output, m.output_price,
+                );
+            }
+            DiffResult::MissingFromDocs { provider, id } => {
+                println!(
+                    "\n[MISSING FROM DOCS] {provider}/{id}  (may be deprecated upstream — review manually)"
                 );
             }
         }
