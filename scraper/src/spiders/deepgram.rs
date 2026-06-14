@@ -103,12 +103,12 @@ fn parse_first_per_min_price(s: &str) -> Option<f64> {
             .unwrap_or(after.len());
         let num_str = &after[..num_end];
         let rest = &after[num_end..];
-        if rest.starts_with("/min") && !num_str.is_empty() {
-            if let Ok(v) = num_str.parse::<f64>() {
-                if (0.001..=0.5).contains(&v) {
-                    return Some(v);
-                }
-            }
+        if rest.starts_with("/min")
+            && !num_str.is_empty()
+            && let Ok(v) = num_str.parse::<f64>()
+            && (0.001..=0.5).contains(&v)
+        {
+            return Some(v);
         }
         // Advance past this dollar sign and keep searching.
         search = &search[dollar + 1..];
