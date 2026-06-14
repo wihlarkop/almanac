@@ -3,8 +3,7 @@ use crate::spider::{HtmlResponse, Spider, SpiderOutput};
 use crate::spiders::doc_page::extract_model_ids;
 use anyhow::Result;
 
-const DOCS_URL: &str =
-    "https://developers.deepgram.com/docs/models-languages-overview";
+const DOCS_URL: &str = "https://developers.deepgram.com/docs/models-languages-overview";
 const PRICING_URL: &str = "https://deepgram.com/pricing";
 
 pub struct DeepgramSpider;
@@ -59,7 +58,10 @@ fn scrape_pricing(res: &HtmlResponse<'_>) -> Result<SpiderOutput> {
         // Flux English — "turn detection" appears only in the Flux English row
         ("flux-general-en", "turn detection, natural interruption"),
         // Flux Multilingual — only multilingual row has this phrase
-        ("flux-general-multi", "multiple languages within a single conversation"),
+        (
+            "flux-general-multi",
+            "multiple languages within a single conversation",
+        ),
         // Nova-3 Monolingual — "highest performing model" is its description header
         ("nova-3-general", "highest performing model"),
     ];
