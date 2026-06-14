@@ -1,8 +1,8 @@
-id: qwen3.5-0.6b
+id: qwen3.5-0.8b
 provider: alibaba
-display_name: Qwen3.5 0.6B
+display_name: Qwen3.5 0.8B
 status: active
-release_date: 2026-03-02
+release_date: 2026-03-05
 deprecation_date: null
 sunset_date: null
 replacement: null
@@ -23,12 +23,16 @@ parameters:
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 0.01
-  output: 0.02
-  pricing_notes: "0.6B open-weight Apache 2.0; 201 languages; ultra-lightweight on-device/embedded deployment"
-last_verified: 2026-05-15
-confidence: inferred
+  input: 0.00
+  output: 0.00
+  pricing_notes: "Open-weight (Apache 2.0), 262K context; self-host only — no first-party serverless API pricing. Smallest model in the Qwen3.5 small dense series (0.8B/2B/4B/9B)."
+last_verified: 2026-06-14
+confidence: official
 endpoint_family: chat_completions
 sources:
+  - url: https://artificialanalysis.ai/articles/qwen3-5-small-models
+    last_verified: 2026-06-14
+  - url: https://qwen.ai/blog?id=qwen3.5
+    last_verified: 2026-06-14
   - url: https://www.alibabacloud.com/help/en/model-studio/models
-    last_verified: 2026-05-15
+    last_verified: 2026-06-14

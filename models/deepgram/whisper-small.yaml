@@ -1,11 +1,11 @@
 id: whisper-small
 provider: deepgram
 display_name: Whisper Small
-status: active
+status: deprecated
 release_date: null
 deprecation_date: null
 sunset_date: null
-replacement: null
+replacement: nova-3
 context_window: 1
 max_output_tokens: 1
 modalities:
@@ -27,7 +27,7 @@ pricing:
   per_minute: 0.0048
   pricing_notes: "Deepgram-hosted OpenAI Whisper Small. $0.0048/min."
 last_verified: 2026-06-05
-confidence: inferred
+confidence: official
 endpoint_family: transcription
 sources:
   - url: https://developers.deepgram.com/docs/models-languages-overview

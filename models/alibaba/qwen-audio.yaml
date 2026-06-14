@@ -1,11 +1,11 @@
 id: qwen-audio
 provider: alibaba
 display_name: Qwen Audio
-status: active
+status: deprecated
 release_date: 2024-05-01
-deprecation_date: null
+deprecation_date: 2026-06-01
 sunset_date: null
-replacement: null
+replacement: qwen3.5-omni-flash
 context_window: 8192
 max_output_tokens: 2048
 modalities:
@@ -25,11 +25,12 @@ pricing:
   currency: USD
   input: 0.00
   output: 0.00
-  per_minute: 0.00286
-  pricing_notes: "~$0.00286/minute of audio (~0.001 CNY/sec). Audio understanding/STT."
-last_verified: 2026-05-11
-confidence: inferred
+  pricing_notes: "qwen-audio-turbo is now free-trial only; not callable after free quota is exhausted. Alibaba recommends migrating to Qwen3.5-Omni (qwen3.5-omni-flash) for audio understanding."
+last_verified: 2026-06-14
+confidence: official
 endpoint_family: transcription
 sources:
-  - url: https://help.aliyun.com/zh/model-studio/user-guide/qwen-audio
-    last_verified: 2026-05-11
+  - url: https://help.aliyun.com/zh/model-studio/billing-for-model-studio
+    last_verified: 2026-06-14
+  - url: https://www.alibabacloud.com/help/en/model-studio/models
+    last_verified: 2026-06-14

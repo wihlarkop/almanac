@@ -2,7 +2,7 @@ id: wan-2.7
 provider: alibaba
 display_name: Wan 2.7
 status: active
-release_date: 2026-03-01
+release_date: 2026-04-25
 deprecation_date: null
 sunset_date: null
 replacement: null
@@ -24,11 +24,13 @@ pricing:
   currency: USD
   input: 0.00
   output: 0.00
-  per_second: 0.07
-  pricing_notes: "~$0.07/second. Wan 2.7 video generation model; state-of-the-art motion quality and physics consistency"
-last_verified: 2026-05-15
-confidence: inferred
+  per_second: 0.10
+  pricing_notes: "Wan 2.7 video (t2v/i2v/r2v, 720P): international tier CNY 0.733924/sec -> ~$0.10/sec at ~7.34 CNY/USD (China-mainland CNY 0.6/sec). Also offered as wan2.7-image-pro at $0.077/image."
+last_verified: 2026-06-14
+confidence: official
 endpoint_family: video_generation
 sources:
-  - url: https://help.aliyun.com/zh/model-studio/user-guide/wan
-    last_verified: 2026-05-15
+  - url: https://help.aliyun.com/zh/model-studio/billing-for-model-studio
+    last_verified: 2026-06-14
+  - url: https://www.alibabacloud.com/help/en/model-studio/models
+    last_verified: 2026-06-14

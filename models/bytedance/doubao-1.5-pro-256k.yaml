@@ -1,11 +1,11 @@
 id: doubao-1.5-pro-256k
 provider: bytedance
 display_name: Doubao 1.5 Pro 256K
-status: active
+status: deprecated
 release_date: 2025-01-14
-deprecation_date: null
+deprecation_date: 2026-06-01
 sunset_date: null
-replacement: null
+replacement: seed-2.0-pro
 context_window: 262144
 max_output_tokens: 4096
 modalities:
@@ -20,9 +20,14 @@ parameters:
   supported: [temperature, top_p, max_tokens, stream, stop]
   rejected: []
   deprecated_for_this_model: []
-last_verified: 2026-05-09
-confidence: inferred
+pricing:
+  currency: USD
+  input: 0.00
+  output: 0.00
+  pricing_notes: "Retired Doubao 1.5 Pro 256K variant; no longer listed on Volcengine pricing. Migrate to Seed 2.0 Pro (256K context)."
+last_verified: 2026-06-14
+confidence: official
 endpoint_family: chat_completions
 sources:
-  - url: https://www.volcengine.com/docs/82379/1174490
-    last_verified: 2026-05-09
+  - url: https://www.volcengine.com/docs/82379/1544106
+    last_verified: 2026-06-14

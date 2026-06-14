@@ -24,11 +24,10 @@ parameters:
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 0.00
-  output: 0.00
-  pricing_notes: "Pricing in CNY via Alibaba Cloud; see docs for current rates."
+  input: 0.80
+  output: 3.20
 last_verified: 2026-06-05
-confidence: inferred
+confidence: official
 endpoint_family: chat_completions
 sources:
   - url: https://www.alibabacloud.com/help/en/model-studio/getting-started/models

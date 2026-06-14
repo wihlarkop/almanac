@@ -24,6 +24,7 @@ pricing:
   currency: USD
   input: 0.00
   output: 0.00
+  per_minute: 0.0078
   pricing_notes: "Multilingual conversational ASR. 10 languages with mid-call language switching. Endpoint: flux-general-multi."
 last_verified: 2026-06-04
 confidence: official

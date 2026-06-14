@@ -22,12 +22,12 @@ parameters:
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 0.07
-  output: 0.20
-  pricing_notes: "$0.07/M input tokens, $0.20/M output tokens. Budget vision model."
-last_verified: 2026-05-11
-confidence: inferred
+  input: 0.05
+  output: 0.40
+  pricing_notes: "Tiered by prompt length (base, prompt <=32K). 32K-128K: 0.075/0.60; 128K-256K: 0.12/0.96 per 1M tokens."
+last_verified: 2026-06-14
+confidence: official
 endpoint_family: chat_completions
 sources:
-  - url: https://help.aliyun.com/zh/model-studio/user-guide/qwen-vl-series
-    last_verified: 2026-05-11
+  - url: https://www.alibabacloud.com/help/en/model-studio/getting-started/models
+    last_verified: 2026-06-14

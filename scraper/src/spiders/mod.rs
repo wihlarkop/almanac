@@ -3,6 +3,7 @@ pub mod anthropic;
 pub mod bytedance;
 pub mod cartesia;
 pub mod cohere;
+pub mod deepgram;
 pub mod deepseek;
 pub mod doc_page;
 pub mod elevenlabs;

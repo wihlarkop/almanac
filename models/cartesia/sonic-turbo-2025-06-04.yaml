@@ -5,7 +5,7 @@ status: active
 release_date: 2025-06-04
 deprecation_date: null
 sunset_date: null
-replacement: sonic-turbo
+replacement: sonic-3.5
 context_window: 8192
 max_output_tokens: 1
 modalities:
@@ -26,11 +26,13 @@ pricing:
   currency: USD
   input: 0.00
   output: 0.00
-  per_million_chars: 15.00
-  pricing_notes: "Pinned snapshot of Sonic Turbo. ~$0.015/min."
-last_verified: 2026-06-05
-confidence: inferred
+  per_million_chars: 30.00
+  pricing_notes: "Pinned Sonic Turbo snapshot. Billed ~1 credit/character. Language support reduced 2026-06-01 (dropped it, nl, pl, ru, sv, tr); migrate to sonic-3.5."
+last_verified: 2026-06-14
+confidence: official
 endpoint_family: speech
 sources:
   - url: https://docs.cartesia.ai/build-with-cartesia/tts-models/api-changes
-    last_verified: 2026-06-05
+    last_verified: 2026-06-14
+  - url: https://docs.cartesia.ai/pricing
+    last_verified: 2026-06-14

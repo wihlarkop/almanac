@@ -24,11 +24,13 @@ pricing:
   currency: USD
   input: 0.00
   output: 0.00
-  per_second: 0.06
-  pricing_notes: "~$0.06/second. ByteDance Seedance 2.0; enhanced spatial coherence, longer durations, improved photorealism"
-last_verified: 2026-05-15
-confidence: inferred
+  per_second: 0.15
+  pricing_notes: "Token-based: 7.0 USD/M tokens (480p/720p, text-to-video). BytePlus dreamina-seedance-2-0-260128. Est. per 5s/16:9 video: 480p $0.35, 720p $0.76, 1080p $1.87; ~$0.15/sec reflects 720p."
+last_verified: 2026-06-14
+confidence: official
 endpoint_family: video_generation
 sources:
-  - url: https://www.volcengine.com/product/seedance
-    last_verified: 2026-05-15
+  - url: https://docs.byteplus.com/en/docs/ModelArk/1544106
+    last_verified: 2026-06-14
+  - url: https://www.volcengine.com/docs/82379/1544106
+    last_verified: 2026-06-14

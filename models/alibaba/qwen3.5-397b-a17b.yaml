@@ -24,10 +24,10 @@ parameters:
 pricing:
   currency: USD
   input: 0.60
-  output: 2.40
+  output: 3.60
   pricing_notes: "397B total / 17B active MoE; open-weight Apache 2.0; 201 languages; hybrid Gated Delta Networks + MoE architecture"
 last_verified: 2026-05-15
-confidence: inferred
+confidence: official
 endpoint_family: chat_completions
 sources:
   - url: https://www.alibabacloud.com/help/en/model-studio/models

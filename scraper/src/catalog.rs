@@ -20,11 +20,15 @@ pub struct CatalogEntry {
 pub struct PricingEntry {
     pub input: Option<f64>,
     pub output: Option<f64>,
+    pub per_minute: Option<f64>,
+    pub per_million_chars: Option<f64>,
 }
 
 impl CatalogEntry {
     pub fn input_price(&self) -> Option<f64> {
-        self.pricing.input
+        // Audio providers store per_minute instead of per-token pricing;
+        // treat it as the comparable "input" unit for drift detection.
+        self.pricing.input.or(self.pricing.per_minute)
     }
     pub fn output_price(&self) -> Option<f64> {
         self.pricing.output

@@ -24,11 +24,13 @@ pricing:
   currency: USD
   input: 0.00
   output: 0.00
-  per_second: 0.04
-  pricing_notes: "~$0.04/second. ByteDance Seedance 1.0 video generation model; strong prompt following and cinematic motion"
-last_verified: 2026-05-15
-confidence: inferred
+  per_second: 0.05
+  pricing_notes: "Token-based: 2.5 USD/M tokens online inference (1.25 offline/batch). BytePlus seedance-1-0-pro-250528. ~$0.05/sec is an estimate for 720p/5s; actual cost = token unit price x token consumption."
+last_verified: 2026-06-14
+confidence: official
 endpoint_family: video_generation
 sources:
-  - url: https://www.volcengine.com/product/seedance
-    last_verified: 2026-05-15
+  - url: https://docs.byteplus.com/en/docs/ModelArk/1544106
+    last_verified: 2026-06-14
+  - url: https://www.volcengine.com/docs/82379/1544106
+    last_verified: 2026-06-14

@@ -24,11 +24,11 @@ pricing:
   currency: USD
   input: 0.00
   output: 0.00
-  per_second: 0.08
-  pricing_notes: "~$0.08/second. Alibaba Wan (Wanxiang) 14B video generation model."
-last_verified: 2026-05-11
-confidence: inferred
+  per_second: 0.10
+  pricing_notes: "Alibaba Wan (Wanxiang) video generation. t2v/i2v Professional (plus): $0.10/sec; Turbo: $0.036/sec."
+last_verified: 2026-06-14
+confidence: official
 endpoint_family: video_generation
 sources:
-  - url: https://help.aliyun.com/zh/model-studio/user-guide/wan
-    last_verified: 2026-05-11
+  - url: https://www.alibabacloud.com/help/en/model-studio/getting-started/models
+    last_verified: 2026-06-14

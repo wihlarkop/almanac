@@ -24,12 +24,12 @@ parameters:
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 0.00
-  output: 0.00
-  pricing_notes: "US-region variant of Qwen3-VL-Flash. Pricing in CNY via Alibaba Cloud."
-last_verified: 2026-06-05
-confidence: inferred
+  input: 0.05
+  output: 0.40
+  pricing_notes: "US-region variant of Qwen3-VL-Flash. Tiered by prompt length (base, prompt <=32K). 32K-128K: 0.075/0.60; 128K-256K: 0.12/0.96 per 1M tokens."
+last_verified: 2026-06-14
+confidence: official
 endpoint_family: chat_completions
 sources:
   - url: https://www.alibabacloud.com/help/en/model-studio/getting-started/models
-    last_verified: 2026-06-05
+    last_verified: 2026-06-14

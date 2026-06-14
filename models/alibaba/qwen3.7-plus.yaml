@@ -2,11 +2,11 @@ id: qwen3.7-plus
 provider: alibaba
 display_name: Qwen3.7 Plus
 status: active
-release_date: 2026-06-02
+release_date: 2026-05-26
 deprecation_date: null
 sunset_date: null
 replacement: null
-context_window: 131072
+context_window: 262144
 max_output_tokens: 16384
 modalities:
   input: [text, image, video]
@@ -23,12 +23,14 @@ parameters:
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 0.40
-  output: 1.60
-  pricing_notes: "Multimodal (text+image+video), deep reasoning, tool invocation, self-programming. Closed commercial API (Bailian platform)."
-last_verified: 2026-06-04
-confidence: inferred
+  input: 0.41
+  output: 1.63
+  pricing_notes: "Snapshot qwen3.7-plus-2026-05-26, 256K context. Converted from Alibaba international-tier CNY (2.998 in / 11.991 out per 1M tokens) at ~7.34 CNY/USD. China-mainland rate is lower (CNY 2 / 8)."
+last_verified: 2026-06-14
+confidence: official
 endpoint_family: chat_completions
 sources:
-  - url: https://www.marktechpost.com/2026/06/02/alibabas-qwen-team-launches-qwen3-7-plus-adding-vision-deep-reasoning-tool-invocation-and-autonomous-iteration-on-the-bailian-platform/
-    last_verified: 2026-06-04
+  - url: https://help.aliyun.com/zh/model-studio/billing-for-model-studio
+    last_verified: 2026-06-14
+  - url: https://www.alibabacloud.com/help/en/model-studio/models
+    last_verified: 2026-06-14

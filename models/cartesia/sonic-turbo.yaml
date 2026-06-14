@@ -26,11 +26,13 @@ pricing:
   currency: USD
   input: 0.00
   output: 0.00
-  per_million_chars: 15.00
-  pricing_notes: "Ultra-low latency variant of Sonic 2. ~$0.015/min."
-last_verified: 2026-06-05
-confidence: inferred
+  per_million_chars: 30.00
+  pricing_notes: "Ultra-low latency variant. Billed ~1 credit/character (uniform TTS rate). Rolling alias; language support reduced 2026-06-01. Migrate to sonic-3.5."
+last_verified: 2026-06-14
+confidence: official
 endpoint_family: speech
 sources:
   - url: https://docs.cartesia.ai/build-with-cartesia/tts-models/api-changes
-    last_verified: 2026-06-05
+    last_verified: 2026-06-14
+  - url: https://docs.cartesia.ai/pricing
+    last_verified: 2026-06-14

@@ -25,9 +25,9 @@ pricing:
   input: 0.00
   output: 0.00
   per_second: 0.15
-  pricing_notes: "$0.15/second of video generated. Faster, lower quality variant."
+  pricing_notes: "$0.10/sec (720p), $0.12/sec (1080p), $0.30/sec (4K)."
 last_verified: 2026-05-11
-confidence: inferred
+confidence: official
 endpoint_family: video_generation
 sources:
   - url: https://ai.google.dev/gemini-api/docs/video-generation

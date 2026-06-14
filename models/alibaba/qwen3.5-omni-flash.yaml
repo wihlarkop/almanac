@@ -26,11 +26,14 @@ parameters:
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 0.30
-  output: 1.20
-last_verified: 2026-05-12
-confidence: inferred
+  input: 0.41
+  output: 2.25
+  pricing_notes: "Snapshot qwen3.5-omni-flash-2026-03-15. Per-modality (international tier, ~7.34 CNY/USD): text/image/video input $0.41, audio input $3.06 per 1M; text output $2.25, multimodal output $12.15 per 1M."
+last_verified: 2026-06-14
+confidence: official
 endpoint_family: custom
 sources:
+  - url: https://help.aliyun.com/zh/model-studio/billing-for-model-studio
+    last_verified: 2026-06-14
   - url: https://www.alibabacloud.com/help/en/model-studio/models
-    last_verified: 2026-05-12
+    last_verified: 2026-06-14

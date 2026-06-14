@@ -25,11 +25,13 @@ pricing:
   currency: USD
   input: 0.00
   output: 0.00
-  per_million_chars: 14.00
-  pricing_notes: "~$14/M chars. Pricing varies by platform. Natural-sounding multilingual TTS."
+  per_million_chars: 10.00
+  pricing_notes: "$0.10/10K chars ($10/M chars). Qwen3-TTS-Flash PAYG rate."
 last_verified: 2026-05-11
-confidence: inferred
+confidence: official
 endpoint_family: speech
 sources:
   - url: https://help.aliyun.com/zh/model-studio/developer-reference/qwen-tts
     last_verified: 2026-05-11
+  - url: https://www.alibabacloud.com/help/en/model-studio/models
+    last_verified: 2026-06-14

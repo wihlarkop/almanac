@@ -24,10 +24,10 @@ pricing:
   currency: USD
   input: 0.00
   output: 0.00
-  per_minute: 0.0043
+  per_minute: 0.0065
   pricing_notes: "English-only Flux model. See deepgram.com/pricing."
 last_verified: 2026-06-05
-confidence: inferred
+confidence: official
 endpoint_family: transcription
 sources:
   - url: https://developers.deepgram.com/docs/models-languages-overview

@@ -4,13 +4,13 @@ use almanac_scraper::engine::run_spider;
 use almanac_scraper::model::ScrapedModel;
 use almanac_scraper::spiders::{
     alibaba::AlibabaSpider, anthropic::AnthropicSpider, bytedance::ByteDanceSpider,
-    cartesia::CartesiaSpider, cohere::CohereSpider, deepseek::DeepSeekSpider,
-    doc_page::DocPageSpider, elevenlabs::ElevenLabsSpider, google::GoogleSpider,
-    heygen::HeyGenSpider, ideogram::IdeogramSpider, inception::InceptionSpider,
-    leonardo::LeonardoSpider, luma::LumaSpider, meta::MetaSpider, microsoft::MicrosoftSpider,
-    mistral::MistralSpider, moonshot::MoonshotSpider, openai::OpenAiSpider,
-    perplexity::PerplexitySpider, voyageai::VoyageAiSpider, xai::XaiSpider, xiaomi::XiaomiSpider,
-    zai::ZaiSpider,
+    cartesia::CartesiaSpider, cohere::CohereSpider, deepgram::DeepgramSpider,
+    deepseek::DeepSeekSpider, doc_page::DocPageSpider, elevenlabs::ElevenLabsSpider,
+    google::GoogleSpider, heygen::HeyGenSpider, ideogram::IdeogramSpider,
+    inception::InceptionSpider, leonardo::LeonardoSpider, luma::LumaSpider, meta::MetaSpider,
+    microsoft::MicrosoftSpider, mistral::MistralSpider, moonshot::MoonshotSpider,
+    openai::OpenAiSpider, perplexity::PerplexitySpider, voyageai::VoyageAiSpider, xai::XaiSpider,
+    xiaomi::XiaomiSpider, zai::ZaiSpider,
 };
 use almanac_scraper::writer::write_model;
 use anyhow::Result;
@@ -44,6 +44,7 @@ const CUSTOM_PROVIDERS: &[&str] = &[
     "cartesia",
     "heygen",
     "ideogram",
+    "deepgram",
 ];
 
 /// Simple providers: scraped with a single public docs URL, no custom logic.
@@ -70,11 +71,6 @@ const SIMPLE_PROVIDERS: &[(&str, &str)] = &[
     ),
     // Black Forest Labs — FLUX model docs
     ("bfl", "https://docs.bfl.ml/"),
-    // Deepgram — static docs with model table
-    (
-        "deepgram",
-        "https://developers.deepgram.com/docs/models-languages-overview",
-    ),
     // IBM Granite — Watson X docs with model list
     (
         "ibm",
@@ -285,6 +281,7 @@ async fn run_all_spiders(provider: &str) -> Result<Vec<ScrapedModel>> {
     run_custom!("cartesia", CartesiaSpider);
     run_custom!("heygen", HeyGenSpider);
     run_custom!("ideogram", IdeogramSpider);
+    run_custom!("deepgram", DeepgramSpider);
 
     // ── Simple providers (DocPageSpider) ──────────────────────────────────────
     for &(name, url) in SIMPLE_PROVIDERS {
