@@ -203,6 +203,58 @@
           "minimum": 0,
           "description": "Price per page processed (OCR/document models)."
         },
+        "input_audio": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Audio input price per 1M tokens, when priced separately (omni/multimodal models)."
+        },
+        "input_image": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Image/vision input price per 1M tokens, when priced separately from text."
+        },
+        "input_video": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Video input price per 1M tokens, when priced separately from text."
+        },
+        "output_audio": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Audio output price per 1M tokens (omni/speech models that emit audio tokens)."
+        },
+        "tiers": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Prompt-length pricing tiers, when the provider charges by input size. The tier whose max_prompt_tokens is the smallest value >= the request's input token count applies; the unbounded top tier uses null. The top-level input/output mirror the first (smallest) tier.",
+          "items": {
+            "type": "object",
+            "required": ["input", "output"],
+            "additionalProperties": false,
+            "properties": {
+              "max_prompt_tokens": {
+                "type": ["integer", "null"],
+                "minimum": 1,
+                "description": "Inclusive upper bound (in tokens) of this tier's prompt length; null for the unbounded top tier."
+              },
+              "input": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Input price per 1M tokens for this tier."
+              },
+              "output": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Output price per 1M tokens for this tier."
+              },
+              "cached_input": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Cached input price per 1M tokens for this tier, when published."
+              }
+            }
+          }
+        },
         "pricing_notes": {
           "type": "string"
         }

@@ -24,7 +24,17 @@ pricing:
   currency: USD
   input: 0.20
   output: 1.60
-  pricing_notes: "Tiered by prompt length (base, prompt <=32K). 32K-128K: 0.30/2.40; 128K-256K: 0.60/4.80 per 1M tokens."
+  tiers:
+    - max_prompt_tokens: 32768
+      input: 0.20
+      output: 1.60
+    - max_prompt_tokens: 131072
+      input: 0.30
+      output: 2.40
+    - max_prompt_tokens: 262144
+      input: 0.60
+      output: 4.80
+  pricing_notes: "Priced in prompt-length tiers (see tiers); top-level input/output reflect the base <=32K tier."
 last_verified: 2026-06-14
 confidence: official
 endpoint_family: chat_completions
