@@ -24,11 +24,11 @@ pricing:
   currency: USD
   input: 0.00
   output: 0.00
-  per_second: 0.06
-  pricing_notes: "~$0.06/second. Wan 2.6 video generation model; improved consistency and text rendering over Wan 2.1"
-last_verified: 2026-05-15
-confidence: inferred
+  per_second: 0.086
+  pricing_notes: "Wan 2.6 t2v/i2v: 720P $0.086/sec, 1080P $0.143/sec. Flash variant: 720P $0.05/sec (audio) / $0.025/sec (silent)."
+last_verified: 2026-06-14
+confidence: official
 endpoint_family: video_generation
 sources:
-  - url: https://help.aliyun.com/zh/model-studio/user-guide/wan
-    last_verified: 2026-05-15
+  - url: https://www.alibabacloud.com/help/en/model-studio/getting-started/models
+    last_verified: 2026-06-14

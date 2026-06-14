@@ -146,8 +146,8 @@ aliases:
 
   # ByteDance Doubao shorthand aliases
   doubao-latest: doubao-1.5-pro-32k
-  doubao-pro-latest: doubao-1.5-pro-256k
-  doubao-thinking-latest: doubao-1.5-thinking-pro
+  doubao-pro-latest: seed-2.0-pro
+  doubao-thinking-latest: seed-1.6-thinking
   seed-latest: seed-2.0-pro
   seed-code-latest: seed-2.0-code
 

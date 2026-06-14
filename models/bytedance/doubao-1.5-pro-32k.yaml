@@ -20,9 +20,14 @@ parameters:
   supported: [temperature, top_p, max_tokens, stream, stop]
   rejected: []
   deprecated_for_this_model: []
-last_verified: 2026-05-09
-confidence: inferred
+pricing:
+  currency: USD
+  input: 0.11
+  output: 0.28
+  pricing_notes: "Legacy Doubao 1.5 Pro 32K (Volcengine doubao-1.5-pro-32k). Converted from CNY 0.80 in / 2.00 out per M tokens at ~7.2 CNY/USD. China-only; superseded by Seed 2.0 series."
+last_verified: 2026-06-14
+confidence: official
 endpoint_family: chat_completions
 sources:
-  - url: https://www.volcengine.com/docs/82379/1174490
-    last_verified: 2026-05-09
+  - url: https://www.volcengine.com/docs/82379/1544106
+    last_verified: 2026-06-14

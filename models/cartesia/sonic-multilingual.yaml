@@ -3,9 +3,9 @@ provider: cartesia
 display_name: Sonic (Multilingual)
 status: deprecated
 release_date: null
-deprecation_date: null
-sunset_date: null
-replacement: sonic-2
+deprecation_date: 2026-06-01
+sunset_date: 2026-06-01
+replacement: sonic-3.5
 context_window: 8192
 max_output_tokens: 1
 modalities:
@@ -27,10 +27,12 @@ pricing:
   input: 0.00
   output: 0.00
   per_million_chars: 30.00
-  pricing_notes: "Legacy Sonic 1 multilingual alias. Superseded by Sonic 2."
-last_verified: 2026-06-05
-confidence: inferred
+  pricing_notes: "Legacy Sonic 1 multilingual alias. Billed ~1 credit/character. Fully sunset 2026-06-01; migrate to sonic-3.5."
+last_verified: 2026-06-14
+confidence: official
 endpoint_family: speech
 sources:
   - url: https://docs.cartesia.ai/build-with-cartesia/tts-models/api-changes
-    last_verified: 2026-06-05
+    last_verified: 2026-06-14
+  - url: https://docs.cartesia.ai/pricing
+    last_verified: 2026-06-14

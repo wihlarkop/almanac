@@ -24,6 +24,7 @@ pricing:
   currency: USD
   input: 0.00
   output: 0.00
+  per_minute: 0.0065
   pricing_notes: "Conversational speech recognition for voice agents. Includes turn-end detection. Nova-3-level accuracy."
 last_verified: 2026-05-23
 confidence: official

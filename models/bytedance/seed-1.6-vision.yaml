@@ -22,12 +22,12 @@ parameters:
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 0.10
-  output: 0.50
-  pricing_notes: "Seed 1.6 vision-language variant"
-last_verified: 2026-05-15
-confidence: inferred
+  input: 0.11
+  output: 1.11
+  pricing_notes: "Seed 1.6 vision-language variant (Volcengine doubao-seed-1.6-vision, base tier <=32K). Converted from CNY 0.80 in / 8.00 out per M tokens at ~7.2 CNY/USD. China-only; not on BytePlus international."
+last_verified: 2026-06-14
+confidence: official
 endpoint_family: chat_completions
 sources:
-  - url: https://www.volcengine.com/docs/82379/1174490
-    last_verified: 2026-05-15
+  - url: https://www.volcengine.com/docs/82379/1544106
+    last_verified: 2026-06-14

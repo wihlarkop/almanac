@@ -23,11 +23,11 @@ parameters:
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 0.30
-  output: 1.20
+  input: 0.40
+  output: 3.20
   pricing_notes: "122B total / 10B active MoE; open-weight Apache 2.0; 201 languages"
 last_verified: 2026-05-15
-confidence: inferred
+confidence: official
 endpoint_family: chat_completions
 sources:
   - url: https://www.alibabacloud.com/help/en/model-studio/models

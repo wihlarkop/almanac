@@ -22,12 +22,14 @@ parameters:
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 0.02
-  output: 0.06
-  pricing_notes: "Cheapest Seed 1.6 tier; $0.022/M input; high-throughput batch use"
-last_verified: 2026-05-15
-confidence: inferred
+  input: 0.075
+  output: 0.30
+  pricing_notes: "Cheapest Seed 1.6 tier (BytePlus seed-1-6-flash-250715, base tier prompt <=128K). Tiered: input 0.10, output 0.80 for prompt 128-256K."
+last_verified: 2026-06-14
+confidence: official
 endpoint_family: chat_completions
 sources:
-  - url: https://www.volcengine.com/docs/82379/1174490
-    last_verified: 2026-05-15
+  - url: https://docs.byteplus.com/en/docs/ModelArk/1544106
+    last_verified: 2026-06-14
+  - url: https://www.volcengine.com/docs/82379/1544106
+    last_verified: 2026-06-14

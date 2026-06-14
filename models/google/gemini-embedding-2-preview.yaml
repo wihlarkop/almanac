@@ -27,7 +27,7 @@ pricing:
   output: 0.00
   pricing_notes: "$0.20/M text input tokens. Multimodal embedding supporting text and image."
 last_verified: 2026-05-11
-confidence: inferred
+confidence: official
 endpoint_family: embeddings
 sources:
   - url: https://ai.google.dev/gemini-api/docs/embeddings

@@ -24,10 +24,10 @@ pricing:
   currency: USD
   input: 0.00
   output: 0.00
-  per_minute: 0.0068
+  per_minute: 0.0077
   pricing_notes: "Domain-optimized Nova-3 variant. $0.0068/min pre-recorded."
 last_verified: 2026-06-05
-confidence: inferred
+confidence: official
 endpoint_family: transcription
 sources:
   - url: https://developers.deepgram.com/docs/models-languages-overview

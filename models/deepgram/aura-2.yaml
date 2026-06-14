@@ -25,8 +25,8 @@ pricing:
   currency: USD
   input: 0.00
   output: 0.00
-  per_million_chars: 15.00
-  pricing_notes: "$15/M chars ($0.015/1K chars). Model accessed as aura-2-[voice]-[lang], e.g. aura-2-thalia-en."
+  per_million_chars: 30.00
+  pricing_notes: "$30/M chars ($0.030/1K chars). Model accessed as aura-2-[voice]-[lang], e.g. aura-2-thalia-en."
 last_verified: 2026-05-11
 confidence: official
 endpoint_family: speech

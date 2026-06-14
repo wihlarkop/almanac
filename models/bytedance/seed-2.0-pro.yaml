@@ -22,13 +22,14 @@ parameters:
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 0.47
-  output: 2.37
-last_verified: 2026-05-09
+  input: 0.50
+  output: 3.00
+  pricing_notes: "BytePlus seed-2-0-pro-260328, base tier (prompt <=128K). Tiered: input 1.00, output 6.00 for prompt 128-256K."
+last_verified: 2026-06-14
 confidence: official
 endpoint_family: chat_completions
 sources:
-  - url: https://www.volcengine.com/docs/82379/1174490
-    last_verified: 2026-05-09
-  - url: https://tokenmix.ai/blog/doubao-api-international-access-guide-2026
-    last_verified: 2026-05-09
+  - url: https://docs.byteplus.com/en/docs/ModelArk/1544106
+    last_verified: 2026-06-14
+  - url: https://www.volcengine.com/docs/82379/1544106
+    last_verified: 2026-06-14

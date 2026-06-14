@@ -27,7 +27,7 @@ pricing:
   per_minute: 0.0043
   pricing_notes: "Domain-optimized Nova-2 variant. $0.0043/min pre-recorded."
 last_verified: 2026-06-05
-confidence: inferred
+confidence: official
 endpoint_family: transcription
 sources:
   - url: https://developers.deepgram.com/docs/models-languages-overview
