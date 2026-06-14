@@ -6,7 +6,7 @@ release_date: null
 deprecation_date: null
 sunset_date: null
 replacement: ministral-8b-2512
-context_window: 4096
+context_window: 32768
 max_output_tokens: 4096
 modalities:
   input: [text]
@@ -26,9 +26,10 @@ pricing:
   currency: USD
   input: 0
   output: 0
-last_verified: 2026-06-13
-confidence: inferred
+  pricing_notes: "Deprecated API model for Mistral 7B; migrate to the replacement. Open weights remain under Apache 2.0."
+last_verified: 2026-06-14
+confidence: official
 endpoint_family: chat_completions
 sources:
   - url: https://docs.mistral.ai/models/model-cards/mistral-7b-0-3
-    last_verified: 2026-06-13
+    last_verified: 2026-06-14

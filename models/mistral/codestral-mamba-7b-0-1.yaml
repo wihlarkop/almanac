@@ -6,7 +6,7 @@ release_date: null
 deprecation_date: null
 sunset_date: null
 replacement: codestral-2508
-context_window: 4096
+context_window: 256000
 max_output_tokens: 4096
 modalities:
   input: [text]
@@ -26,9 +26,10 @@ pricing:
   currency: USD
   input: 0
   output: 0
-last_verified: 2026-06-13
-confidence: inferred
+  pricing_notes: "Deprecated. Codestral Mamba 7B (Apache 2.0), 256K context; migrate to the replacement."
+last_verified: 2026-06-14
+confidence: official
 endpoint_family: chat_completions
 sources:
   - url: https://docs.mistral.ai/models/model-cards/codestral-mamba-7b-0-1
-    last_verified: 2026-06-13
+    last_verified: 2026-06-14
