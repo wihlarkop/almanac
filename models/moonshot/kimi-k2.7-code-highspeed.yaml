@@ -1,34 +1,38 @@
 id: kimi-k2.7-code-highspeed
 provider: moonshot
-display_name: kimi-k2.7-code-highspeed
+display_name: Kimi K2.7 Code (High-Speed)
 status: active
 release_date: null
 deprecation_date: null
 sunset_date: null
 replacement: null
-context_window: 4096
-max_output_tokens: 4096
+context_window: 262144
+max_output_tokens: 32768
 modalities:
-  input: [text]
+  input: [text, image]
   output: [text]
 capabilities:
-  tools: false
-  vision: false
+  tools: true
+  vision: true
   streaming: true
-  json_mode: false
-  prompt_caching: false
-  thinking: false
+  json_mode: true
+  prompt_caching: true
+  thinking: true
 parameters:
-  supported: []
-  rejected: []
+  supported: [max_tokens, stream, tools, response_format, thinking]
+  rejected: [temperature, top_p, n, presence_penalty, frequency_penalty]
   deprecated_for_this_model: []
 pricing:
   currency: USD
-  input: 0
-  output: 0
+  input: 1.90
+  output: 8.00
+  cached_input: 0.38
+  pricing_notes: "High-speed serving tier of Kimi K2.7 Code (~180-260 tokens/s), 2x the standard kimi-k2.7-code rate. Input cache-miss 1.90 / cache-hit 0.38; output 8.00 per 1M tokens."
 last_verified: 2026-06-17
-confidence: inferred
+confidence: official
 endpoint_family: chat_completions
 sources:
   - url: https://platform.kimi.ai/docs/models
+    last_verified: 2026-06-17
+  - url: https://platform.kimi.ai/docs/pricing/chat-k27-code
     last_verified: 2026-06-17
