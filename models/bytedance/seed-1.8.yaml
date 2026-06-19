@@ -25,7 +25,14 @@ pricing:
   currency: USD
   input: 0.25
   output: 2.00
-  pricing_notes: "Bridge model between Seed 1.6 and 2.0 (BytePlus seed-1-8-251228, base tier prompt <=128K). Tiered: input 0.50, output 4.00 for prompt 128-256K."
+  tiers:
+    - max_prompt_tokens: 131072
+      input: 0.25
+      output: 2.00
+    - max_prompt_tokens: 262144
+      input: 0.50
+      output: 4.00
+  pricing_notes: "Bridge model between Seed 1.6 and 2.0 (BytePlus seed-1-8-251228). Priced in prompt-length tiers; top-level input/output reflect the base <=128K tier."
 last_verified: 2026-06-14
 confidence: official
 endpoint_family: chat_completions

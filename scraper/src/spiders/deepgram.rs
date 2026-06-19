@@ -1,10 +1,14 @@
 use crate::model::ScrapedModel;
+use crate::pricing::first_unit_price;
 use crate::spider::{HtmlResponse, Spider, SpiderOutput};
 use crate::spiders::doc_page::extract_model_ids;
 use anyhow::Result;
 
 const DOCS_URL: &str = "https://developers.deepgram.com/docs/models-languages-overview";
 const PRICING_URL: &str = "https://deepgram.com/pricing";
+
+/// Sanity range for Deepgram per-minute PAYG rates ($/min).
+const PER_MIN_RANGE: std::ops::RangeInclusive<f64> = 0.001..=0.5;
 
 pub struct DeepgramSpider;
 
@@ -87,30 +91,9 @@ fn scrape_pricing(res: &HtmlResponse<'_>) -> Result<SpiderOutput> {
 }
 
 /// Scans `html` from the position of `keyword` and returns the numeric value
-/// of the first `$X.XXXX/min` token found after that position.
+/// of the first `$X.XXXX/min` token found after that position. Deepgram's
+/// pricing table lists the PAYG streaming rate first within each tier row.
 fn first_per_min_price_after(html: &str, keyword: &str) -> Option<f64> {
     let offset = html.find(keyword)?;
-    parse_first_per_min_price(&html[offset..])
-}
-
-fn parse_first_per_min_price(s: &str) -> Option<f64> {
-    let mut search = s;
-    loop {
-        let dollar = search.find('$')?;
-        let after = &search[dollar + 1..];
-        let num_end = after
-            .find(|c: char| !c.is_ascii_digit() && c != '.')
-            .unwrap_or(after.len());
-        let num_str = &after[..num_end];
-        let rest = &after[num_end..];
-        if rest.starts_with("/min")
-            && !num_str.is_empty()
-            && let Ok(v) = num_str.parse::<f64>()
-            && (0.001..=0.5).contains(&v)
-        {
-            return Some(v);
-        }
-        // Advance past this dollar sign and keep searching.
-        search = &search[dollar + 1..];
-    }
+    first_unit_price(&html[offset..], "/min", &PER_MIN_RANGE)
 }

@@ -24,7 +24,14 @@ pricing:
   currency: USD
   input: 0.075
   output: 0.30
-  pricing_notes: "Cheapest Seed 1.6 tier (BytePlus seed-1-6-flash-250715, base tier prompt <=128K). Tiered: input 0.10, output 0.80 for prompt 128-256K."
+  tiers:
+    - max_prompt_tokens: 131072
+      input: 0.075
+      output: 0.30
+    - max_prompt_tokens: 262144
+      input: 0.10
+      output: 0.80
+  pricing_notes: "Cheapest Seed 1.6 tier (BytePlus seed-1-6-flash-250715). Priced in prompt-length tiers; top-level input/output reflect the base <=128K tier."
 last_verified: 2026-06-14
 confidence: official
 endpoint_family: chat_completions

@@ -28,7 +28,11 @@ pricing:
   currency: USD
   input: 0.41
   output: 2.25
-  pricing_notes: "Snapshot qwen3.5-omni-flash-2026-03-15. Per-modality (international tier, ~7.34 CNY/USD): text/image/video input $0.41, audio input $3.06 per 1M; text output $2.25, multimodal output $12.15 per 1M."
+  input_image: 0.41
+  input_video: 0.41
+  input_audio: 3.06
+  output_audio: 12.15
+  pricing_notes: "Snapshot qwen3.5-omni-flash-2026-03-15 (international tier, ~7.34 CNY/USD). input/output are the text rates; text/image/video share one input rate, audio input and multimodal (output_audio) priced separately."
 last_verified: 2026-06-14
 confidence: official
 endpoint_family: custom

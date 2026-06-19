@@ -5,7 +5,7 @@ status: deprecated
 release_date: null
 deprecation_date: null
 sunset_date: null
-replacement: mistral-medium-3-5
+replacement: mistral-small-4
 context_window: 4096
 max_output_tokens: 4096
 modalities:

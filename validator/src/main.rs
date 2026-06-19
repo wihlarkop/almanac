@@ -209,9 +209,16 @@ fn official_source_roots(provider: &str, providers: &HashMap<String, ProviderMet
         }
     }
 
+    // Some providers publish authoritative docs/pricing on more than one
+    // first-party domain (e.g. a regional or international portal). These are
+    // all owned by the provider and count as official sources.
     match provider {
         "anthropic" => roots.push("claude.com".to_string()),
         "google" => roots.push("google.com".to_string()),
+        // Alibaba's China portal (Model Studio / Bailian docs + pricing).
+        "alibaba" => roots.push("aliyun.com".to_string()),
+        // ByteDance's international AI platform (BytePlus ModelArk).
+        "bytedance" => roots.push("byteplus.com".to_string()),
         _ => {}
     }
 
@@ -1149,6 +1156,66 @@ mod tests {
         validate_official_confidence_sources(
             &mut errors,
             "models/anthropic/claude-test.yaml",
+            &data,
+            &providers,
+        );
+
+        assert!(errors.is_empty());
+    }
+
+    #[test]
+    fn official_confidence_accepts_alibaba_china_portal() {
+        // help.aliyun.com (aliyun.com) is Alibaba's first-party China portal,
+        // distinct from the alibabacloud.com international domain.
+        let mut errors = Vec::new();
+        let data = json!({
+            "provider": "alibaba",
+            "confidence": "official",
+            "sources": [
+                {"url": "https://help.aliyun.com/zh/model-studio/billing-for-model-studio", "last_verified": "2026-06-14"}
+            ]
+        });
+        let providers = HashMap::from([(
+            "alibaba".to_string(),
+            ProviderMeta {
+                website: Some("https://www.alibabacloud.com/product/modelstudio".to_string()),
+                api_docs: Some("https://www.alibabacloud.com/help/en/model-studio/".to_string()),
+            },
+        )]);
+
+        validate_official_confidence_sources(
+            &mut errors,
+            "models/alibaba/qwen3.7-plus.yaml",
+            &data,
+            &providers,
+        );
+
+        assert!(errors.is_empty());
+    }
+
+    #[test]
+    fn official_confidence_accepts_bytedance_byteplus_portal() {
+        // docs.byteplus.com (byteplus.com) is ByteDance's international AI
+        // platform, distinct from the volcengine.com China domain.
+        let mut errors = Vec::new();
+        let data = json!({
+            "provider": "bytedance",
+            "confidence": "official",
+            "sources": [
+                {"url": "https://docs.byteplus.com/en/docs/ModelArk/1544106", "last_verified": "2026-06-14"}
+            ]
+        });
+        let providers = HashMap::from([(
+            "bytedance".to_string(),
+            ProviderMeta {
+                website: Some("https://www.volcengine.com".to_string()),
+                api_docs: Some("https://www.volcengine.com/docs/82379/1174490".to_string()),
+            },
+        )]);
+
+        validate_official_confidence_sources(
+            &mut errors,
+            "models/bytedance/seed-2.0-code.yaml",
             &data,
             &providers,
         );

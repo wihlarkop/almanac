@@ -26,9 +26,10 @@ pricing:
   currency: USD
   input: 0
   output: 0
-last_verified: 2026-06-13
-confidence: inferred
+  pricing_notes: "Open-weight (Apache 2.0) Mathstral 7B (math-specialized); self-host, no first-party API pricing."
+last_verified: 2026-06-14
+confidence: official
 endpoint_family: chat_completions
 sources:
   - url: https://docs.mistral.ai/getting-started/models/models_overview/
-    last_verified: 2026-06-13
+    last_verified: 2026-06-14

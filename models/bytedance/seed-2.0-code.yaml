@@ -25,7 +25,14 @@ pricing:
   currency: USD
   input: 0.50
   output: 3.00
-  pricing_notes: "Coding-specialized Seed 2.0 (BytePlus seed-2-0-code-preview-260328, base tier prompt <=128K). Tiered: input 1.00, output 6.00 for prompt 128-256K."
+  tiers:
+    - max_prompt_tokens: 131072
+      input: 0.50
+      output: 3.00
+    - max_prompt_tokens: 262144
+      input: 1.00
+      output: 6.00
+  pricing_notes: "Coding-specialized Seed 2.0 (BytePlus seed-2-0-code-preview-260328). Priced in prompt-length tiers; top-level input/output reflect the base <=128K tier."
 last_verified: 2026-06-14
 confidence: official
 endpoint_family: chat_completions

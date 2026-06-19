@@ -26,7 +26,17 @@ pricing:
   currency: USD
   input: 0.05
   output: 0.40
-  pricing_notes: "US-region variant of Qwen3-VL-Flash. Tiered by prompt length (base, prompt <=32K). 32K-128K: 0.075/0.60; 128K-256K: 0.12/0.96 per 1M tokens."
+  tiers:
+    - max_prompt_tokens: 32768
+      input: 0.05
+      output: 0.40
+    - max_prompt_tokens: 131072
+      input: 0.075
+      output: 0.60
+    - max_prompt_tokens: 262144
+      input: 0.12
+      output: 0.96
+  pricing_notes: "US-region variant of Qwen3-VL-Flash. Priced in prompt-length tiers (see tiers); top-level input/output reflect the base <=32K tier."
 last_verified: 2026-06-14
 confidence: official
 endpoint_family: chat_completions
