@@ -14,6 +14,20 @@ pub struct CatalogEntry {
     pub max_output_tokens: Option<u64>,
     #[serde(default)]
     pub pricing: PricingEntry,
+    /// Catalog confidence ("official", "inferred", "community", ...). Drives how
+    /// the diff treats scraped price drift: verified `official` values are
+    /// protected (drift is only flagged for human review), while `inferred`
+    /// stubs are safe to enrich.
+    #[serde(default)]
+    pub confidence: String,
+}
+
+impl CatalogEntry {
+    /// Whether this entry's data is human-verified and must not be overwritten
+    /// by a scraped value without review.
+    pub fn is_official(&self) -> bool {
+        self.confidence == "official"
+    }
 }
 
 #[derive(Debug, Deserialize, Default)]

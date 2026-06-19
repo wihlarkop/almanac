@@ -1,5 +1,5 @@
 use almanac_scraper::catalog::load_catalog;
-use almanac_scraper::diff::{DiffResult, diff};
+use almanac_scraper::diff::{DiffResult, PriceChangeKind, diff};
 use almanac_scraper::engine::run_spider;
 use almanac_scraper::model::ScrapedModel;
 use almanac_scraper::spiders::{
@@ -191,11 +191,39 @@ async fn main() -> Result<()> {
         .iter()
         .filter(|r| matches!(r, DiffResult::MissingFromDocs { .. }))
         .count();
+    let enrich_count = results
+        .iter()
+        .filter(|r| {
+            matches!(
+                r,
+                DiffResult::PriceChanged {
+                    kind: PriceChangeKind::Enrich,
+                    ..
+                }
+            )
+        })
+        .count();
+    let drift_count = results
+        .iter()
+        .filter(|r| {
+            matches!(
+                r,
+                DiffResult::PriceChanged {
+                    kind: PriceChangeKind::DriftAlert,
+                    ..
+                }
+            )
+        })
+        .count();
 
-    if new_count == 0 && missing_count == 0 && results.is_empty() {
+    if results.is_empty() {
         println!("\nAll scraped models are already in the catalog.");
         return Ok(());
     }
+
+    println!(
+        "Summary: {new_count} new, {enrich_count} stub price fill, {drift_count} official price drift, {missing_count} missing from docs.",
+    );
 
     println!("\n--- Diff Results ---");
     for result in &results {
@@ -222,9 +250,17 @@ async fn main() -> Result<()> {
                 model: m,
                 old_input,
                 old_output,
+                kind,
             } => {
+                // Stub (inferred) entries are safe to enrich; official entries are
+                // human-verified, so drift is only flagged for manual review and
+                // the catalog file is left untouched.
+                let label = match kind {
+                    PriceChangeKind::Enrich => "[ENRICH STUB]",
+                    PriceChangeKind::DriftAlert => "[DRIFT — verify, not auto-applied]",
+                };
                 println!(
-                    "\n[PRICE CHANGE] {}/{}\n  input:  {:?} -> {:?}\n  output: {:?} -> {:?}",
+                    "\n{label} {}/{}\n  input:  {:?} -> {:?}\n  output: {:?} -> {:?}",
                     m.provider, m.id, old_input, m.input_price, old_output, m.output_price,
                 );
             }
