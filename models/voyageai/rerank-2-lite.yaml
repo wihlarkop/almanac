@@ -1,12 +1,12 @@
-id: rerank-lite-2
+id: rerank-2-lite
 provider: voyageai
-display_name: Rerank Lite 2
+display_name: Rerank 2 Lite
 status: active
 release_date: 2024-09-01
 deprecation_date: null
 sunset_date: null
 replacement: null
-context_window: 16000
+context_window: 8000
 max_output_tokens: 1
 modalities:
   input: [text]
@@ -26,11 +26,11 @@ pricing:
   input: 0.02
   output: 0.00
   pricing_notes: "$0.02/1M tokens. Smaller, faster, affordable reranker."
-last_verified: 2026-05-11
+last_verified: 2026-06-20
 confidence: official
 endpoint_family: reranking
 sources:
   - url: https://docs.voyageai.com/docs/reranker
-    last_verified: 2026-05-11
+    last_verified: 2026-06-20
   - url: https://www.voyageai.com/pricing
-    last_verified: 2026-05-11
+    last_verified: 2026-06-20

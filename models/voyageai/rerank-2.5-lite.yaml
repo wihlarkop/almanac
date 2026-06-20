@@ -1,6 +1,6 @@
-id: rerank-lite-2.5
+id: rerank-2.5-lite
 provider: voyageai
-display_name: Rerank Lite 2.5
+display_name: Rerank 2.5 Lite
 status: active
 release_date: 2025-08-11
 deprecation_date: null
@@ -26,11 +26,11 @@ pricing:
   input: 0.02
   output: 0.00
   pricing_notes: "$0.02/1M tokens; lightweight variant with instruction-following; +7.16% over Cohere Rerank v3.5; Batch API 33% discount"
-last_verified: 2026-05-15
+last_verified: 2026-06-20
 confidence: official
 endpoint_family: reranking
 sources:
   - url: https://blog.voyageai.com/2025/08/11/rerank-2-5/
-    last_verified: 2026-05-15
+    last_verified: 2026-06-20
   - url: https://docs.voyageai.com/docs/pricing
-    last_verified: 2026-05-15
+    last_verified: 2026-06-20
