@@ -19,8 +19,14 @@ impl Spider for CohereSpider {
         // Reject deployment-namespace IDs:
         //   "cohere.command-r-plus-v1:0"  — AWS Bedrock (dot-prefixed, colon-versioned)
         //   "cohere-rerank-v4-pro"         — "Unique per deployment" section in Cohere docs
+        // but keep the real `cohere-transcribe-*` audio model IDs, which also
+        // carry the `cohere-` prefix.
         models.retain(|m| {
-            !m.id.contains(':') && !m.id.starts_with("cohere.") && !m.id.starts_with("cohere-")
+            let id = m.id.as_str();
+            if id.starts_with("cohere-transcribe") {
+                return true;
+            }
+            !id.contains(':') && !id.starts_with("cohere.") && !id.starts_with("cohere-")
         });
         Ok(SpiderOutput::new().items(models))
     }

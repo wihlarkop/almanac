@@ -1,0 +1,35 @@
+id: voyage-multimodal-3.5
+provider: voyageai
+display_name: Voyage Multimodal 3.5
+status: active
+release_date: null
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 32000
+max_output_tokens: 1024
+modalities:
+  input: [text, image]
+  output: [embedding]
+capabilities:
+  tools: false
+  vision: true
+  streaming: false
+  json_mode: false
+parameters:
+  supported: [truncation, output_dimension]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.12
+  output: 0.00
+  pricing_notes: "$0.12/1M text tokens plus $0.60 per billion pixels for images/video. Latest multimodal embedding model."
+last_verified: 2026-06-20
+confidence: official
+endpoint_family: embeddings
+sources:
+  - url: https://docs.voyageai.com/docs/multimodal-embeddings
+    last_verified: 2026-06-20
+  - url: https://docs.voyageai.com/docs/pricing
+    last_verified: 2026-06-20

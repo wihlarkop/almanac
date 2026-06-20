@@ -25,10 +25,12 @@ pricing:
   currency: USD
   input: 0.00
   output: 0.00
-  pricing_notes: "Free during preview. Supports 14 languages."
-last_verified: 2026-05-11
-confidence: inferred
+  pricing_notes: "No public list price (contact sales; research release). High-accuracy multilingual speech-to-text; 25MB max audio file."
+last_verified: 2026-06-20
+confidence: official
 endpoint_family: transcription
 sources:
   - url: https://docs.cohere.com/reference/transcribe
-    last_verified: 2026-05-11
+    last_verified: 2026-06-20
+  - url: https://docs.cohere.com/v2/docs/models
+    last_verified: 2026-06-20
