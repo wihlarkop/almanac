@@ -5,6 +5,10 @@ use crate::spiders::doc_page::extract_model_ids;
 use anyhow::Result;
 
 const DOCS_URL: &str = "https://developers.deepgram.com/docs/models-languages-overview";
+/// STT docs list Nova/Flux/etc.; the Aura (TTS) models live on a separate page.
+/// Safe to crawl now that `normalize_family_ids` collapses the 100+ per-voice
+/// variants down to the base family id (`aura-2`) instead of emitting each one.
+const TTS_DOCS_URL: &str = "https://developers.deepgram.com/docs/tts-models";
 const PRICING_URL: &str = "https://deepgram.com/pricing";
 
 /// Sanity range for Deepgram per-minute PAYG rates ($/min).
@@ -19,7 +23,7 @@ impl Spider for DeepgramSpider {
     }
 
     fn start_urls(&self) -> Vec<String> {
-        vec![DOCS_URL.into(), PRICING_URL.into()]
+        vec![DOCS_URL.into(), TTS_DOCS_URL.into(), PRICING_URL.into()]
     }
 
     async fn scrape(&self, res: &HtmlResponse<'_>) -> Result<SpiderOutput> {
@@ -46,7 +50,92 @@ fn scrape_docs(res: &HtmlResponse<'_>) -> Result<SpiderOutput> {
             || id.starts_with("whisper-")
             || id.starts_with("aura-")
     });
+
+    // Collapse Aura voice variants to their base family id, and surface the bare
+    // Flux family id — both are tracked in the catalog as bare family ids that the
+    // raw extractor never produces. See `normalize_family_ids` for details.
+    normalize_family_ids(&mut models);
+
     Ok(SpiderOutput::new().items(models))
+}
+
+/// Rewrites scraped Deepgram docs ids so they match the bare *family* ids the
+/// catalog tracks, then de-duplicates.
+///
+/// Two transforms, both designed to avoid flooding the catalog with per-variant
+/// stubs:
+///
+/// 1. **Aura voice collapse.** Deepgram's TTS docs expose Aura models only as
+///    per-voice, per-language ids — `aura-2-thalia-en` (gen-2, 100+) and the
+///    unversioned `aura-asteria-en` (gen-1, 12) — but the catalog tracks just
+///    the bare families `aura-2` and `aura-1`. We rewrite every voice variant
+///    down to its base family (see `aura_base_family`), emitting ONLY the base
+///    and never the voice variants. A bare `aura-N` passes through unchanged.
+///
+/// 2. **Flux family surfacing.** The catalog id is the bare `flux`, but the
+///    generic extractor can never emit it: `flux` has no hyphen/dot/underscore
+///    and so fails `looks_like_model_id`. Whenever the docs/pricing surface any
+///    `flux-*` row (e.g. `flux-general-en`), we also emit the bare `flux`
+///    family id. The `flux-*` ids themselves are preserved.
+fn normalize_family_ids(models: &mut Vec<ScrapedModel>) {
+    let mut seen = std::collections::HashSet::new();
+    let mut out = Vec::with_capacity(models.len());
+    let mut has_flux_variant = false;
+
+    for mut m in models.drain(..) {
+        if let Some(base) = aura_base_family(&m.id) {
+            m.id = base.to_string();
+        }
+        if m.id.starts_with("flux-") {
+            has_flux_variant = true;
+        }
+        if seen.insert(m.id.clone()) {
+            out.push(m);
+        }
+    }
+
+    // Surface the bare Flux family id from any `flux-*` variant, reusing a
+    // variant's source_url so the emitted stub points at a real page.
+    if has_flux_variant && seen.insert("flux".to_string()) {
+        let source_url = out
+            .iter()
+            .find(|m| m.id.starts_with("flux-"))
+            .map(|m| m.source_url.clone())
+            .unwrap_or_default();
+        out.push(ScrapedModel {
+            id: "flux".into(),
+            provider: "deepgram".into(),
+            source_url,
+            ..Default::default()
+        });
+    }
+
+    *models = out;
+}
+
+/// Returns the base Aura family id (`aura-1` / `aura-2`) for a per-voice variant
+/// id, or `None` if `id` is not an Aura variant that should be collapsed (bare
+/// family ids and non-Aura ids return `None`).
+///
+/// Two id shapes exist on the TTS docs:
+/// - Gen-2 is versioned: `aura-2-thalia-en` → `aura-2`.
+/// - Gen-1 (original Aura) is unversioned: `aura-asteria-en` → `aura-1`. The
+///   12 gen-1 voices carry no `-1` in their id, so any `aura-<voice>-<lang>`
+///   that isn't a gen-2 variant or a bare family id is gen-1.
+fn aura_base_family(id: &str) -> Option<&'static str> {
+    for base in ["aura-2", "aura-1"] {
+        // Match `aura-2-<something>` but NOT the bare `aura-2` itself.
+        if let Some(rest) = id.strip_prefix(base)
+            && rest.starts_with('-')
+        {
+            return Some(base);
+        }
+    }
+    // Unversioned gen-1 voice variant (e.g. `aura-asteria-en`) → `aura-1`.
+    if id.starts_with("aura-") && id != "aura-1" && id != "aura-2" {
+        return Some("aura-1");
+    }
+    None
 }
 
 // ── Pricing page: extract per-minute PAYG rates ──────────────────────────────
@@ -90,6 +179,21 @@ fn scrape_pricing(res: &HtmlResponse<'_>) -> Result<SpiderOutput> {
         });
     }
 
+    // Surface the bare `flux` family id whenever the pricing page yields any
+    // Flux row. The catalog tracks `flux` as a bare family id that the generic
+    // extractor can never emit (no hyphen ⇒ fails `looks_like_model_id`), so the
+    // pricing page is the most reliable place to anchor it. The diff aggregates
+    // scraped ids across all pages, so emitting it here clears the
+    // "missing from docs" false flag without depending on docs-page content.
+    if items.iter().any(|m| m.id.starts_with("flux-")) {
+        items.push(ScrapedModel {
+            id: "flux".into(),
+            provider: "deepgram".into(),
+            source_url: res.url.into(),
+            ..Default::default()
+        });
+    }
+
     Ok(SpiderOutput::new().items(items))
 }
 
@@ -109,4 +213,109 @@ fn per_min_rates_after(html: &str, keyword: &str) -> Vec<f64> {
         .into_iter()
         .take(TIERS_PER_ROW)
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn ids(out: &SpiderOutput) -> Vec<String> {
+        let mut v: Vec<String> = out.items.iter().map(|m| m.id.clone()).collect();
+        v.sort();
+        v
+    }
+
+    fn docs(body: &str) -> SpiderOutput {
+        let res = HtmlResponse {
+            url: DOCS_URL,
+            body,
+        };
+        scrape_docs(&res).unwrap()
+    }
+
+    #[test]
+    fn aura_base_family_collapses_voice_variants_only() {
+        assert_eq!(aura_base_family("aura-2-thalia-en"), Some("aura-2"));
+        assert_eq!(aura_base_family("aura-2-andromeda-en"), Some("aura-2"));
+        assert_eq!(aura_base_family("aura-1-asteria-en"), Some("aura-1"));
+        // Unversioned gen-1 voices (no `-1` in the id) collapse to aura-1.
+        assert_eq!(aura_base_family("aura-asteria-en"), Some("aura-1"));
+        assert_eq!(aura_base_family("aura-zeus-en"), Some("aura-1"));
+        // Bare family ids are already correct and must NOT be collapsed/changed.
+        assert_eq!(aura_base_family("aura-2"), None);
+        assert_eq!(aura_base_family("aura-1"), None);
+        // Non-Aura ids are untouched.
+        assert_eq!(aura_base_family("nova-3-general"), None);
+    }
+
+    #[test]
+    fn docs_collapses_aura_voice_variants_to_base_family() {
+        // The TTS docs expose 100+ gen-2 plus 12 unversioned gen-1 voices; we
+        // must emit ONLY the base families `aura-2`/`aura-1`, never the per-voice
+        // variants (no flooding).
+        let html = "<code>aura-2-thalia-en</code> <code>aura-2-andromeda-en</code> \
+                    <code>aura-2-hera-en</code> <code>aura-asteria-en</code> \
+                    <code>aura-zeus-en</code>";
+        let out = docs(html);
+        let got = ids(&out);
+        // Only the two base families survive — nothing else.
+        assert_eq!(got, vec!["aura-1".to_string(), "aura-2".to_string()]);
+        // No per-voice variant (versioned or unversioned) should survive.
+        assert!(
+            !got.iter()
+                .any(|id| id != "aura-1" && id != "aura-2" && id.starts_with("aura-")),
+            "voice variants leaked through: {got:?}"
+        );
+    }
+
+    #[test]
+    fn docs_keeps_bare_aura_family_when_already_present() {
+        let html = "<code>aura-2</code> <code>aura-2-thalia-en</code>";
+        let out = docs(html);
+        // Collapse + dedup ⇒ exactly one `aura-2`.
+        assert_eq!(ids(&out), vec!["aura-2".to_string()]);
+    }
+
+    #[test]
+    fn docs_surfaces_bare_flux_from_flux_variant() {
+        let html = "<code>flux-general-en</code>";
+        let out = docs(html);
+        let got = ids(&out);
+        assert!(
+            got.contains(&"flux".to_string()),
+            "bare flux not surfaced: {got:?}"
+        );
+        assert!(
+            got.contains(&"flux-general-en".to_string()),
+            "variant dropped: {got:?}"
+        );
+    }
+
+    #[test]
+    fn docs_no_flux_when_no_flux_variant() {
+        let html = "<code>nova-3-general</code>";
+        let out = docs(html);
+        assert!(!ids(&out).contains(&"flux".to_string()));
+    }
+
+    #[test]
+    fn pricing_surfaces_bare_flux_family() {
+        // Minimal pricing HTML: a Flux English row with two $/min tiers.
+        let html = "<div>turn detection, natural interruption</div>\
+                    <span>$0.0065/min</span><span>$0.0050/min</span>";
+        let res = HtmlResponse {
+            url: PRICING_URL,
+            body: html,
+        };
+        let out = scrape_pricing(&res).unwrap();
+        let got = ids(&out);
+        assert!(
+            got.contains(&"flux".to_string()),
+            "bare flux not surfaced: {got:?}"
+        );
+        assert!(
+            got.contains(&"flux-general-en".to_string()),
+            "variant dropped: {got:?}"
+        );
+    }
 }
