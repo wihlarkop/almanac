@@ -1,11 +1,11 @@
 id: jina-reranker-v2-base-en
 provider: jina
 display_name: Jina Reranker v2 Base English
-status: active
+status: deprecated
 release_date: 2024-06-01
-deprecation_date: null
+deprecation_date: 2026-06-20
 sunset_date: null
-replacement: null
+replacement: jina-reranker-v3
 context_window: 8192
 max_output_tokens: 1
 modalities:
@@ -24,8 +24,8 @@ pricing:
   currency: USD
   input: 0.02
   output: 0.00
-  pricing_notes: "$0.02/1M tokens. English-specialized reranker."
-last_verified: 2026-05-11
+  pricing_notes: "$0.02/1M tokens. English-specialized reranker. No longer listed by Jina; superseded by jina-reranker-v2-base-multilingual and jina-reranker-v3."
+last_verified: 2026-06-20
 confidence: official
 endpoint_family: reranking
 sources:

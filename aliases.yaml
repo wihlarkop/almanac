@@ -379,9 +379,9 @@ aliases:
 
   # Voyage reranker aliases
   voyage-rerank-latest: rerank-2.5
-  voyage-rerank-lite-latest: rerank-lite-2.5
+  voyage-rerank-lite-latest: rerank-2.5-lite
   voyage-rerank-2.5-latest: rerank-2.5
-  voyage-rerank-lite-2.5-latest: rerank-lite-2.5
+  voyage-rerank-lite-2.5-latest: rerank-2.5-lite
 
   # Voyage specialized model aliases
   voyage-code-latest: voyage-code-3
@@ -394,7 +394,7 @@ aliases:
   # Jina reranker aliases
   jina-reranker-latest: jina-reranker-v3
   jina-reranker-v3-latest: jina-reranker-v3
-  jina-reranker-en-latest: jina-reranker-v2-base-en
+  jina-reranker-en-latest: jina-reranker-v3
   codestral-embed-latest: codestral-embed-2505
   nomic-embed-latest: nomic-embed-text-v2
 
