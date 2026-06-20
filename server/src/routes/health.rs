@@ -33,7 +33,7 @@ pub struct HealthData {
                     "message": "OK",
                     "data": {
                         "status": "ok",
-                        "version": "0.1.0",
+                        "version": "0.27.0",
                         "total_models": 120,
                         "total_providers": 12,
                         "total_aliases": 40

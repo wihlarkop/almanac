@@ -88,7 +88,7 @@ fly deploy --image ghcr.io/wihlarkop/almanac:latest
 Update to a new release:
 
 ```bash
-fly deploy --image ghcr.io/wihlarkop/almanac:v0.1.0
+fly deploy --image ghcr.io/wihlarkop/almanac:v0.27.0
 ```
 
 ---
@@ -200,7 +200,7 @@ Expected response:
   "message": "OK",
   "data": {
     "status": "ok",
-    "version": "0.1.0",
+    "version": "0.27.0",
     "total_models": 646,
     "total_providers": 64,
     "total_aliases": 273

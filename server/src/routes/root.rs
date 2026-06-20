@@ -32,7 +32,7 @@ pub struct RootData {
                     "message": "OK",
                     "data": {
                         "name": "Almanac API",
-                        "version": "0.1.0",
+                        "version": "0.27.0",
                         "base_path": "/api/v1",
                         "health": "/api/v1/health",
                         "openapi": "/openapi.json",
