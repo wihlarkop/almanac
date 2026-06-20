@@ -201,9 +201,9 @@ Expected response:
   "data": {
     "status": "ok",
     "version": "0.27.0",
-    "total_models": 646,
-    "total_providers": 64,
-    "total_aliases": 273
+    "total_models": 817,
+    "total_providers": 62,
+    "total_aliases": 292
   }
 }
 ```
