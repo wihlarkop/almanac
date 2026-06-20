@@ -2,7 +2,7 @@
 
 A free, open-source model catalog and REST API for LLM developers.
 
-646 models · 64 providers · 273 aliases — all queryable, filterable, and comparable via a single HTTP API.
+817 models · 62 providers · 292 aliases — all queryable, filterable, and comparable via a single HTTP API.
 
 [![CI](https://github.com/wihlarkop/almanac/actions/workflows/validate.yml/badge.svg)](https://github.com/wihlarkop/almanac/actions/workflows/validate.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
