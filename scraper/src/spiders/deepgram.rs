@@ -5,6 +5,10 @@ use crate::spiders::doc_page::extract_model_ids;
 use anyhow::Result;
 
 const DOCS_URL: &str = "https://developers.deepgram.com/docs/models-languages-overview";
+/// STT docs list Nova/Flux/etc.; the Aura (TTS) models live on a separate page.
+/// Safe to crawl now that `normalize_family_ids` collapses the 100+ per-voice
+/// variants down to the base family id (`aura-2`) instead of emitting each one.
+const TTS_DOCS_URL: &str = "https://developers.deepgram.com/docs/tts-models";
 const PRICING_URL: &str = "https://deepgram.com/pricing";
 
 /// Sanity range for Deepgram per-minute PAYG rates ($/min).
@@ -19,7 +23,7 @@ impl Spider for DeepgramSpider {
     }
 
     fn start_urls(&self) -> Vec<String> {
-        vec![DOCS_URL.into(), PRICING_URL.into()]
+        vec![DOCS_URL.into(), TTS_DOCS_URL.into(), PRICING_URL.into()]
     }
 
     async fn scrape(&self, res: &HtmlResponse<'_>) -> Result<SpiderOutput> {
@@ -239,11 +243,18 @@ mod tests {
                     <code>aura-2-hera-en</code> <code>aura-1-asteria-en</code>";
         let out = docs(html);
         let got = ids(&out);
-        assert!(got.contains(&"aura-2".to_string()), "expected base aura-2: {got:?}");
-        assert!(got.contains(&"aura-1".to_string()), "expected base aura-1: {got:?}");
+        assert!(
+            got.contains(&"aura-2".to_string()),
+            "expected base aura-2: {got:?}"
+        );
+        assert!(
+            got.contains(&"aura-1".to_string()),
+            "expected base aura-1: {got:?}"
+        );
         // No per-voice variant should survive.
         assert!(
-            !got.iter().any(|id| id.starts_with("aura-2-") || id.starts_with("aura-1-")),
+            !got.iter()
+                .any(|id| id.starts_with("aura-2-") || id.starts_with("aura-1-")),
             "voice variants leaked through: {got:?}"
         );
     }
@@ -261,8 +272,14 @@ mod tests {
         let html = "<code>flux-general-en</code>";
         let out = docs(html);
         let got = ids(&out);
-        assert!(got.contains(&"flux".to_string()), "bare flux not surfaced: {got:?}");
-        assert!(got.contains(&"flux-general-en".to_string()), "variant dropped: {got:?}");
+        assert!(
+            got.contains(&"flux".to_string()),
+            "bare flux not surfaced: {got:?}"
+        );
+        assert!(
+            got.contains(&"flux-general-en".to_string()),
+            "variant dropped: {got:?}"
+        );
     }
 
     #[test]
@@ -283,7 +300,13 @@ mod tests {
         };
         let out = scrape_pricing(&res).unwrap();
         let got = ids(&out);
-        assert!(got.contains(&"flux".to_string()), "bare flux not surfaced: {got:?}");
-        assert!(got.contains(&"flux-general-en".to_string()), "variant dropped: {got:?}");
+        assert!(
+            got.contains(&"flux".to_string()),
+            "bare flux not surfaced: {got:?}"
+        );
+        assert!(
+            got.contains(&"flux-general-en".to_string()),
+            "variant dropped: {got:?}"
+        );
     }
 }
