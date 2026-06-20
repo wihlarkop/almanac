@@ -81,6 +81,7 @@ impl Spider for AnthropicSpider {
                         context_window: contexts[i],
                         max_output_tokens: max_outputs[i],
                         input_price: input_prices[i],
+                        input_price_candidates: Vec::new(),
                         output_price: output_prices[i],
                         source_url: START_URL.into(),
                     });

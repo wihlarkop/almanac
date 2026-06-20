@@ -85,6 +85,7 @@ fn extract_model(res: &HtmlResponse<'_>) -> Vec<ScrapedModel> {
         context_window,
         max_output_tokens,
         input_price: None,
+        input_price_candidates: Vec::new(),
         output_price: None,
         source_url: res.url.to_string(),
     }]

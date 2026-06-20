@@ -53,6 +53,29 @@ pub fn first_unit_price(s: &str, unit: &str, range: &RangeInclusive<f64>) -> Opt
     }
 }
 
+/// Collect every `$<number><unit>` in `s` whose value falls within `range`, in
+/// order of appearance. Used when a provider lists multiple billing tiers for
+/// one model (e.g. pay-as-you-go and growth rates side by side).
+pub fn all_unit_prices(s: &str, unit: &str, range: &RangeInclusive<f64>) -> Vec<f64> {
+    let unit_lower = unit.to_ascii_lowercase();
+    let mut out = Vec::new();
+    let mut search = s;
+    while let Some(dollar) = search.find('$') {
+        let after = &search[dollar + 1..];
+        let (num_str, rest) = split_amount(after);
+        if rest
+            .trim_start()
+            .to_ascii_lowercase()
+            .starts_with(&unit_lower)
+            && let Some(v) = parse_in_range(&num_str, range)
+        {
+            out.push(v);
+        }
+        search = &search[dollar + 1..];
+    }
+    out
+}
+
 /// Find the first `$<number>` qualified by a per-1M-token unit (e.g. `/1M`,
 /// `/MTok`, `per 1M tokens`) whose value falls within `range`.
 pub fn first_per_million_token_price(s: &str, range: &RangeInclusive<f64>) -> Option<f64> {
@@ -123,6 +146,13 @@ mod tests {
     #[test]
     fn unit_price_returns_none_when_absent() {
         assert_eq!(first_unit_price("no prices here", "/min", &PER_MIN), None);
+    }
+
+    #[test]
+    fn all_unit_prices_collects_every_tier_rate() {
+        // A model row listing two billing tiers side by side.
+        let s = "highest performing model. $0.0048/min $0.0077/min";
+        assert_eq!(all_unit_prices(s, "/min", &PER_MIN), vec![0.0048, 0.0077]);
     }
 
     #[test]

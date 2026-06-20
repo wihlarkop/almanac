@@ -1,5 +1,5 @@
 use crate::model::ScrapedModel;
-use crate::pricing::first_unit_price;
+use crate::pricing::all_unit_prices;
 use crate::spider::{HtmlResponse, Spider, SpiderOutput};
 use crate::spiders::doc_page::extract_model_ids;
 use anyhow::Result;
@@ -55,9 +55,11 @@ fn scrape_pricing(res: &HtmlResponse<'_>) -> Result<SpiderOutput> {
     let html = res.body;
     let mut items = Vec::new();
 
-    // Each tuple: (catalog_model_id, unique keyword from the tier description)
-    // We capture the *first* $X.XXXX/min that appears after the keyword, which
-    // is always the PAYG streaming rate in Deepgram's pricing table layout.
+    // Each tuple: (catalog_model_id, unique keyword from the tier description).
+    // Deepgram lists two billing tiers ($/min) side by side per model row
+    // (pay-as-you-go and growth), in an order that varies by row, so we capture
+    // *all* the rates in the row and let the diff match the catalog against any
+    // of them — avoiding false drift from picking the wrong column.
     let tiers: &[(&str, &str)] = &[
         // Flux English — "turn detection" appears only in the Flux English row
         ("flux-general-en", "turn detection, natural interruption"),
@@ -71,29 +73,40 @@ fn scrape_pricing(res: &HtmlResponse<'_>) -> Result<SpiderOutput> {
     ];
 
     for &(id, keyword) in tiers {
-        if let Some(price) = first_per_min_price_after(html, keyword) {
-            items.push(ScrapedModel {
-                id: id.into(),
-                provider: "deepgram".into(),
-                display_name: None,
-                context_window: None,
-                max_output_tokens: None,
-                // per_minute rate stored in input_price for drift detection;
-                // catalog.rs CatalogEntry::input_price() falls back to per_minute.
-                input_price: Some(price),
-                output_price: None,
-                source_url: res.url.into(),
-            });
+        let mut rates = per_min_rates_after(html, keyword);
+        if rates.is_empty() {
+            continue;
         }
+        let primary = rates.remove(0);
+        items.push(ScrapedModel {
+            id: id.into(),
+            provider: "deepgram".into(),
+            // per_minute rate stored in input_price for drift detection;
+            // catalog.rs CatalogEntry::input_price() falls back to per_minute.
+            input_price: Some(primary),
+            input_price_candidates: rates,
+            source_url: res.url.into(),
+            ..Default::default()
+        });
     }
 
     Ok(SpiderOutput::new().items(items))
 }
 
-/// Scans `html` from the position of `keyword` and returns the numeric value
-/// of the first `$X.XXXX/min` token found after that position. Deepgram's
-/// pricing table lists the PAYG streaming rate first within each tier row.
-fn first_per_min_price_after(html: &str, keyword: &str) -> Option<f64> {
-    let offset = html.find(keyword)?;
-    first_unit_price(&html[offset..], "/min", &PER_MIN_RANGE)
+/// Number of $/min tiers Deepgram lists per model row (pay-as-you-go + growth).
+const TIERS_PER_ROW: usize = 2;
+
+/// Collects the per-minute rates listed for the model whose description contains
+/// `keyword`. Each row shows exactly [`TIERS_PER_ROW`] tiers; we scan a window
+/// large enough to include both (the second sits ~450 raw chars in) and take
+/// only the first two, so the following row's rates can never bleed in.
+fn per_min_rates_after(html: &str, keyword: &str) -> Vec<f64> {
+    let Some(offset) = html.find(keyword) else {
+        return Vec::new();
+    };
+    let end = (offset + 700).min(html.len());
+    all_unit_prices(&html[offset..end], "/min", &PER_MIN_RANGE)
+        .into_iter()
+        .take(TIERS_PER_ROW)
+        .collect()
 }
