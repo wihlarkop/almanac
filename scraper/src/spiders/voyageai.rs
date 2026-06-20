@@ -11,7 +11,14 @@ impl Spider for VoyageAiSpider {
     }
 
     fn start_urls(&self) -> Vec<String> {
-        vec!["https://docs.voyageai.com/docs/embeddings".into()]
+        // Voyage splits its catalog across separate docs pages — embeddings,
+        // rerankers and multimodal each live on their own page, so we crawl all
+        // three to avoid false "missing from docs" for rerank-* / multimodal IDs.
+        vec![
+            "https://docs.voyageai.com/docs/embeddings".into(),
+            "https://docs.voyageai.com/docs/reranker".into(),
+            "https://docs.voyageai.com/docs/multimodal-embeddings".into(),
+        ]
     }
 
     async fn scrape(&self, res: &HtmlResponse<'_>) -> Result<SpiderOutput> {

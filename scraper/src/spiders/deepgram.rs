@@ -5,6 +5,8 @@ use crate::spiders::doc_page::extract_model_ids;
 use anyhow::Result;
 
 const DOCS_URL: &str = "https://developers.deepgram.com/docs/models-languages-overview";
+/// STT docs list Nova/Flux/etc.; the Aura (TTS) models live on a separate page.
+const TTS_DOCS_URL: &str = "https://developers.deepgram.com/docs/tts-models";
 const PRICING_URL: &str = "https://deepgram.com/pricing";
 
 /// Sanity range for Deepgram per-minute PAYG rates ($/min).
@@ -19,7 +21,7 @@ impl Spider for DeepgramSpider {
     }
 
     fn start_urls(&self) -> Vec<String> {
-        vec![DOCS_URL.into(), PRICING_URL.into()]
+        vec![DOCS_URL.into(), TTS_DOCS_URL.into(), PRICING_URL.into()]
     }
 
     async fn scrape(&self, res: &HtmlResponse<'_>) -> Result<SpiderOutput> {
