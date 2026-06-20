@@ -66,16 +66,29 @@ pub fn diff(scraped: &[ScrapedModel], catalog: &HashMap<String, CatalogEntry>) -
         }
     }
 
-    // For each provider that was scraped, flag active catalog entries that are now absent.
+    // For each provider that was scraped, flag active catalog entries that are
+    // now absent — but only when the scrape was complete enough to trust an
+    // absence. Many spiders only discover a subset of a provider's model IDs
+    // (JS-heavy pages, partial doc tables); for those, "missing" is just an
+    // extraction gap, not a deprecation, so we suppress it below the coverage
+    // threshold to avoid flooding the report with false positives.
     for (provider, scraped_ids) in &scraped_by_provider {
-        for entry in catalog.values() {
-            if entry.provider != *provider {
-                continue;
-            }
-            // Only flag active models — already-deprecated entries are expected to be absent.
-            if entry.status == "deprecated" {
-                continue;
-            }
+        let active: Vec<&CatalogEntry> = catalog
+            .values()
+            .filter(|e| e.provider == *provider && e.status != "deprecated")
+            .collect();
+        if active.is_empty() {
+            continue;
+        }
+        let matched = active
+            .iter()
+            .filter(|e| scraped_ids.contains(e.id.as_str()))
+            .count();
+        let coverage = matched as f64 / active.len() as f64;
+        if coverage < MISSING_COVERAGE_THRESHOLD {
+            continue;
+        }
+        for entry in active {
             if !scraped_ids.contains(entry.id.as_str()) {
                 results.push(DiffResult::MissingFromDocs {
                     provider: provider.to_string(),
@@ -87,6 +100,11 @@ pub fn diff(scraped: &[ScrapedModel], catalog: &HashMap<String, CatalogEntry>) -
 
     results
 }
+
+/// A scrape must cover at least this fraction of a provider's active catalog
+/// before we trust that a *missing* model signals an upstream removal rather
+/// than an incomplete extraction.
+const MISSING_COVERAGE_THRESHOLD: f64 = 0.7;
 
 fn differs_price(scraped: Option<f64>, catalog: Option<f64>) -> bool {
     match (scraped, catalog) {
@@ -239,5 +257,48 @@ mod tests {
                 .any(|r| matches!(r, DiffResult::PriceChanged { .. })),
             "no PriceChanged expected when prices match"
         );
+    }
+
+    fn five_active_models() -> HashMap<String, CatalogEntry> {
+        catalog_of(
+            ["m1", "m2", "m3", "m4", "m5"]
+                .iter()
+                .map(|id| catalog_entry(id, "official", Some(1.0), Some(1.0)))
+                .collect(),
+        )
+    }
+
+    #[test]
+    fn missing_from_docs_suppressed_when_coverage_is_low() {
+        // Scrape found only 1 of 5 catalog models (20%) — the spider clearly
+        // didn't extract everything, so absences are not trustworthy.
+        let results = diff(
+            &[scraped("m1", Some(1.0), Some(1.0))],
+            &five_active_models(),
+        );
+        assert!(
+            !results
+                .iter()
+                .any(|r| matches!(r, DiffResult::MissingFromDocs { .. })),
+            "missing should be suppressed below the coverage threshold"
+        );
+    }
+
+    #[test]
+    fn missing_from_docs_emitted_when_coverage_is_high() {
+        // Found 4 of 5 (80%); m5 is genuinely absent from the scrape.
+        let found: Vec<ScrapedModel> = ["m1", "m2", "m3", "m4"]
+            .iter()
+            .map(|id| scraped(id, Some(1.0), Some(1.0)))
+            .collect();
+        let results = diff(&found, &five_active_models());
+        let missing: Vec<&str> = results
+            .iter()
+            .filter_map(|r| match r {
+                DiffResult::MissingFromDocs { id, .. } => Some(id.as_str()),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(missing, vec!["m5"]);
     }
 }
