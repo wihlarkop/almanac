@@ -93,14 +93,20 @@ fn scrape_pricing(res: &HtmlResponse<'_>) -> Result<SpiderOutput> {
     Ok(SpiderOutput::new().items(items))
 }
 
-/// Collects every `$X.XXXX/min` rate listed for the model whose description
-/// contains `keyword`, scanning a bounded window after the keyword so the next
-/// model's rates aren't picked up. Returns rates in order of appearance.
+/// Number of $/min tiers Deepgram lists per model row (pay-as-you-go + growth).
+const TIERS_PER_ROW: usize = 2;
+
+/// Collects the per-minute rates listed for the model whose description contains
+/// `keyword`. Each row shows exactly [`TIERS_PER_ROW`] tiers; we scan a window
+/// large enough to include both (the second sits ~450 raw chars in) and take
+/// only the first two, so the following row's rates can never bleed in.
 fn per_min_rates_after(html: &str, keyword: &str) -> Vec<f64> {
     let Some(offset) = html.find(keyword) else {
         return Vec::new();
     };
-    // Rows are >1000 chars apart; a 400-char window captures one row's tiers.
-    let end = (offset + 400).min(html.len());
+    let end = (offset + 700).min(html.len());
     all_unit_prices(&html[offset..end], "/min", &PER_MIN_RANGE)
+        .into_iter()
+        .take(TIERS_PER_ROW)
+        .collect()
 }
