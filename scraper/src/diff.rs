@@ -47,7 +47,7 @@ pub fn diff(scraped: &[ScrapedModel], catalog: &HashMap<String, CatalogEntry>) -
         match catalog.get(&model.id) {
             None => results.push(DiffResult::New(model.clone())),
             Some(entry) => {
-                let input_changed = differs_price(model.input_price, entry.input_price());
+                let input_changed = input_drifted(model, entry.input_price());
                 let output_changed = differs_price(model.output_price, entry.output_price());
                 if input_changed || output_changed {
                     let kind = if entry.is_official() {
@@ -96,6 +96,23 @@ fn differs_price(scraped: Option<f64>, catalog: Option<f64>) -> bool {
     }
 }
 
+/// The scraped input price has drifted from the catalog only if the catalog
+/// value matches NONE of the scraped tiers (primary `input_price` plus any
+/// `input_price_candidates`). This keeps multi-tier pricing tables from flagging
+/// drift just because the catalog tracks a different published tier.
+fn input_drifted(model: &ScrapedModel, catalog: Option<f64>) -> bool {
+    let scraped: Vec<f64> = model
+        .input_price
+        .into_iter()
+        .chain(model.input_price_candidates.iter().copied())
+        .collect();
+    match catalog {
+        // Catalog has no price yet: drift (enrichment) if the scrape found one.
+        None => !scraped.is_empty(),
+        Some(c) => !scraped.is_empty() && !scraped.iter().any(|s| (s - c).abs() <= 0.001),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -127,17 +144,44 @@ mod tests {
         ScrapedModel {
             id: id.into(),
             provider: "moonshot".into(),
-            display_name: None,
-            context_window: None,
-            max_output_tokens: None,
             input_price: input,
             output_price: output,
             source_url: "https://example.com".into(),
+            ..Default::default()
         }
     }
 
     fn catalog_of(entries: Vec<CatalogEntry>) -> HashMap<String, CatalogEntry> {
         entries.into_iter().map(|e| (e.id.clone(), e)).collect()
+    }
+
+    #[test]
+    fn catalog_matching_any_scraped_tier_is_not_drift() {
+        // Provider lists two tiers (0.0048 / 0.0077); catalog tracks the 2nd.
+        let catalog = catalog_of(vec![catalog_entry("nova", "official", Some(0.0077), None)]);
+        let mut m = scraped("nova", Some(0.0048), None);
+        m.input_price_candidates = vec![0.0077];
+        let results = diff(&[m], &catalog);
+        assert!(
+            !results
+                .iter()
+                .any(|r| matches!(r, DiffResult::PriceChanged { .. })),
+            "catalog value matches a published tier — no drift expected"
+        );
+    }
+
+    #[test]
+    fn catalog_matching_no_scraped_tier_is_drift() {
+        let catalog = catalog_of(vec![catalog_entry("nova", "official", Some(0.99), None)]);
+        let mut m = scraped("nova", Some(0.0048), None);
+        m.input_price_candidates = vec![0.0077];
+        let results = diff(&[m], &catalog);
+        assert!(
+            results
+                .iter()
+                .any(|r| matches!(r, DiffResult::PriceChanged { .. })),
+            "catalog value matches no published tier — drift expected"
+        );
     }
 
     #[test]

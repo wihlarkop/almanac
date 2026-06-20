@@ -86,6 +86,7 @@ pub fn extract_model_ids(html: &str, provider: &str, source_url: &str) -> Vec<Sc
                 context_window: None,
                 max_output_tokens: None,
                 input_price: None,
+                input_price_candidates: Vec::new(),
                 output_price: None,
                 source_url: source_url.into(),
             });
