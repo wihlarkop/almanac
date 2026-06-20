@@ -18,7 +18,7 @@ capabilities:
   json_mode: false
   multilingual_tts: true
 parameters:
-  supported: [text, model, encoding, sample_rate, container]
+  supported: [text, model, voice, language, encoding, sample_rate, container]
   rejected: []
   deprecated_for_this_model: []
 pricing:
@@ -26,12 +26,12 @@ pricing:
   input: 0.00
   output: 0.00
   per_million_chars: 30.00
-  pricing_notes: "$30/M chars ($0.030/1K chars). Model accessed as aura-2-[voice]-[lang], e.g. aura-2-thalia-en."
-last_verified: 2026-05-11
+  pricing_notes: "$30/M chars ($0.030/1K chars). Voice and language are selected via the model id aura-2-[voice]-[lang], e.g. aura-2-thalia-en. ~95 voices across 7 languages (en, es, nl, fr, de, it, ja); 41 English voices including thalia, andromeda, helena, apollo, arcas, aries, asteria, athena, atlas, aurora, hera, hermes, luna, orion, zeus."
+last_verified: 2026-06-20
 confidence: official
 endpoint_family: speech
 sources:
   - url: https://developers.deepgram.com/docs/tts-models
-    last_verified: 2026-05-11
+    last_verified: 2026-06-20
   - url: https://deepgram.com/pricing
     last_verified: 2026-05-11
