@@ -1,0 +1,36 @@
+id: rerank-1
+provider: voyageai
+display_name: Rerank 1
+status: active
+release_date: null
+deprecation_date: null
+sunset_date: null
+replacement: null
+context_window: 8000
+max_output_tokens: 1
+modalities:
+  input: [text]
+  output: [text]
+capabilities:
+  tools: false
+  vision: false
+  streaming: false
+  json_mode: false
+  multilingual: true
+parameters:
+  supported: [query, documents, model, top_k, return_documents, truncation]
+  rejected: []
+  deprecated_for_this_model: []
+pricing:
+  currency: USD
+  input: 0.05
+  output: 0.00
+  pricing_notes: "$0.05/1M tokens. Legacy (gen-1) reranker; superseded by rerank-2.5."
+last_verified: 2026-06-20
+confidence: official
+endpoint_family: reranking
+sources:
+  - url: https://docs.voyageai.com/docs/reranker
+    last_verified: 2026-06-20
+  - url: https://docs.voyageai.com/docs/pricing
+    last_verified: 2026-06-20
