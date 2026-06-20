@@ -66,11 +66,11 @@ fn scrape_docs(res: &HtmlResponse<'_>) -> Result<SpiderOutput> {
 /// stubs:
 ///
 /// 1. **Aura voice collapse.** Deepgram's TTS docs expose Aura models only as
-///    per-voice, per-language ids — `aura-2-thalia-en`, `aura-2-andromeda-en`,
-///    … (100+ of them) — but the catalog tracks just the bare family `aura-2`
-///    (and `aura-1`). We rewrite any `aura-N-<voice>-<lang>` id down to
-///    `aura-N`, emitting ONLY the base family and never the voice variants.
-///    A bare `aura-N` is already correct and passes through unchanged.
+///    per-voice, per-language ids — `aura-2-thalia-en` (gen-2, 100+) and the
+///    unversioned `aura-asteria-en` (gen-1, 12) — but the catalog tracks just
+///    the bare families `aura-2` and `aura-1`. We rewrite every voice variant
+///    down to its base family (see `aura_base_family`), emitting ONLY the base
+///    and never the voice variants. A bare `aura-N` passes through unchanged.
 ///
 /// 2. **Flux family surfacing.** The catalog id is the bare `flux`, but the
 ///    generic extractor can never emit it: `flux` has no hyphen/dot/underscore
@@ -114,8 +114,14 @@ fn normalize_family_ids(models: &mut Vec<ScrapedModel>) {
 }
 
 /// Returns the base Aura family id (`aura-1` / `aura-2`) for a per-voice variant
-/// id like `aura-2-thalia-en`, or `None` if `id` is not an Aura variant that
-/// should be collapsed (bare `aura-2` and non-Aura ids return `None`).
+/// id, or `None` if `id` is not an Aura variant that should be collapsed (bare
+/// family ids and non-Aura ids return `None`).
+///
+/// Two id shapes exist on the TTS docs:
+/// - Gen-2 is versioned: `aura-2-thalia-en` → `aura-2`.
+/// - Gen-1 (original Aura) is unversioned: `aura-asteria-en` → `aura-1`. The
+///   12 gen-1 voices carry no `-1` in their id, so any `aura-<voice>-<lang>`
+///   that isn't a gen-2 variant or a bare family id is gen-1.
 fn aura_base_family(id: &str) -> Option<&'static str> {
     for base in ["aura-2", "aura-1"] {
         // Match `aura-2-<something>` but NOT the bare `aura-2` itself.
@@ -124,6 +130,10 @@ fn aura_base_family(id: &str) -> Option<&'static str> {
         {
             return Some(base);
         }
+    }
+    // Unversioned gen-1 voice variant (e.g. `aura-asteria-en`) → `aura-1`.
+    if id.starts_with("aura-") && id != "aura-1" && id != "aura-2" {
+        return Some("aura-1");
     }
     None
 }
@@ -228,6 +238,9 @@ mod tests {
         assert_eq!(aura_base_family("aura-2-thalia-en"), Some("aura-2"));
         assert_eq!(aura_base_family("aura-2-andromeda-en"), Some("aura-2"));
         assert_eq!(aura_base_family("aura-1-asteria-en"), Some("aura-1"));
+        // Unversioned gen-1 voices (no `-1` in the id) collapse to aura-1.
+        assert_eq!(aura_base_family("aura-asteria-en"), Some("aura-1"));
+        assert_eq!(aura_base_family("aura-zeus-en"), Some("aura-1"));
         // Bare family ids are already correct and must NOT be collapsed/changed.
         assert_eq!(aura_base_family("aura-2"), None);
         assert_eq!(aura_base_family("aura-1"), None);
@@ -237,24 +250,20 @@ mod tests {
 
     #[test]
     fn docs_collapses_aura_voice_variants_to_base_family() {
-        // The TTS docs expose 100+ per-voice variants; we must emit ONLY the
-        // base family `aura-2`, never the voice variants (no flooding).
+        // The TTS docs expose 100+ gen-2 plus 12 unversioned gen-1 voices; we
+        // must emit ONLY the base families `aura-2`/`aura-1`, never the per-voice
+        // variants (no flooding).
         let html = "<code>aura-2-thalia-en</code> <code>aura-2-andromeda-en</code> \
-                    <code>aura-2-hera-en</code> <code>aura-1-asteria-en</code>";
+                    <code>aura-2-hera-en</code> <code>aura-asteria-en</code> \
+                    <code>aura-zeus-en</code>";
         let out = docs(html);
         let got = ids(&out);
-        assert!(
-            got.contains(&"aura-2".to_string()),
-            "expected base aura-2: {got:?}"
-        );
-        assert!(
-            got.contains(&"aura-1".to_string()),
-            "expected base aura-1: {got:?}"
-        );
-        // No per-voice variant should survive.
+        // Only the two base families survive — nothing else.
+        assert_eq!(got, vec!["aura-1".to_string(), "aura-2".to_string()]);
+        // No per-voice variant (versioned or unversioned) should survive.
         assert!(
             !got.iter()
-                .any(|id| id.starts_with("aura-2-") || id.starts_with("aura-1-")),
+                .any(|id| id != "aura-1" && id != "aura-2" && id.starts_with("aura-")),
             "voice variants leaked through: {got:?}"
         );
     }
