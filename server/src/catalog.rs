@@ -132,6 +132,17 @@ pub enum Confidence {
     Unknown,
 }
 
+impl Confidence {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Official => "official",
+            Self::Inferred => "inferred",
+            Self::Community => "community",
+            Self::Unknown => "unknown",
+        }
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, utoipa::ToSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum EndpointFamily {
@@ -196,6 +207,7 @@ pub struct CatalogStats {
     pub models_by_endpoint_family: std::collections::HashMap<String, usize>,
     pub models_by_input_modality: std::collections::HashMap<String, usize>,
     pub models_by_output_modality: std::collections::HashMap<String, usize>,
+    pub models_by_confidence: std::collections::HashMap<String, usize>,
     pub free_models: usize,
     pub models_without_pricing: usize,
     pub cheapest_input: Option<ModelPriceStat>,
