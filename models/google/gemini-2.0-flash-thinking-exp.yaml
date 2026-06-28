@@ -29,3 +29,4 @@ endpoint_family: custom
 sources:
   - url: https://ai.google.dev/gemini-api/docs/models/gemini
     last_verified: 2026-05-02
+unpriced_reason: experimental preview, no published pricing
