@@ -39,7 +39,7 @@ checksum = "683d7910e743518b0e34f1186f92494becacb047c7b6bf616c96772180fef923"
 
 [[package]]
 name = "almanac-scraper"
-version = "0.1.0"
+version = "0.27.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -59,7 +59,7 @@ dependencies = [
 
 [[package]]
 name = "almanac-server"
-version = "0.1.0"
+version = "0.27.0"
 dependencies = [
  "anyhow",
  "axum",
@@ -90,7 +90,7 @@ dependencies = [
 
 [[package]]
 name = "almanac-validator"
-version = "0.1.0"
+version = "0.27.0"
 dependencies = [
  "anyhow",
  "jsonschema",
