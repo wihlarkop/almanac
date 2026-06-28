@@ -29,3 +29,4 @@ sources:
     last_verified: 2026-05-11
   - url: https://huggingface.co/meta-llama/Llama-Guard-3-11B-Vision-Instruct
     last_verified: 2026-05-11
+unpriced_reason: open weights, no first party token pricing
