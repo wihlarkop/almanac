@@ -26,3 +26,4 @@ endpoint_family: chat_completions
 sources:
   - url: https://build.nvidia.com/nvidia/nemotron-4-340b-instruct
     last_verified: 2026-05-09
+unpriced_reason: open weights, no first party token pricing

@@ -27,3 +27,4 @@ endpoint_family: custom
 sources:
   - url: https://docs.cohere.com/docs/models
     last_verified: 2026-05-02
+unpriced_reason: open weights, no first party token pricing
