@@ -124,6 +124,10 @@
       "enum": ["official", "inferred", "community", "unknown"],
       "description": "Confidence level for the model metadata."
     },
+    "unpriced_reason": {
+      "type": "string",
+      "description": "Set when pricing is intentionally absent (e.g. open-weight model with no provider token price). Suppresses the missing-pricing warning."
+    },
     "endpoint_family": {
       "type": "string",
       "enum": ["chat_completions", "responses", "custom", "agent", "search", "embeddings", "reranking", "image_generation", "speech", "transcription", "video_generation", "realtime", "ocr", "music_generation", "mesh_generation"],

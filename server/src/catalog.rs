@@ -35,6 +35,8 @@ pub struct Model {
     pub confidence: Confidence,
     pub endpoint_family: EndpointFamily,
     pub sources: Vec<Source>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unpriced_reason: Option<String>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, utoipa::ToSchema)]

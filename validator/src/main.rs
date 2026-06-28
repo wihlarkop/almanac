@@ -126,6 +126,11 @@ fn report_error(errors: &mut Vec<String>, message: String) {
     errors.push(message);
 }
 
+fn report_warning(warnings: &mut Vec<String>, message: String) {
+    println!("  \u{26a0} {message}");
+    warnings.push(message);
+}
+
 fn is_http_url(value: &str) -> bool {
     let Some(rest) = value
         .strip_prefix("https://")
@@ -680,6 +685,7 @@ fn main() -> Result<()> {
     let model_validator = load_schema(&root.join("schema/model.schema.json"))?;
 
     let mut errors: Vec<String> = Vec::new();
+    let mut warnings: Vec<String> = Vec::new();
     let mut provider_ids: HashSet<String> = HashSet::new();
     let mut provider_meta: HashMap<String, ProviderMeta> = HashMap::new();
     let mut model_ids: HashMap<String, String> = HashMap::new();
@@ -804,6 +810,18 @@ fn main() -> Result<()> {
                                 &provider_meta,
                             );
                             collect_sources(&data, &rel, &mut source_index);
+                            if data["pricing"].as_object().is_none() {
+                                let status = data["status"].as_str().unwrap_or_default();
+                                let has_reason = optional_string(&data, "unpriced_reason").is_some();
+                                if status != "retired" && !has_reason {
+                                    report_warning(
+                                        &mut warnings,
+                                        format!(
+                                            "{rel}: {status} model has no pricing and no unpriced_reason"
+                                        ),
+                                    );
+                                }
+                            }
                             model_meta.insert(
                                 actual.to_string(),
                                 ModelMeta {
@@ -947,6 +965,13 @@ fn main() -> Result<()> {
     let file_total = provider_count + model_values.len() + usize::from(aliases_path.exists());
 
     print_catalog_summary(&model_values, provider_count, alias_count, &today);
+
+    if !warnings.is_empty() {
+        println!(
+            "\n{} warning(s) (not counted as errors)",
+            warnings.len()
+        );
+    }
 
     if errors.is_empty() {
         println!("All {file_total} file(s) valid");

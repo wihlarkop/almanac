@@ -351,6 +351,7 @@ mod tests {
             confidence: Confidence::Official,
             endpoint_family: EndpointFamily::ChatCompletions,
             sources: vec![],
+            unpriced_reason: None,
         }
     }
 
