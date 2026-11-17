@@ -29,6 +29,26 @@ This table is illustrative and **does not authorize the example issues**. One wr
 - Reserve shared `scraper/src/main.rs`, `engine.rs`, `writer.rs`, schema, validator, `aliases.yaml`, `Cargo.lock` and workflow for one designated integrator. Avoid simultaneous writes to any common path even if worktrees are separate.
 - No paid API calls, authentication bypass, hidden external network, unauthorized robots/ToS bypass, continuous scheduled scraping, publication or production data mutation.
 
+
+## Creator-only expansion and scraper v2 dispatch (2026-11-17)
+
+Before onboarding a **new provider**, screen whether it is a **first-party model creator** using [BE-16 #71](https://github.com/wihlarkop/almanac/issues/71) and [BE-20 #75](https://github.com/wihlarkop/almanac/issues/75). A company with only inference hosting/routing is excluded from canonical provider entries. Mixed creator/host companies may submit only independently authored model families. The historic 62-provider inventory is a bounded audit baseline, not an upper limit or endorsement of each provider's current lineage.
+
+**Example new candidate:** TypeSafe AI (developer) → Jev (System One typed judgment model), [BE-17 #72](https://github.com/wihlarkop/almanac/issues/72). Official model ownership and real API ID are separately verified. Any new endpoint taxonomy must be integrated by the designated shared schema writer before independently owned TypeSafe provider model YAML is eligible.
+
+**Scraper v2 worktree map** (illustrative only; actual owner scope and resource budget still needed):
+
+| Planned work | Single-writer boundaries | May run before prerequisites? |
+| --- | --- | --- |
+| BE-16 creator audit | provider ownership/eligibility inventory only | read-only audit yes |
+| BE-03 safe transport | `scraper/src/engine.rs`, request/response safety | after BE-01/BE-02 |
+| BE-18 adapters | provider source descriptors, adapter trait and shared extraction interface | design yes; code after BE-03 |
+| BE-19 evidence/diff | semantic field observations, freshness receipts, review queue | design yes; code after BE-18/BE-10 |
+| BE-20 new creator discovery | source research and screened creator candidate list | read-only discovery yes; automated implementation after BE-16/18/19 |
+| BE-05..09 existing cohorts + BE-17 Jev | exclusive `models/<creator>/` and spider files for each creator, one registry integrator | provider research yes, code after required contracts |
+
+**Quality gates:** require official source URL and per-field evidence; classify `CANDIDATE` versus `VERIFIED_CREATOR`, `SOURCE_VERIFIED` versus merely scraped; distinguish blocked sources, partial fetches and authentic no-new-model results. Never auto-retire on missing HTML, fabricate zero/free price or mark a provider eligible because a hosting website lists another lab's model. No unauthorized paid calls or live schedule. Maintain compatibility with `almanac-web` [FE-12 #50](https://github.com/wihlarkop/almanac-web/issues/50).
+
 ## 4. Feature fan-in, batch fan-in and review
 
 1. Per-feature coordinator integrates its children in a dedicated **non-main** worktree. Preserve exact commits and owned file list; resolve shared changes only under designated writer.
