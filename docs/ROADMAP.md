@@ -23,11 +23,11 @@ Almanac is the **developer-facing** source of truth and public Rust/Axum REST AP
 | P0 safe data | [BE-02 #56](https://github.com/wihlarkop/almanac/issues/56) — fail-closed unknown metadata and writer/schema | BE-01 checks | schema/validator/writer single writer |
 | P0 scraper core | [BE-03 #57](https://github.com/wihlarkop/almanac/issues/57) — transport, extraction, host bounds, error receipts | BE-01, BE-02 | scraper core single writer |
 | P0 coverage | [BE-04 #58](https://github.com/wihlarkop/almanac/issues/58) — inventory 62, add eight registrations | research: none; integration: BE-03 for shared dispatch | inventory in parallel, one registry writer |
-| P1 core model cohort | [BE-05 #59](https://github.com/wihlarkop/almanac/issues/59) — seven core providers | BE-02, BE-03, BE-04 | provider-owned disjoint paths |
-| P1 cloud/open-weight | [BE-06 #60](https://github.com/wihlarkop/almanac/issues/60) — eight platform providers | BE-02, BE-03, BE-04 | alongside BE-05/07/08/09 |
-| P1 long tail | [BE-07 #61](https://github.com/wihlarkop/almanac/issues/61) — 18 chat/search/embedding providers | BE-02, BE-03, BE-04 | alongside other cohorts |
-| P1 speech/music | [BE-08 #62](https://github.com/wihlarkop/almanac/issues/62) — nine speech/audio/music providers | BE-02, BE-03, BE-04 and BE-10 if new pricing units are needed | disjoint provider paths |
-| P1 visual/3D | [BE-09 #63](https://github.com/wihlarkop/almanac/issues/63) — 20 image/video/3D providers | BE-02, BE-03, BE-04 and BE-10 if new pricing units are needed | disjoint provider paths |
+| P1 core model cohort | [BE-05 #59](https://github.com/wihlarkop/almanac/issues/59) — seven core providers | BE-02, BE-03, BE-04, **BE-16 creator eligibility** | provider-owned disjoint paths |
+| P1 cloud/open-weight | [BE-06 #60](https://github.com/wihlarkop/almanac/issues/60) — eight platform providers | BE-02, BE-03, BE-04, **BE-16 creator eligibility** | alongside BE-05/07/08/09 |
+| P1 long tail | [BE-07 #61](https://github.com/wihlarkop/almanac/issues/61) — 18 chat/search/embedding providers | BE-02, BE-03, BE-04, **BE-16 creator eligibility** | alongside other cohorts |
+| P1 speech/music | [BE-08 #62](https://github.com/wihlarkop/almanac/issues/62) — nine speech/audio/music providers | BE-02, BE-03, BE-04, **BE-16 creator eligibility**, plus BE-10 if new pricing units are needed | disjoint provider paths |
+| P1 visual/3D | [BE-09 #63](https://github.com/wihlarkop/almanac/issues/63) — 20 image/video/3D providers | BE-02, BE-03, BE-04, **BE-16 creator eligibility**, plus BE-10 if new pricing units are needed | disjoint provider paths |
 | P1 pricing contract | [BE-10 #64](https://github.com/wihlarkop/almanac/issues/64) — modality pricing/provenance semantics | BE-02; review PR #49 overlap | schema/API owner; parallel read-only research |
 | P1 catalog audit | [BE-11 #65](https://github.com/wihlarkop/almanac/issues/65) — lifecycle, source verification and alias freshness for 817 entries | BE-02, BE-04; review relevant cohort outputs and BE-10 | shard source research, serialize alias/schema integration |
 | P1 safe automation | [BE-12 #66](https://github.com/wihlarkop/almanac/issues/66) — review-only discovery runs and optional schedule | BE-03, BE-04 and at least one verified provider flow | workflow owner; **schedule requires owner authorization** |
