@@ -552,6 +552,39 @@ async fn openapi_json_returns_spec() {
     );
     assert_ne!(model_properties["context_window"]["nullable"], true);
     assert_ne!(model_properties["pricing"]["nullable"], true);
+    let pricing_properties = &json["components"]["schemas"]["Pricing"]["properties"];
+    for field in [
+        "cached_input",
+        "batch_input",
+        "batch_output",
+        "request_fee",
+        "search_fee",
+        "reasoning",
+        "per_image",
+        "per_second",
+        "per_minute",
+        "per_million_chars",
+        "per_page",
+        "input_audio",
+        "input_image",
+        "input_video",
+        "output_audio",
+        "tiers",
+        "pricing_notes",
+    ] {
+        assert_ne!(
+            pricing_properties[field]["nullable"], true,
+            "Pricing.{field}"
+        );
+    }
+    assert_ne!(
+        json["components"]["schemas"]["PricingTier"]["properties"]["max_prompt_tokens"]["nullable"],
+        true
+    );
+    assert_ne!(
+        json["components"]["schemas"]["PricingTier"]["properties"]["cached_input"]["nullable"],
+        true
+    );
     let required_model_fields = json["components"]["schemas"]["Model"]["required"]
         .as_array()
         .unwrap();
