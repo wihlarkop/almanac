@@ -74,5 +74,3 @@ Provider source URLs below are declared in `providers/<id>.yaml`; `api_docs` is 
 
 Missing registrations: `haiper`, `hidream`, `kling`, `pika`, `reve`, `suno`, `synthesia`, `udio`. Verify creator eligibility (BE-16) and official source access before adding adapters. Generic HTML token heuristics need source-specific validation; custom spiders need field-by-field output comparison. Shared transport constraints depend on BE-03. No tests/live scraping were run.
 
-
-
