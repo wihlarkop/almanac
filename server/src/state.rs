@@ -91,6 +91,7 @@ fn compute_stats(
     let mut models_by_endpoint_family: HashMap<String, usize> = HashMap::new();
     let mut models_by_input_modality: HashMap<String, usize> = HashMap::new();
     let mut models_by_output_modality: HashMap<String, usize> = HashMap::new();
+    let mut models_by_confidence: HashMap<String, usize> = HashMap::new();
     let mut free_models = 0usize;
     let mut models_without_pricing = 0usize;
     let mut cheapest_input: Option<ModelPriceStat> = None;
@@ -114,6 +115,9 @@ fn compute_stats(
         for m in &model.modalities.output {
             *models_by_output_modality.entry(m.clone()).or_insert(0) += 1;
         }
+        *models_by_confidence
+            .entry(model.confidence.as_str().to_string())
+            .or_insert(0) += 1;
 
         match &model.pricing {
             None => models_without_pricing += 1,
@@ -195,6 +199,7 @@ fn compute_stats(
         models_by_endpoint_family,
         models_by_input_modality,
         models_by_output_modality,
+        models_by_confidence,
         free_models,
         models_without_pricing,
         cheapest_input,
@@ -346,6 +351,7 @@ mod tests {
             confidence: Confidence::Official,
             endpoint_family: EndpointFamily::ChatCompletions,
             sources: vec![],
+            unpriced_reason: None,
         }
     }
 
@@ -420,6 +426,7 @@ mod tests {
         assert_eq!(*stats.models_by_status.get("deprecated").unwrap(), 1);
         assert_eq!(*stats.models_by_provider.get("p1").unwrap(), 2);
         assert_eq!(*stats.models_by_provider.get("p2").unwrap(), 1);
+        assert_eq!(*stats.models_by_confidence.get("official").unwrap(), 3);
         let cheapest = stats.cheapest_input.unwrap();
         assert_eq!(cheapest.model_id, "m1");
         assert_eq!(cheapest.price, 1.0);
