@@ -27,7 +27,7 @@ The same hosted audit reported three unmaintained packages (`fxhash 0.2.1`, `pas
 
 A local `cargo audit --json --file Cargo.lock` invocation reported 22 vulnerability findings and 356 locked dependencies, but its JSON output was not retained. A repeat was blocked because the advisory database lock is under the read-only user Cargo directory. Do not treat that count as the hosted run's exact list or assume the difference is a code change.
 
-The current checkout uses workspace version `0.27.0` consistently in manifests. Cargo metadata succeeds offline, but `cargo tree --locked` says the lockfile would need updating. The corresponding `cargo update` attempt failed fetching crates.io's `config.json` because network access is unavailable. Therefore the lockfile/dependency graph discrepancy cannot be resolved or safely updated in this environment; no hand-editing or audit suppression was used.
+The current checkout uses workspace version `0.27.0` consistently in manifests, but the three workspace-package entries in `Cargo.lock` still say `0.1.0` (`almanac-server`, `almanac-validator`, and `almanac-scraper`). This explains why Cargo says the lockfile needs updating. PR #49's description independently says it syncs `Cargo.lock` to workspace version `0.27.0`, so this stale lock state is present on the current main base and that PR already carries the lockfile correction alongside its feature. The current PR #49 branch is not an approved dependency base and was not copied or modified here. A `cargo update` attempt failed fetching crates.io's `config.json` because network access is unavailable; no lockfile was edited. Resolve the workspace lock mismatch and dependency advisories together on an approved integration base before merging.
 
 ## Checks and status
 
