@@ -374,6 +374,20 @@
       "then": { "properties": { "capabilities": { "maxProperties": 0 } } }
     },
     {
+      "if": { "properties": { "parameters_state": { "enum": ["unknown", "not_applicable"] } }, "required": ["parameters_state"] },
+      "then": {
+        "properties": {
+          "parameters": {
+            "properties": {
+              "supported": { "maxItems": 0 },
+              "rejected": { "maxItems": 0 },
+              "deprecated_for_this_model": { "maxItems": 0 }
+            }
+          }
+        }
+      }
+    },
+    {
       "if": { "properties": { "context_window_state": { "const": "known" } }, "required": ["context_window_state"] },
       "then": { "properties": { "context_window": { "type": "integer" } } }
     },

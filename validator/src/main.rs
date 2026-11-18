@@ -1002,6 +1002,13 @@ sources:
             validation_errors.is_empty(),
             "candidate validation errors: {validation_errors:?}"
         );
+        let mut unknown_with_parameters = candidate.clone();
+        unknown_with_parameters["parameters"]["supported"] = serde_json::json!(["tools"]);
+        assert!(!validator.is_valid(&unknown_with_parameters));
+        let mut inapplicable_with_parameters = candidate.clone();
+        inapplicable_with_parameters["parameters_state"] = serde_json::json!("not_applicable");
+        inapplicable_with_parameters["parameters"]["rejected"] = serde_json::json!(["tools"]);
+        assert!(!validator.is_valid(&inapplicable_with_parameters));
         let mut inconsistent = candidate;
         inconsistent["context_window_state"] = serde_json::json!("known");
         assert!(!validator.is_valid(&inconsistent));

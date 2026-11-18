@@ -20,7 +20,7 @@ pub struct ModelFilter {
     /// Filter by provider id (comma-separated for multiple)
     #[param(example = "openai")]
     pub(crate) provider: Option<String>,
-    /// Filter by lifecycle status: active, deprecating, deprecated, retired
+    /// Filter by lifecycle status: active, deprecating, deprecated, retired, unknown
     #[param(example = "active")]
     pub(crate) status: Option<String>,
     /// Filter by capability key (comma-separated, e.g. vision,tools)
@@ -340,6 +340,10 @@ fn non_empty(value: Option<&str>) -> Option<&str> {
     })
 }
 
+fn price_is_within_usd(currency: &str, price: f64, maximum: f64) -> bool {
+    currency == "USD" && price <= maximum
+}
+
 pub(crate) fn model_matches_filter(model: &Model, filter: &ModelFilter) -> bool {
     let providers = filter.providers();
     if !providers.is_empty() && !providers.contains(&model.provider.as_str()) {
@@ -391,29 +395,35 @@ pub(crate) fn model_matches_filter(model: &Model, filter: &ModelFilter) -> bool 
     {
         return false;
     }
-    if filter.max_input_price.is_some() && !model.has_comparable_token_pricing() {
-        return false;
-    }
-    if let Some(max_input_price) = filter.max_input_price
-        && model
-            .pricing
-            .as_ref()
-            .map(|pricing| pricing.input)
-            .unwrap_or(f64::MAX)
-            > max_input_price
+    if filter.max_input_price.is_some()
+        && (!model.has_comparable_token_pricing()
+            || model
+                .pricing
+                .as_ref()
+                .is_none_or(|pricing| pricing.currency != "USD"))
     {
         return false;
     }
-    if filter.max_output_price.is_some() && !model.has_comparable_token_pricing() {
+    if let Some(max_input_price) = filter.max_input_price
+        && model.pricing.as_ref().is_none_or(|pricing| {
+            !price_is_within_usd(&pricing.currency, pricing.input, max_input_price)
+        })
+    {
+        return false;
+    }
+    if filter.max_output_price.is_some()
+        && (!model.has_comparable_token_pricing()
+            || model
+                .pricing
+                .as_ref()
+                .is_none_or(|pricing| pricing.currency != "USD"))
+    {
         return false;
     }
     if let Some(max_output_price) = filter.max_output_price
-        && model
-            .pricing
-            .as_ref()
-            .map(|pricing| pricing.output)
-            .unwrap_or(f64::MAX)
-            > max_output_price
+        && model.pricing.as_ref().is_none_or(|pricing| {
+            !price_is_within_usd(&pricing.currency, pricing.output, max_output_price)
+        })
     {
         return false;
     }
@@ -488,4 +498,16 @@ pub(crate) fn sort_models(models: &mut [Model], sort: Option<&str>, order: Optio
             ordering
         }
     });
+}
+
+#[cfg(test)]
+mod pricing_filter_tests {
+    use super::price_is_within_usd;
+
+    #[test]
+    fn usd_price_filter_does_not_compare_other_currencies() {
+        assert!(price_is_within_usd("USD", 0.5, 1.0));
+        assert!(!price_is_within_usd("EUR", 0.5, 1.0));
+        assert!(!price_is_within_usd("EUR", 2.0, 1.0));
+    }
 }
