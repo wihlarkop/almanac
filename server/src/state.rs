@@ -4,7 +4,10 @@ use crate::{
 };
 use anyhow::{Context, Result, bail};
 use sha2::{Digest, Sha256};
-use std::{collections::HashMap, path::Path};
+use std::{
+    collections::{HashMap, HashSet},
+    path::Path,
+};
 use time::OffsetDateTime;
 use walkdir::WalkDir;
 
@@ -86,10 +89,19 @@ fn fill_legacy_metadata_states(model: &mut Model) {
         });
     }
     if model.pricing_state.is_none() {
-        model.pricing_state = Some(if model.pricing.is_some() {
-            PricingState::Published
-        } else {
-            PricingState::Unknown
+        model.pricing_state = Some(match &model.pricing {
+            None => PricingState::Unknown,
+            Some(pricing)
+                if pricing.is_free()
+                    && model.modalities.as_ref().is_some_and(|modalities| {
+                        modalities.input.as_slice() == ["text"]
+                            && modalities.output.as_slice() == ["text"]
+                    }) =>
+            {
+                PricingState::Free
+            }
+            Some(pricing) if pricing.is_free() => PricingState::Unknown,
+            Some(_) => PricingState::Published,
         });
     }
 }
@@ -150,6 +162,7 @@ fn compute_stats(
     let mut most_expensive_input: Option<ModelPriceStat> = None;
     let mut cheapest_output: Option<ModelPriceStat> = None;
     let mut most_expensive_output: Option<ModelPriceStat> = None;
+    let mut comparable_price_currencies = HashSet::new();
 
     for model in models {
         *models_by_status
@@ -170,77 +183,74 @@ fn compute_stats(
             }
         }
 
-        match &model.pricing {
-            None if model.pricing_state == Some(crate::catalog::PricingState::Free) => {
-                free_models += 1;
-            }
-            None if model.pricing_state == Some(crate::catalog::PricingState::NotApplicable) => {}
-            None => models_without_pricing += 1,
-            Some(p) => {
-                if model.pricing_state == Some(crate::catalog::PricingState::Free)
-                    || (model.pricing_state.is_none() && p.input == 0.0 && p.output == 0.0)
-                {
-                    free_models += 1;
+        if model.is_known_free() {
+            free_models += 1;
+        } else if model.pricing_is_missing() {
+            models_without_pricing += 1;
+        } else if let Some(p) = model
+            .pricing
+            .as_ref()
+            .filter(|_| model.has_comparable_token_pricing())
+        {
+            comparable_price_currencies.insert(p.currency.clone());
+            let stat_in = ModelPriceStat {
+                model_id: model.id.clone(),
+                provider: model.provider.clone(),
+                price: p.input,
+            };
+            cheapest_input = Some(match cheapest_input.take() {
+                None => stat_in.clone(),
+                Some(prev) => {
+                    if p.input < prev.price {
+                        stat_in.clone()
+                    } else {
+                        prev
+                    }
                 }
-                let stat_in = ModelPriceStat {
-                    model_id: model.id.clone(),
-                    provider: model.provider.clone(),
-                    price: p.input,
-                };
-                cheapest_input = Some(match cheapest_input.take() {
-                    None => stat_in.clone(),
-                    Some(prev) => {
-                        if p.input < prev.price {
-                            stat_in.clone()
-                        } else {
-                            prev
+            });
+            most_expensive_input = Some(match most_expensive_input.take() {
+                None => stat_in,
+                Some(prev) => {
+                    if p.input > prev.price {
+                        ModelPriceStat {
+                            model_id: model.id.clone(),
+                            provider: model.provider.clone(),
+                            price: p.input,
                         }
+                    } else {
+                        prev
                     }
-                });
-                most_expensive_input = Some(match most_expensive_input.take() {
-                    None => stat_in,
-                    Some(prev) => {
-                        if p.input > prev.price {
-                            ModelPriceStat {
-                                model_id: model.id.clone(),
-                                provider: model.provider.clone(),
-                                price: p.input,
-                            }
-                        } else {
-                            prev
+                }
+            });
+            let stat_out = ModelPriceStat {
+                model_id: model.id.clone(),
+                provider: model.provider.clone(),
+                price: p.output,
+            };
+            cheapest_output = Some(match cheapest_output.take() {
+                None => stat_out.clone(),
+                Some(prev) => {
+                    if p.output < prev.price {
+                        stat_out.clone()
+                    } else {
+                        prev
+                    }
+                }
+            });
+            most_expensive_output = Some(match most_expensive_output.take() {
+                None => stat_out,
+                Some(prev) => {
+                    if p.output > prev.price {
+                        ModelPriceStat {
+                            model_id: model.id.clone(),
+                            provider: model.provider.clone(),
+                            price: p.output,
                         }
+                    } else {
+                        prev
                     }
-                });
-                let stat_out = ModelPriceStat {
-                    model_id: model.id.clone(),
-                    provider: model.provider.clone(),
-                    price: p.output,
-                };
-                cheapest_output = Some(match cheapest_output.take() {
-                    None => stat_out.clone(),
-                    Some(prev) => {
-                        if p.output < prev.price {
-                            stat_out.clone()
-                        } else {
-                            prev
-                        }
-                    }
-                });
-                most_expensive_output = Some(match most_expensive_output.take() {
-                    None => stat_out,
-                    Some(prev) => {
-                        if p.output > prev.price {
-                            ModelPriceStat {
-                                model_id: model.id.clone(),
-                                provider: model.provider.clone(),
-                                price: p.output,
-                            }
-                        } else {
-                            prev
-                        }
-                    }
-                });
-            }
+                }
+            });
         }
     }
 
@@ -258,10 +268,18 @@ fn compute_stats(
         models_by_output_modality,
         free_models,
         models_without_pricing,
-        cheapest_input,
-        most_expensive_input,
-        cheapest_output,
-        most_expensive_output,
+        cheapest_input: (comparable_price_currencies.len() == 1)
+            .then_some(cheapest_input)
+            .flatten(),
+        most_expensive_input: (comparable_price_currencies.len() == 1)
+            .then_some(most_expensive_input)
+            .flatten(),
+        cheapest_output: (comparable_price_currencies.len() == 1)
+            .then_some(cheapest_output)
+            .flatten(),
+        most_expensive_output: (comparable_price_currencies.len() == 1)
+            .then_some(most_expensive_output)
+            .flatten(),
         last_updated,
     }
 }

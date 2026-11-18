@@ -318,6 +318,62 @@
       "then": { "required": ["pricing_state"] }
     },
     {
+      "if": { "properties": { "pricing_state": { "const": "published" } }, "required": ["pricing_state"] },
+      "then": { "required": ["pricing"], "properties": { "pricing": { "type": "object" } } }
+    },
+    {
+      "if": { "properties": { "pricing_state": { "enum": ["unknown", "not_published", "not_applicable"] } }, "required": ["pricing_state"] },
+      "then": { "required": ["pricing"], "properties": { "pricing": { "type": "null" } } }
+    },
+    {
+      "if": { "properties": { "pricing_state": { "const": "free" } }, "required": ["pricing_state"] },
+      "then": {
+        "anyOf": [
+          { "not": { "required": ["pricing"] } },
+          {
+            "required": ["pricing"],
+            "properties": {
+              "pricing": {
+                "type": "object",
+                "properties": {
+                  "input": { "const": 0 },
+                  "output": { "const": 0 },
+                  "cached_input": { "const": 0 },
+                  "batch_input": { "const": 0 },
+                  "batch_output": { "const": 0 },
+                  "request_fee": { "const": 0 },
+                  "search_fee": { "const": 0 },
+                  "reasoning": { "const": 0 },
+                  "per_image": { "const": 0 },
+                  "per_second": { "const": 0 },
+                  "per_minute": { "const": 0 },
+                  "per_million_chars": { "const": 0 },
+                  "per_page": { "const": 0 },
+                  "input_audio": { "const": 0 },
+                  "input_image": { "const": 0 },
+                  "input_video": { "const": 0 },
+                  "output_audio": { "const": 0 },
+                  "tiers": {
+                    "items": {
+                      "properties": {
+                        "input": { "const": 0 },
+                        "output": { "const": 0 },
+                        "cached_input": { "const": 0 }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "if": { "properties": { "capabilities_state": { "enum": ["unknown", "not_applicable"] } }, "required": ["capabilities_state"] },
+      "then": { "properties": { "capabilities": { "maxProperties": 0 } } }
+    },
+    {
       "if": { "properties": { "context_window_state": { "const": "known" } }, "required": ["context_window_state"] },
       "then": { "properties": { "context_window": { "type": "integer" } } }
     },

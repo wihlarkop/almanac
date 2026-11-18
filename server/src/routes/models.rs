@@ -350,6 +350,9 @@ pub(crate) fn model_matches_filter(model: &Model, filter: &ModelFilter) -> bool 
         return false;
     }
     if let Some(caps) = filter.capability() {
+        if model.capabilities_state != Some(crate::catalog::MetadataState::Known) {
+            return false;
+        }
         for cap in caps.split(',') {
             if model.capabilities.get(cap.trim()) != Some(&true) {
                 return false;
@@ -388,6 +391,9 @@ pub(crate) fn model_matches_filter(model: &Model, filter: &ModelFilter) -> bool 
     {
         return false;
     }
+    if filter.max_input_price.is_some() && !model.has_comparable_token_pricing() {
+        return false;
+    }
     if let Some(max_input_price) = filter.max_input_price
         && model
             .pricing
@@ -396,6 +402,9 @@ pub(crate) fn model_matches_filter(model: &Model, filter: &ModelFilter) -> bool 
             .unwrap_or(f64::MAX)
             > max_input_price
     {
+        return false;
+    }
+    if filter.max_output_price.is_some() && !model.has_comparable_token_pricing() {
         return false;
     }
     if let Some(max_output_price) = filter.max_output_price
@@ -410,64 +419,10 @@ pub(crate) fn model_matches_filter(model: &Model, filter: &ModelFilter) -> bool 
     }
     if let Some(pricing_filter) = filter.pricing() {
         match pricing_filter {
-            "available" => {
-                if model.pricing.is_none() {
-                    return false;
-                }
-            }
-            "unavailable" => {
-                if model.pricing.is_some() {
-                    return false;
-                }
-            }
-            "free" => match (&model.pricing_state, &model.pricing) {
-                (Some(crate::catalog::PricingState::Free), _) => {}
-                (
-                    Some(
-                        crate::catalog::PricingState::Unknown
-                        | crate::catalog::PricingState::NotPublished
-                        | crate::catalog::PricingState::NotApplicable,
-                    ),
-                    _,
-                ) => return false,
-                (_, None) => return false,
-                (_, Some(p)) => {
-                    let is_free = p.input == 0.0
-                        && p.output == 0.0
-                        && p.per_image.unwrap_or(0.0) == 0.0
-                        && p.per_second.unwrap_or(0.0) == 0.0
-                        && p.per_minute.unwrap_or(0.0) == 0.0
-                        && p.per_million_chars.unwrap_or(0.0) == 0.0
-                        && p.per_page.unwrap_or(0.0) == 0.0;
-                    if !is_free {
-                        return false;
-                    }
-                }
-            },
-            "paid" => match (&model.pricing_state, &model.pricing) {
-                (
-                    Some(
-                        crate::catalog::PricingState::Free
-                        | crate::catalog::PricingState::Unknown
-                        | crate::catalog::PricingState::NotPublished
-                        | crate::catalog::PricingState::NotApplicable,
-                    ),
-                    _,
-                ) => return false,
-                (_, None) => return false,
-                (_, Some(p)) => {
-                    let is_paid = p.input > 0.0
-                        || p.output > 0.0
-                        || p.per_image.unwrap_or(0.0) > 0.0
-                        || p.per_second.unwrap_or(0.0) > 0.0
-                        || p.per_minute.unwrap_or(0.0) > 0.0
-                        || p.per_million_chars.unwrap_or(0.0) > 0.0
-                        || p.per_page.unwrap_or(0.0) > 0.0;
-                    if !is_paid {
-                        return false;
-                    }
-                }
-            },
+            "available" if !model.pricing_is_available() => return false,
+            "unavailable" if !model.pricing_is_missing() => return false,
+            "free" if !model.is_known_free() => return false,
+            "paid" if !model.is_known_paid() => return false,
             _ => {}
         }
     }
@@ -496,13 +451,29 @@ pub(crate) fn sort_models(models: &mut [Model], sort: Option<&str>, order: Optio
             "context_window" => a.context_window.cmp(&b.context_window),
             "max_output_tokens" => a.max_output_tokens.cmp(&b.max_output_tokens),
             "input_price" => {
-                let a_p = a.pricing.as_ref().map(|p| p.input).unwrap_or(f64::MAX);
-                let b_p = b.pricing.as_ref().map(|p| p.input).unwrap_or(f64::MAX);
+                let a_p = a
+                    .has_comparable_token_pricing()
+                    .then(|| a.pricing.as_ref().map(|p| p.input))
+                    .flatten()
+                    .unwrap_or(f64::MAX);
+                let b_p = b
+                    .has_comparable_token_pricing()
+                    .then(|| b.pricing.as_ref().map(|p| p.input))
+                    .flatten()
+                    .unwrap_or(f64::MAX);
                 a_p.partial_cmp(&b_p).unwrap_or(std::cmp::Ordering::Equal)
             }
             "output_price" => {
-                let a_p = a.pricing.as_ref().map(|p| p.output).unwrap_or(f64::MAX);
-                let b_p = b.pricing.as_ref().map(|p| p.output).unwrap_or(f64::MAX);
+                let a_p = a
+                    .has_comparable_token_pricing()
+                    .then(|| a.pricing.as_ref().map(|p| p.output))
+                    .flatten()
+                    .unwrap_or(f64::MAX);
+                let b_p = b
+                    .has_comparable_token_pricing()
+                    .then(|| b.pricing.as_ref().map(|p| p.output))
+                    .flatten()
+                    .unwrap_or(f64::MAX);
                 a_p.partial_cmp(&b_p).unwrap_or(std::cmp::Ordering::Equal)
             }
             "status" => a.status.as_str().cmp(b.status.as_str()),

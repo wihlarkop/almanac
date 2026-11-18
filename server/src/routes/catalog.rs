@@ -40,6 +40,8 @@ pub struct ModelIssue {
     id: String,
     display_name: String,
     status: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[schema(nullable = false)]
     last_verified: Option<String>,
     replacement: Option<String>,
 }
@@ -107,7 +109,7 @@ pub async fn health(
         *status_counts
             .entry(model.status.as_str().to_string())
             .or_insert(0) += 1;
-        if model.pricing.is_none() {
+        if model.pricing_is_missing() {
             missing_pricing_count += 1;
         }
         if let Some(last_verified) = model.last_verified.as_deref().and_then(parse_catalog_date) {
@@ -213,7 +215,7 @@ pub async fn issues(
         {
             stale_models.push(issue.clone());
         }
-        if model.pricing.is_none() {
+        if model.pricing_is_missing() {
             missing_pricing_models.push(issue.clone());
         }
         if model.status.as_str() == "deprecated" {

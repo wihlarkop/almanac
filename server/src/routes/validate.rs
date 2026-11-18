@@ -275,14 +275,22 @@ fn validate_parameters(
     let Some(parameters) = &req.parameters else {
         return;
     };
-    if matches!(
-        model.parameters_state,
-        Some(crate::catalog::MetadataState::Unknown | crate::catalog::MetadataState::NotApplicable)
-    ) {
+    if let Some(
+        state @ (crate::catalog::MetadataState::Unknown
+        | crate::catalog::MetadataState::NotApplicable),
+    ) = &model.parameters_state
+    {
+        let (code, reason) = match state {
+            crate::catalog::MetadataState::Unknown => ("PARAMETER_SUPPORT_UNKNOWN", "is unknown"),
+            crate::catalog::MetadataState::NotApplicable => {
+                ("PARAMETER_SUPPORT_NOT_APPLICABLE", "is not applicable")
+            }
+            crate::catalog::MetadataState::Known => unreachable!(),
+        };
         for parameter in parameters.keys() {
             warnings.push(ValidationIssue {
-                code: "PARAMETER_SUPPORT_UNKNOWN".to_string(),
-                message: format!("parameter support for '{}' is unknown", parameter),
+                code: code.to_string(),
+                message: format!("parameter support for '{}' {}", parameter, reason),
                 suggestions: vec![],
                 parameter: Some(parameter.clone()),
                 modality: None,
@@ -342,7 +350,16 @@ fn validate_modalities(
         return;
     };
 
-    let Some(model_modalities) = &model.modalities else {
+    let state = model.modalities_state.as_ref();
+    let unknown =
+        model.modalities.is_none() || state == Some(&crate::catalog::MetadataState::Unknown);
+    let not_applicable = state == Some(&crate::catalog::MetadataState::NotApplicable);
+    if unknown || not_applicable {
+        let (code, reason) = if not_applicable {
+            ("MODALITY_SUPPORT_NOT_APPLICABLE", "is not applicable")
+        } else {
+            ("MODALITY_SUPPORT_UNKNOWN", "is unknown")
+        };
         for (direction, requested) in [
             ("input", modalities.input.as_ref()),
             ("output", modalities.output.as_ref()),
@@ -350,33 +367,10 @@ fn validate_modalities(
             if let Some(requested) = requested {
                 for modality in requested {
                     warnings.push(ValidationIssue {
-                        code: "MODALITY_SUPPORT_UNKNOWN".to_string(),
+                        code: code.to_string(),
                         message: format!(
-                            "{} modality support for '{}' is unknown",
-                            direction, modality
-                        ),
-                        suggestions: vec![],
-                        parameter: None,
-                        modality: Some(modality.clone()),
-                        direction: Some(direction.to_string()),
-                    });
-                }
-            }
-        }
-        return;
-    };
-    if model.modalities_state == Some(crate::catalog::MetadataState::Unknown) {
-        for (direction, requested) in [
-            ("input", modalities.input.as_ref()),
-            ("output", modalities.output.as_ref()),
-        ] {
-            if let Some(requested) = requested {
-                for modality in requested {
-                    warnings.push(ValidationIssue {
-                        code: "MODALITY_SUPPORT_UNKNOWN".to_string(),
-                        message: format!(
-                            "{} modality support for '{}' is unknown",
-                            direction, modality
+                            "{} modality support for '{}' {}",
+                            direction, modality, reason
                         ),
                         suggestions: vec![],
                         parameter: None,
@@ -388,6 +382,9 @@ fn validate_modalities(
         }
         return;
     }
+    let Some(model_modalities) = &model.modalities else {
+        return;
+    };
     if let Some(requested) = &modalities.input {
         for modality in requested {
             if !model_modalities.input.iter().any(|m| m == modality) {

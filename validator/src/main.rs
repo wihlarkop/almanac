@@ -1005,6 +1005,46 @@ sources:
         let mut inconsistent = candidate;
         inconsistent["context_window_state"] = serde_json::json!("known");
         assert!(!validator.is_valid(&inconsistent));
+
+        let mut missing_published_price: serde_json::Value = serde_yaml::from_str(
+            r#"
+id: candidate
+provider: example
+display_name: Candidate
+status: unknown
+context_window: null
+context_window_state: unknown
+max_output_tokens: null
+max_output_tokens_state: unknown
+modalities: null
+modalities_state: unknown
+capabilities: {}
+capabilities_state: unknown
+parameters:
+  supported: []
+  rejected: []
+  deprecated_for_this_model: []
+parameters_state: unknown
+pricing: null
+pricing_state: published
+last_verified: null
+confidence: unknown
+endpoint_family: unknown
+sources:
+  - url: https://example.com/models
+"#,
+        )
+        .unwrap();
+        assert!(!validator.is_valid(&missing_published_price));
+        missing_published_price["pricing_state"] = serde_json::json!("unknown");
+        missing_published_price["pricing"] = serde_json::json!({
+            "currency": "USD",
+            "input": 1.0,
+            "output": 2.0
+        });
+        assert!(!validator.is_valid(&missing_published_price));
+        missing_published_price["pricing_state"] = serde_json::json!("free");
+        assert!(!validator.is_valid(&missing_published_price));
     }
     use serde_json::json;
 

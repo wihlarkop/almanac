@@ -226,26 +226,36 @@ pub async fn compare(
             .iter()
             .filter_map(|model| model.max_output_tokens)
             .max(),
-        cheapest_input: models
-            .iter()
-            .filter_map(|model| model.pricing.as_ref().map(|pricing| (model, pricing)))
-            .min_by(|(_, left), (_, right)| left.input.total_cmp(&right.input))
-            .map(|(model, pricing)| CheapestModel {
-                model_id: model.id.clone(),
-                provider: model.provider.clone(),
-                input_price: pricing.input,
-                currency: pricing.currency.clone(),
-            }),
-        cheapest_output: models
-            .iter()
-            .filter_map(|model| model.pricing.as_ref().map(|pricing| (model, pricing)))
-            .min_by(|(_, left), (_, right)| left.output.total_cmp(&right.output))
-            .map(|(model, pricing)| CheapestOutputModel {
-                model_id: model.id.clone(),
-                provider: model.provider.clone(),
-                output_price: pricing.output,
-                currency: pricing.currency.clone(),
-            }),
+        cheapest_input: if has_one_comparable_currency(&models) {
+            models
+                .iter()
+                .filter(|model| model.has_comparable_token_pricing())
+                .filter_map(|model| model.pricing.as_ref().map(|pricing| (model, pricing)))
+                .min_by(|(_, left), (_, right)| left.input.total_cmp(&right.input))
+                .map(|(model, pricing)| CheapestModel {
+                    model_id: model.id.clone(),
+                    provider: model.provider.clone(),
+                    input_price: pricing.input,
+                    currency: pricing.currency.clone(),
+                })
+        } else {
+            None
+        },
+        cheapest_output: if has_one_comparable_currency(&models) {
+            models
+                .iter()
+                .filter(|model| model.has_comparable_token_pricing())
+                .filter_map(|model| model.pricing.as_ref().map(|pricing| (model, pricing)))
+                .min_by(|(_, left), (_, right)| left.output.total_cmp(&right.output))
+                .map(|(model, pricing)| CheapestOutputModel {
+                    model_id: model.id.clone(),
+                    provider: model.provider.clone(),
+                    output_price: pricing.output,
+                    currency: pricing.currency.clone(),
+                })
+        } else {
+            None
+        },
         pricing_breakdown: build_pricing_breakdown(&models),
     };
 
@@ -254,6 +264,17 @@ pub async fn compare(
         &context,
     ))
     .into_response())
+}
+
+fn has_one_comparable_currency(models: &[Model]) -> bool {
+    !models.is_empty()
+        && models.iter().all(Model::has_comparable_token_pricing)
+        && models
+            .iter()
+            .filter_map(|model| model.pricing.as_ref().map(|pricing| &pricing.currency))
+            .collect::<std::collections::HashSet<_>>()
+            .len()
+            == 1
 }
 
 fn comparable_cost(pricing: &crate::catalog::Pricing) -> Option<f64> {
@@ -265,8 +286,8 @@ fn comparable_cost(pricing: &crate::catalog::Pricing) -> Option<f64> {
 fn build_pricing_breakdown(models: &[crate::catalog::Model]) -> Vec<PricingBreakdownEntry> {
     models
         .iter()
-        .map(|model| match &model.pricing {
-            None => PricingBreakdownEntry {
+        .map(|model| {
+            let no_price = || PricingBreakdownEntry {
                 model_id: model.id.clone(),
                 provider: model.provider.clone(),
                 currency: None,
@@ -284,26 +305,32 @@ fn build_pricing_breakdown(models: &[crate::catalog::Model]) -> Vec<PricingBreak
                 per_million_chars: None,
                 per_page: None,
                 comparable_cost: None,
-            },
-            Some(p) => PricingBreakdownEntry {
-                model_id: model.id.clone(),
-                provider: model.provider.clone(),
-                currency: Some(p.currency.clone()),
-                input: Some(p.input),
-                output: Some(p.output),
-                cached_input: p.cached_input,
-                batch_input: p.batch_input,
-                batch_output: p.batch_output,
-                request_fee: p.request_fee,
-                search_fee: p.search_fee,
-                reasoning: p.reasoning,
-                per_image: p.per_image,
-                per_second: p.per_second,
-                per_minute: p.per_minute,
-                per_million_chars: p.per_million_chars,
-                per_page: p.per_page,
-                comparable_cost: comparable_cost(p),
-            },
+            };
+            if !model.pricing_is_available() {
+                return no_price();
+            }
+            match &model.pricing {
+                None => no_price(),
+                Some(p) => PricingBreakdownEntry {
+                    model_id: model.id.clone(),
+                    provider: model.provider.clone(),
+                    currency: Some(p.currency.clone()),
+                    input: Some(p.input),
+                    output: Some(p.output),
+                    cached_input: p.cached_input,
+                    batch_input: p.batch_input,
+                    batch_output: p.batch_output,
+                    request_fee: p.request_fee,
+                    search_fee: p.search_fee,
+                    reasoning: p.reasoning,
+                    per_image: p.per_image,
+                    per_second: p.per_second,
+                    per_minute: p.per_minute,
+                    per_million_chars: p.per_million_chars,
+                    per_page: p.per_page,
+                    comparable_cost: comparable_cost(p),
+                },
+            }
         })
         .collect()
 }
