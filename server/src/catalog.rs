@@ -107,9 +107,6 @@ impl Model {
 
     pub fn is_known_free(&self) -> bool {
         self.pricing_state == Some(PricingState::Free)
-            || (self.pricing_state.is_none()
-                && self.has_comparable_token_pricing()
-                && self.pricing.as_ref().is_some_and(Pricing::is_free))
     }
 
     pub fn is_known_paid(&self) -> bool {

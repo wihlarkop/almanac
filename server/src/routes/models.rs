@@ -32,7 +32,7 @@ pub struct ModelFilter {
     /// Number of results to skip for pagination
     #[param(example = 0)]
     pub(crate) offset: Option<usize>,
-    /// Sort field: provider, id, status, context_window, max_output_tokens
+    /// Sort field: provider, id, status, context_window, max_output_tokens, input_price, output_price
     #[param(example = "context_window")]
     pub(crate) sort: Option<String>,
     /// Sort direction: asc or desc
@@ -457,35 +457,30 @@ pub(crate) fn sort_models(models: &mut [Model], sort: Option<&str>, order: Optio
     let descending = order == Some("desc");
 
     models.sort_by(|a, b| {
+        use std::cmp::Ordering;
+
+        if matches!(sort, "input_price" | "output_price") {
+            let a_price = token_price_for_sort(a, sort);
+            let b_price = token_price_for_sort(b, sort);
+            return match (a_price, b_price) {
+                (Some((a_currency, a_value)), Some((b_currency, b_value))) => {
+                    match a_currency.cmp(b_currency) {
+                        Ordering::Equal if descending => {
+                            b_value.partial_cmp(&a_value).unwrap_or(Ordering::Equal)
+                        }
+                        Ordering::Equal => a_value.partial_cmp(&b_value).unwrap_or(Ordering::Equal),
+                        currency_order => currency_order,
+                    }
+                }
+                (Some(_), None) => Ordering::Less,
+                (None, Some(_)) => Ordering::Greater,
+                (None, None) => a.provider.cmp(&b.provider).then(a.id.cmp(&b.id)),
+            };
+        }
+
         let ordering = match sort {
             "context_window" => a.context_window.cmp(&b.context_window),
             "max_output_tokens" => a.max_output_tokens.cmp(&b.max_output_tokens),
-            "input_price" => {
-                let a_p = a
-                    .has_comparable_token_pricing()
-                    .then(|| a.pricing.as_ref().map(|p| p.input))
-                    .flatten()
-                    .unwrap_or(f64::MAX);
-                let b_p = b
-                    .has_comparable_token_pricing()
-                    .then(|| b.pricing.as_ref().map(|p| p.input))
-                    .flatten()
-                    .unwrap_or(f64::MAX);
-                a_p.partial_cmp(&b_p).unwrap_or(std::cmp::Ordering::Equal)
-            }
-            "output_price" => {
-                let a_p = a
-                    .has_comparable_token_pricing()
-                    .then(|| a.pricing.as_ref().map(|p| p.output))
-                    .flatten()
-                    .unwrap_or(f64::MAX);
-                let b_p = b
-                    .has_comparable_token_pricing()
-                    .then(|| b.pricing.as_ref().map(|p| p.output))
-                    .flatten()
-                    .unwrap_or(f64::MAX);
-                a_p.partial_cmp(&b_p).unwrap_or(std::cmp::Ordering::Equal)
-            }
             "status" => a.status.as_str().cmp(b.status.as_str()),
             "id" => a.id.cmp(&b.id),
             "provider" => a.provider.cmp(&b.provider),
@@ -500,14 +495,160 @@ pub(crate) fn sort_models(models: &mut [Model], sort: Option<&str>, order: Optio
     });
 }
 
+fn token_price_for_sort<'a>(model: &'a Model, sort: &str) -> Option<(&'a str, f64)> {
+    if !model.has_comparable_token_pricing() {
+        return None;
+    }
+    let pricing = model.pricing.as_ref()?;
+    let currency = pricing.currency.as_str();
+    if currency.len() != 3 || !currency.bytes().all(|byte| byte.is_ascii_uppercase()) {
+        return None;
+    }
+    let value = match sort {
+        "input_price" => pricing.input,
+        "output_price" => pricing.output,
+        _ => return None,
+    };
+    Some((currency, value))
+}
+
 #[cfg(test)]
 mod pricing_filter_tests {
-    use super::price_is_within_usd;
+    use super::{ModelFilter, model_matches_filter, price_is_within_usd, sort_models};
+    use crate::catalog::{
+        Confidence, EndpointFamily, Modalities, Model, ModelParameters, ModelStatus, Pricing,
+        PricingState,
+    };
+    use std::collections::HashMap;
+
+    fn model(id: &str, currency: Option<&str>, input: f64, output: f64) -> Model {
+        Model {
+            id: id.to_string(),
+            provider: "test".to_string(),
+            display_name: id.to_string(),
+            status: ModelStatus::Active,
+            release_date: None,
+            deprecation_date: None,
+            sunset_date: None,
+            replacement: None,
+            context_window: None,
+            context_window_state: None,
+            max_output_tokens: None,
+            max_output_tokens_state: None,
+            modalities: Some(Modalities {
+                input: vec!["text".to_string()],
+                output: vec!["text".to_string()],
+            }),
+            modalities_state: None,
+            capabilities: HashMap::new(),
+            capabilities_state: None,
+            parameters: ModelParameters {
+                supported: vec![],
+                rejected: vec![],
+                deprecated_for_this_model: vec![],
+            },
+            parameters_state: None,
+            pricing: currency.map(|currency| Pricing {
+                currency: currency.to_string(),
+                input,
+                output,
+                cached_input: None,
+                batch_input: None,
+                batch_output: None,
+                request_fee: None,
+                search_fee: None,
+                reasoning: None,
+                per_image: None,
+                per_second: None,
+                per_minute: None,
+                per_million_chars: None,
+                per_page: None,
+                input_audio: None,
+                input_image: None,
+                input_video: None,
+                output_audio: None,
+                tiers: None,
+                pricing_notes: None,
+            }),
+            pricing_state: currency.map(|_| PricingState::Published),
+            last_verified: None,
+            confidence: Confidence::Unknown,
+            endpoint_family: EndpointFamily::ChatCompletions,
+            sources: vec![],
+        }
+    }
 
     #[test]
     fn usd_price_filter_does_not_compare_other_currencies() {
         assert!(price_is_within_usd("USD", 0.5, 1.0));
         assert!(!price_is_within_usd("EUR", 0.5, 1.0));
         assert!(!price_is_within_usd("EUR", 2.0, 1.0));
+    }
+
+    #[test]
+    fn price_sort_groups_currencies_without_comparing_their_amounts() {
+        let mut models = vec![
+            model("eur", Some("EUR"), 0.01, 0.02),
+            model("usd-high", Some("USD"), 0.9, 1.8),
+            model("usd-low", Some("USD"), 0.02, 0.04),
+        ];
+
+        sort_models(&mut models, Some("input_price"), Some("asc"));
+        assert_eq!(
+            models
+                .iter()
+                .map(|model| model.id.as_str())
+                .collect::<Vec<_>>(),
+            ["eur", "usd-low", "usd-high"]
+        );
+
+        sort_models(&mut models, Some("output_price"), Some("desc"));
+        assert_eq!(
+            models
+                .iter()
+                .map(|model| model.id.as_str())
+                .collect::<Vec<_>>(),
+            ["eur", "usd-high", "usd-low"]
+        );
+    }
+
+    #[test]
+    fn descending_price_sort_keeps_unknown_prices_last_and_unpriced_is_not_free() {
+        let mut unknown = model("unknown", None, 0.0, 0.0);
+        unknown.pricing_state = Some(PricingState::Unknown);
+        let mut models = vec![
+            unknown.clone(),
+            model("low", Some("USD"), 0.1, 0.2),
+            model("high", Some("USD"), 1.0, 2.0),
+        ];
+
+        sort_models(&mut models, Some("input_price"), Some("desc"));
+        assert_eq!(
+            models
+                .iter()
+                .map(|model| model.id.as_str())
+                .collect::<Vec<_>>(),
+            ["high", "low", "unknown"]
+        );
+
+        let free_filter = ModelFilter {
+            provider: None,
+            status: None,
+            capability: None,
+            limit: None,
+            offset: None,
+            sort: None,
+            order: None,
+            modality_input: None,
+            modality_output: None,
+            min_context: None,
+            max_input_price: None,
+            max_output_price: None,
+            pricing: Some("free".to_string()),
+            endpoint_family: None,
+            query: None,
+        };
+        assert!(!model_matches_filter(&unknown, &free_filter));
+        assert!(!unknown.is_known_free());
     }
 }

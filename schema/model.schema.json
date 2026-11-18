@@ -274,7 +274,7 @@
     "pricing_state": {
       "type": "string",
       "enum": ["published", "free", "unknown", "not_published", "not_applicable"],
-      "description": "Explicit interpretation of pricing. Missing legacy state retains legacy pricing semantics."
+      "description": "Explicit interpretation of pricing. Legacy numeric pricing values are preserved, but missing legacy state is exposed as unknown; zero values alone do not establish a free offer."
     },
     "sources": {
       "type": "array",
