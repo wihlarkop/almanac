@@ -1,0 +1,21 @@
+# BE-02 metadata compatibility contract
+
+Base: `2d4278721b8899a26971a8db3a78cb37e972fb01`
+
+## Writer behavior
+
+Generated records are discovery candidates. Missing context and output limits serialize as `null` with a matching `*_state: unknown`; scraped zero or nonzero price candidates stay unpublished because `ScrapedModel` does not identify a unit, currency, seller or price evidence. Pricing serializes as `null` and `pricing_state: unknown`. Lifecycle and endpoint family are `unknown`. Modality and parameter lists are not guessed. Capability facts are an empty map with `capabilities_state: unknown`. Confidence is `unknown`.
+
+The CLI's retrieval date is not a verified date. Generated records omit source `last_verified` and leave model `last_verified` null. YAML is serialized through the YAML library, and provider/model IDs are checked as single catalog path components before writing.
+
+## Schema and API behavior
+
+Existing model YAML remains valid without migration. Existing records retain numeric context/output values, modality arrays, status, pricing, dates and capability flags. New state fields are optional for legacy inputs. The API DTO accepts these old documents and serializes their known values as before. Candidate YAML may store explicit nulls for unknown values, while API JSON omits unknown value fields and returns the corresponding `*_state: unknown`; consumers therefore keep the old omission behavior and can opt into the state fields. The status enum adds `unknown`; existing lifecycle values are unchanged. Source verification dates are optional.
+
+The OpenAPI model types derive from the Rust DTOs; context/output/modality/pricing and verification fields are optional and non-null when present, and the new state fields are optional enums. Consumers must handle omitted values and `unknown`. The field names and versioned path remain unchanged; all prior catalog records remain loadable.
+
+Validation treats unknown lifecycle as a warning, and unknown parameter or modality evidence as a warning rather than falsely claiming support or rejection. Not-applicable parameter or modality evidence has a distinct warning. `parameters_state: unknown` and `not_applicable` require empty supported/rejected/deprecated arrays; known parameter facts cannot coexist with either state. Capability filters require known capability evidence. The status enum includes `unknown`, and the `/models` status filter accepts it. USD price filters include only USD offers; they do not convert or compare other currencies. Pricing availability, free/paid filters and token-price ranking distinguish explicitly classified free pricing from unknown or not-published pricing, and include request fees when deciding whether a record is free. Legacy all-zero numeric values do not establish that an offer is free. Price sorting groups comparable text-token prices by currency code, sorts amounts only within each currency group, and keeps unknown/non-comparable prices last for both sort directions. It never presents a cross-currency price ranking.
+
+## Deliberate boundaries
+
+This contract does not normalize prices across units, currencies, regions, hosting routes or qualifiers. It does not bulk-edit model YAML. For backward compatibility, legacy numeric pricing values remain in the API payload, but an old all-zero value with no explicit `pricing_state` loads as `unknown`; it is unavailable for `free` or `paid` filters and contributes to `models_without_pricing`. `free_models` counts only records explicitly classified with `pricing_state: free`; zero values alone are not evidence. PR #49's `unpriced_reason` is not part of this schema and its 25 records cannot be integrated until BE-10 resolves a compatible representation; do not duplicate or overwrite PR #49. PR #34 must update its TypeScript `ModelStatus` union for `unknown`, consume optional metadata state fields, preserve nullable/omitted value handling, and treat `pricing_state: unknown` as distinct from `free`. It also still depends on PR #49's `models_by_confidence` stats field. Do not change Almanac Web in this batch. BE-03 may only write candidates through this contract and must retain failed/partial receipts without retirement implications.

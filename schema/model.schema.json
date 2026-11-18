@@ -32,7 +32,7 @@
     },
     "status": {
       "type": "string",
-      "enum": ["active", "deprecating", "deprecated", "retired"]
+      "enum": ["unknown", "active", "deprecating", "deprecated", "retired"]
     },
     "release_date": {
       "type": ["string", "null"],
@@ -51,15 +51,23 @@
       "description": "Canonical id of the successor model"
     },
     "context_window": {
-      "type": "integer",
-      "minimum": 1
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "description": "Known context capacity; null means unknown or inapplicable as specified by context_window_state."
+    },
+    "context_window_state": {
+      "$ref": "#/definitions/metadata_state"
     },
     "max_output_tokens": {
-      "type": "integer",
-      "minimum": 1
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "description": "Known output limit; null means unknown or inapplicable as specified by max_output_tokens_state."
+    },
+    "max_output_tokens_state": {
+      "$ref": "#/definitions/metadata_state"
     },
     "modalities": {
-      "type": "object",
+      "type": ["object", "null"],
       "required": ["input", "output"],
       "additionalProperties": false,
       "properties": {
@@ -83,6 +91,7 @@
         }
       }
     },
+    "modalities_state": { "$ref": "#/definitions/metadata_state" },
     "capabilities": {
       "type": "object",
       "additionalProperties": {
@@ -90,6 +99,7 @@
       },
       "description": "Open-ended boolean flags. Any capability key is allowed."
     },
+    "capabilities_state": { "$ref": "#/definitions/metadata_state" },
     "parameters": {
       "type": "object",
       "required": ["supported", "rejected", "deprecated_for_this_model"],
@@ -114,10 +124,11 @@
         }
       }
     },
+    "parameters_state": { "$ref": "#/definitions/metadata_state" },
     "last_verified": {
-      "type": "string",
+      "type": ["string", "null"],
       "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-      "description": "Date this model entry was last reviewed against its sources."
+      "description": "Date this model entry was independently reviewed against its sources; scrape time is not verification."
     },
     "confidence": {
       "type": "string",
@@ -126,11 +137,11 @@
     },
     "endpoint_family": {
       "type": "string",
-      "enum": ["chat_completions", "responses", "custom", "agent", "search", "embeddings", "reranking", "image_generation", "speech", "transcription", "video_generation", "realtime", "ocr", "music_generation", "mesh_generation"],
+      "enum": ["unknown", "chat_completions", "responses", "custom", "agent", "search", "embeddings", "reranking", "image_generation", "speech", "transcription", "video_generation", "realtime", "ocr", "music_generation", "mesh_generation"],
       "description": "Primary API shape used by this provider/model."
     },
     "pricing": {
-      "type": "object",
+      "type": ["object", "null"],
       "required": ["currency", "input", "output"],
       "additionalProperties": false,
       "properties": {
@@ -260,21 +271,145 @@
         }
       }
     },
+    "pricing_state": {
+      "type": "string",
+      "enum": ["published", "free", "unknown", "not_published", "not_applicable"],
+      "description": "Explicit interpretation of pricing. Legacy numeric pricing values are preserved, but missing legacy state is exposed as unknown; zero values alone do not establish a free offer."
+    },
     "sources": {
       "type": "array",
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["url", "last_verified"],
+        "required": ["url"],
         "additionalProperties": false,
         "properties": {
           "url": { "type": "string" },
           "last_verified": {
-            "type": "string",
+            "type": ["string", "null"],
             "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
           }
         }
       }
     }
-  }
+  },
+  "definitions": {
+    "metadata_state": {
+      "type": "string",
+      "enum": ["known", "unknown", "not_applicable"],
+      "description": "State of a metadata property whose value may be absent or null."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "context_window": { "type": "null" } }, "required": ["context_window"] },
+      "then": { "required": ["context_window_state"] }
+    },
+    {
+      "if": { "properties": { "max_output_tokens": { "type": "null" } }, "required": ["max_output_tokens"] },
+      "then": { "required": ["max_output_tokens_state"] }
+    },
+    {
+      "if": { "properties": { "modalities": { "type": "null" } }, "required": ["modalities"] },
+      "then": { "required": ["modalities_state"] }
+    },
+    {
+      "if": { "properties": { "pricing": { "type": "null" } }, "required": ["pricing"] },
+      "then": { "required": ["pricing_state"] }
+    },
+    {
+      "if": { "properties": { "pricing_state": { "const": "published" } }, "required": ["pricing_state"] },
+      "then": { "required": ["pricing"], "properties": { "pricing": { "type": "object" } } }
+    },
+    {
+      "if": { "properties": { "pricing_state": { "enum": ["unknown", "not_published", "not_applicable"] } }, "required": ["pricing_state"] },
+      "then": { "required": ["pricing"], "properties": { "pricing": { "type": "null" } } }
+    },
+    {
+      "if": { "properties": { "pricing_state": { "const": "free" } }, "required": ["pricing_state"] },
+      "then": {
+        "anyOf": [
+          { "not": { "required": ["pricing"] } },
+          {
+            "required": ["pricing"],
+            "properties": {
+              "pricing": {
+                "type": "object",
+                "properties": {
+                  "input": { "const": 0 },
+                  "output": { "const": 0 },
+                  "cached_input": { "const": 0 },
+                  "batch_input": { "const": 0 },
+                  "batch_output": { "const": 0 },
+                  "request_fee": { "const": 0 },
+                  "search_fee": { "const": 0 },
+                  "reasoning": { "const": 0 },
+                  "per_image": { "const": 0 },
+                  "per_second": { "const": 0 },
+                  "per_minute": { "const": 0 },
+                  "per_million_chars": { "const": 0 },
+                  "per_page": { "const": 0 },
+                  "input_audio": { "const": 0 },
+                  "input_image": { "const": 0 },
+                  "input_video": { "const": 0 },
+                  "output_audio": { "const": 0 },
+                  "tiers": {
+                    "items": {
+                      "properties": {
+                        "input": { "const": 0 },
+                        "output": { "const": 0 },
+                        "cached_input": { "const": 0 }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "if": { "properties": { "capabilities_state": { "enum": ["unknown", "not_applicable"] } }, "required": ["capabilities_state"] },
+      "then": { "properties": { "capabilities": { "maxProperties": 0 } } }
+    },
+    {
+      "if": { "properties": { "parameters_state": { "enum": ["unknown", "not_applicable"] } }, "required": ["parameters_state"] },
+      "then": {
+        "properties": {
+          "parameters": {
+            "properties": {
+              "supported": { "maxItems": 0 },
+              "rejected": { "maxItems": 0 },
+              "deprecated_for_this_model": { "maxItems": 0 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "context_window_state": { "const": "known" } }, "required": ["context_window_state"] },
+      "then": { "properties": { "context_window": { "type": "integer" } } }
+    },
+    {
+      "if": { "properties": { "context_window_state": { "enum": ["unknown", "not_applicable"] } }, "required": ["context_window_state"] },
+      "then": { "properties": { "context_window": { "type": "null" } } }
+    },
+    {
+      "if": { "properties": { "max_output_tokens_state": { "const": "known" } }, "required": ["max_output_tokens_state"] },
+      "then": { "properties": { "max_output_tokens": { "type": "integer" } } }
+    },
+    {
+      "if": { "properties": { "max_output_tokens_state": { "enum": ["unknown", "not_applicable"] } }, "required": ["max_output_tokens_state"] },
+      "then": { "properties": { "max_output_tokens": { "type": "null" } } }
+    },
+    {
+      "if": { "properties": { "modalities_state": { "const": "known" } }, "required": ["modalities_state"] },
+      "then": { "properties": { "modalities": { "type": "object" } } }
+    },
+    {
+      "if": { "properties": { "modalities_state": { "enum": ["unknown", "not_applicable"] } }, "required": ["modalities_state"] },
+      "then": { "properties": { "modalities": { "type": "null" } } }
+    }
+  ]
 }

@@ -4,7 +4,10 @@ use crate::{
 };
 use anyhow::{Context, Result, bail};
 use sha2::{Digest, Sha256};
-use std::{collections::HashMap, path::Path};
+use std::{
+    collections::{HashMap, HashSet},
+    path::Path,
+};
 use time::OffsetDateTime;
 use walkdir::WalkDir;
 
@@ -34,11 +37,66 @@ pub fn load_state_with_scope(data_dir: &Path, scope: &CatalogScope) -> Result<Ap
     ensure_file(&aliases_path)?;
 
     let providers: Vec<Provider> = load_yaml_dir(&providers_dir)?;
-    let models: Vec<Model> = load_yaml_recursive(&models_dir)?;
+    let mut models: Vec<Model> = load_yaml_recursive(&models_dir)?;
+    for model in &mut models {
+        fill_legacy_metadata_states(model);
+    }
     let aliases = load_aliases(&aliases_path)?;
     let scoped = scope.apply(providers, models, aliases)?;
 
     build_state(scoped.providers, scoped.models, scoped.aliases)
+}
+
+fn fill_legacy_metadata_states(model: &mut Model) {
+    use crate::catalog::{MetadataState, PricingState};
+
+    if model.context_window_state.is_none() {
+        model.context_window_state = Some(if model.context_window.is_some() {
+            MetadataState::Known
+        } else {
+            MetadataState::Unknown
+        });
+    }
+    if model.max_output_tokens_state.is_none() {
+        model.max_output_tokens_state = Some(if model.max_output_tokens.is_some() {
+            MetadataState::Known
+        } else {
+            MetadataState::Unknown
+        });
+    }
+    if model.modalities_state.is_none() {
+        model.modalities_state = Some(if model.modalities.is_some() {
+            MetadataState::Known
+        } else {
+            MetadataState::Unknown
+        });
+    }
+    if model.capabilities_state.is_none() {
+        model.capabilities_state = Some(if model.capabilities.is_empty() {
+            MetadataState::Unknown
+        } else {
+            MetadataState::Known
+        });
+    }
+    if model.parameters_state.is_none() {
+        let has_parameter_facts = !model.parameters.supported.is_empty()
+            || !model.parameters.rejected.is_empty()
+            || !model.parameters.deprecated_for_this_model.is_empty();
+        model.parameters_state = Some(if has_parameter_facts {
+            MetadataState::Known
+        } else {
+            MetadataState::Unknown
+        });
+    }
+    if model.pricing_state.is_none() {
+        model.pricing_state = Some(match &model.pricing {
+            None => PricingState::Unknown,
+            // Historical zeroes can be placeholders. Only an explicit state
+            // may classify a model as free; preserve the old numeric payload.
+            Some(pricing) if pricing.is_free() => PricingState::Unknown,
+            Some(_) => PricingState::Published,
+        });
+    }
 }
 
 fn build_state(
@@ -97,6 +155,7 @@ fn compute_stats(
     let mut most_expensive_input: Option<ModelPriceStat> = None;
     let mut cheapest_output: Option<ModelPriceStat> = None;
     let mut most_expensive_output: Option<ModelPriceStat> = None;
+    let mut comparable_price_currencies = HashSet::new();
 
     for model in models {
         *models_by_status
@@ -108,78 +167,83 @@ fn compute_stats(
         *models_by_endpoint_family
             .entry(model.endpoint_family.as_str().to_string())
             .or_insert(0) += 1;
-        for m in &model.modalities.input {
-            *models_by_input_modality.entry(m.clone()).or_insert(0) += 1;
-        }
-        for m in &model.modalities.output {
-            *models_by_output_modality.entry(m.clone()).or_insert(0) += 1;
+        if let Some(modalities) = &model.modalities {
+            for m in &modalities.input {
+                *models_by_input_modality.entry(m.clone()).or_insert(0) += 1;
+            }
+            for m in &modalities.output {
+                *models_by_output_modality.entry(m.clone()).or_insert(0) += 1;
+            }
         }
 
-        match &model.pricing {
-            None => models_without_pricing += 1,
-            Some(p) => {
-                if p.input == 0.0 && p.output == 0.0 {
-                    free_models += 1;
+        if model.is_known_free() {
+            free_models += 1;
+        } else if model.pricing_is_missing() {
+            models_without_pricing += 1;
+        } else if let Some(p) = model
+            .pricing
+            .as_ref()
+            .filter(|_| model.has_comparable_token_pricing())
+        {
+            comparable_price_currencies.insert(p.currency.clone());
+            let stat_in = ModelPriceStat {
+                model_id: model.id.clone(),
+                provider: model.provider.clone(),
+                price: p.input,
+            };
+            cheapest_input = Some(match cheapest_input.take() {
+                None => stat_in.clone(),
+                Some(prev) => {
+                    if p.input < prev.price {
+                        stat_in.clone()
+                    } else {
+                        prev
+                    }
                 }
-                let stat_in = ModelPriceStat {
-                    model_id: model.id.clone(),
-                    provider: model.provider.clone(),
-                    price: p.input,
-                };
-                cheapest_input = Some(match cheapest_input.take() {
-                    None => stat_in.clone(),
-                    Some(prev) => {
-                        if p.input < prev.price {
-                            stat_in.clone()
-                        } else {
-                            prev
+            });
+            most_expensive_input = Some(match most_expensive_input.take() {
+                None => stat_in,
+                Some(prev) => {
+                    if p.input > prev.price {
+                        ModelPriceStat {
+                            model_id: model.id.clone(),
+                            provider: model.provider.clone(),
+                            price: p.input,
                         }
+                    } else {
+                        prev
                     }
-                });
-                most_expensive_input = Some(match most_expensive_input.take() {
-                    None => stat_in,
-                    Some(prev) => {
-                        if p.input > prev.price {
-                            ModelPriceStat {
-                                model_id: model.id.clone(),
-                                provider: model.provider.clone(),
-                                price: p.input,
-                            }
-                        } else {
-                            prev
+                }
+            });
+            let stat_out = ModelPriceStat {
+                model_id: model.id.clone(),
+                provider: model.provider.clone(),
+                price: p.output,
+            };
+            cheapest_output = Some(match cheapest_output.take() {
+                None => stat_out.clone(),
+                Some(prev) => {
+                    if p.output < prev.price {
+                        stat_out.clone()
+                    } else {
+                        prev
+                    }
+                }
+            });
+            most_expensive_output = Some(match most_expensive_output.take() {
+                None => stat_out,
+                Some(prev) => {
+                    if p.output > prev.price {
+                        ModelPriceStat {
+                            model_id: model.id.clone(),
+                            provider: model.provider.clone(),
+                            price: p.output,
                         }
+                    } else {
+                        prev
                     }
-                });
-                let stat_out = ModelPriceStat {
-                    model_id: model.id.clone(),
-                    provider: model.provider.clone(),
-                    price: p.output,
-                };
-                cheapest_output = Some(match cheapest_output.take() {
-                    None => stat_out.clone(),
-                    Some(prev) => {
-                        if p.output < prev.price {
-                            stat_out.clone()
-                        } else {
-                            prev
-                        }
-                    }
-                });
-                most_expensive_output = Some(match most_expensive_output.take() {
-                    None => stat_out,
-                    Some(prev) => {
-                        if p.output > prev.price {
-                            ModelPriceStat {
-                                model_id: model.id.clone(),
-                                provider: model.provider.clone(),
-                                price: p.output,
-                            }
-                        } else {
-                            prev
-                        }
-                    }
-                });
-            }
+                }
+            });
         }
     }
 
@@ -197,10 +261,18 @@ fn compute_stats(
         models_by_output_modality,
         free_models,
         models_without_pricing,
-        cheapest_input,
-        most_expensive_input,
-        cheapest_output,
-        most_expensive_output,
+        cheapest_input: (comparable_price_currencies.len() == 1)
+            .then_some(cheapest_input)
+            .flatten(),
+        most_expensive_input: (comparable_price_currencies.len() == 1)
+            .then_some(most_expensive_input)
+            .flatten(),
+        cheapest_output: (comparable_price_currencies.len() == 1)
+            .then_some(cheapest_output)
+            .flatten(),
+        most_expensive_output: (comparable_price_currencies.len() == 1)
+            .then_some(most_expensive_output)
+            .flatten(),
         last_updated,
     }
 }
@@ -329,20 +401,26 @@ mod tests {
             deprecation_date: None,
             sunset_date: None,
             replacement: None,
-            context_window: 4096,
-            max_output_tokens: 1024,
-            modalities: Modalities {
+            context_window: Some(4096),
+            context_window_state: Some(crate::catalog::MetadataState::Known),
+            max_output_tokens: Some(1024),
+            max_output_tokens_state: Some(crate::catalog::MetadataState::Known),
+            modalities: Some(Modalities {
                 input: vec!["text".to_string()],
                 output: vec!["text".to_string()],
-            },
+            }),
+            modalities_state: Some(crate::catalog::MetadataState::Known),
             capabilities: std::collections::HashMap::new(),
+            capabilities_state: Some(crate::catalog::MetadataState::Unknown),
             parameters: ModelParameters {
                 supported: vec![],
                 rejected: vec![],
                 deprecated_for_this_model: vec![],
             },
+            parameters_state: Some(crate::catalog::MetadataState::Unknown),
             pricing,
-            last_verified: "2024-01-01".to_string(),
+            pricing_state: None,
+            last_verified: Some("2024-01-01".to_string()),
             confidence: Confidence::Official,
             endpoint_family: EndpointFamily::ChatCompletions,
             sources: vec![],
@@ -447,5 +525,94 @@ mod tests {
 
         assert!(err.to_string().contains("required catalog directory"));
         std::fs::remove_dir(&data_dir).unwrap();
+    }
+
+    #[test]
+    fn missing_legacy_states_are_exposed_as_unknown_or_known_from_values() {
+        use crate::catalog::{MetadataState, PricingState};
+
+        let mut model = make_model("m1", "p1", ModelStatus::Active, None);
+        model.context_window_state = None;
+        model.max_output_tokens = None;
+        model.max_output_tokens_state = None;
+        model.modalities_state = None;
+        model.capabilities.clear();
+        model.capabilities_state = None;
+        model.parameters = ModelParameters {
+            supported: vec![],
+            rejected: vec![],
+            deprecated_for_this_model: vec![],
+        };
+        model.parameters_state = None;
+        model.pricing_state = None;
+
+        fill_legacy_metadata_states(&mut model);
+
+        assert_eq!(model.context_window_state, Some(MetadataState::Known));
+        assert_eq!(model.max_output_tokens_state, Some(MetadataState::Unknown));
+        assert_eq!(model.modalities_state, Some(MetadataState::Known));
+        assert_eq!(model.capabilities_state, Some(MetadataState::Unknown));
+        assert_eq!(model.parameters_state, Some(MetadataState::Unknown));
+        assert_eq!(model.pricing_state, Some(PricingState::Unknown));
+    }
+
+    #[test]
+    fn legacy_zero_pricing_stays_unknown_while_explicit_free_remains_free() {
+        use crate::catalog::PricingState;
+
+        let zero_pricing = || Pricing {
+            currency: "USD".to_string(),
+            input: 0.0,
+            output: 0.0,
+            cached_input: None,
+            batch_input: None,
+            batch_output: None,
+            request_fee: None,
+            search_fee: None,
+            reasoning: None,
+            per_image: None,
+            per_second: None,
+            per_minute: None,
+            per_million_chars: None,
+            per_page: None,
+            input_audio: None,
+            input_image: None,
+            input_video: None,
+            output_audio: None,
+            tiers: None,
+            pricing_notes: None,
+        };
+
+        let mut legacy = make_model(
+            "legacy-zero",
+            "p1",
+            ModelStatus::Active,
+            Some(zero_pricing()),
+        );
+        legacy.pricing_state = None;
+        fill_legacy_metadata_states(&mut legacy);
+
+        assert_eq!(legacy.pricing_state, Some(PricingState::Unknown));
+        assert!(!legacy.is_known_free());
+        assert!(!legacy.is_known_paid());
+        assert!(legacy.pricing_is_missing());
+
+        let mut verified_free = make_model(
+            "verified-free",
+            "p1",
+            ModelStatus::Active,
+            Some(zero_pricing()),
+        );
+        verified_free.pricing_state = Some(PricingState::Free);
+        assert!(verified_free.is_known_free());
+        assert!(!verified_free.pricing_is_missing());
+
+        let stats = compute_stats(
+            &[legacy, verified_free],
+            &[make_provider("p1")],
+            OffsetDateTime::now_utc(),
+        );
+        assert_eq!(stats.free_models, 1);
+        assert_eq!(stats.models_without_pricing, 1);
     }
 }

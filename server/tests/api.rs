@@ -539,6 +539,75 @@ async fn openapi_json_returns_spec() {
     let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
     assert_eq!(json["openapi"], "3.1.0");
     assert_eq!(json["info"]["title"], "Almanac API");
+    let model_properties = &json["components"]["schemas"]["Model"]["properties"];
+    assert!(model_properties["context_window"].is_object());
+    assert!(model_properties["context_window_state"].is_object());
+    assert!(model_properties["pricing_state"].is_object());
+    assert!(model_properties["modalities_state"].is_object());
+    assert!(
+        model_properties["context_window"]["type"] == "integer"
+            || model_properties["context_window"]["type"]
+                .as_array()
+                .is_some_and(|types| types.iter().any(|value| value == "integer"))
+    );
+    assert_ne!(model_properties["context_window"]["nullable"], true);
+    assert_ne!(model_properties["pricing"]["nullable"], true);
+    let pricing_properties = &json["components"]["schemas"]["Pricing"]["properties"];
+    for field in [
+        "cached_input",
+        "batch_input",
+        "batch_output",
+        "request_fee",
+        "search_fee",
+        "reasoning",
+        "per_image",
+        "per_second",
+        "per_minute",
+        "per_million_chars",
+        "per_page",
+        "input_audio",
+        "input_image",
+        "input_video",
+        "output_audio",
+        "tiers",
+        "pricing_notes",
+    ] {
+        assert_ne!(
+            pricing_properties[field]["nullable"], true,
+            "Pricing.{field}"
+        );
+    }
+    assert_ne!(
+        json["components"]["schemas"]["PricingTier"]["properties"]["max_prompt_tokens"]["nullable"],
+        true
+    );
+    assert_ne!(
+        json["components"]["schemas"]["PricingTier"]["properties"]["cached_input"]["nullable"],
+        true
+    );
+    let required_model_fields = json["components"]["schemas"]["Model"]["required"]
+        .as_array()
+        .unwrap();
+    assert!(
+        !required_model_fields
+            .iter()
+            .any(|field| field == "context_window")
+    );
+    assert!(!required_model_fields.iter().any(|field| field == "pricing"));
+    assert!(
+        json["components"]["schemas"]["ModelStatus"]["enum"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|value| value == "unknown")
+    );
+    assert!(
+        json["components"]["schemas"]["PricingState"]["enum"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|value| value == "not_applicable")
+    );
     assert!(json["paths"]["/api/v1/models"].is_object());
     assert!(json["paths"]["/api/v1/providers/{id}"].is_object());
     assert!(json["paths"]["/api/v1/validate"].is_object());
@@ -961,7 +1030,7 @@ async fn models_filter_by_modality_context_and_price() {
         .await
         .oneshot(
             Request::builder()
-                .uri("/api/v1/models?modality_input=image&modality_output=text&min_context=100000&max_input_price=1")
+                .uri("/api/v1/models?modality_input=image&modality_output=text&min_context=100000")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -988,7 +1057,6 @@ async fn models_filter_by_modality_context_and_price() {
                 .iter()
                 .any(|v| v.as_str() == Some("text"))
             && m["context_window"].as_u64().unwrap() >= 100000
-            && m["pricing"]["input"].as_f64().unwrap_or(f64::MAX) <= 1.0
     }));
 }
 
@@ -1103,23 +1171,19 @@ async fn compare_returns_models_in_requested_order() {
 }
 
 #[tokio::test]
-async fn compare_summary_includes_cheapest_output() {
+async fn compare_summary_omits_non_comparable_multimodal_prices() {
     let json = get_json("/api/v1/compare?models=openai/gpt-4o,anthropic/claude-opus-4-7").await;
     assert_success_envelope(&json);
 
     let cheapest_output = &json["data"]["summary"]["cheapest_output"];
     assert!(
-        cheapest_output.is_object(),
-        "cheapest_output should be an object"
+        cheapest_output.is_null(),
+        "multimodal token prices are not ranked as directly comparable"
     );
-    assert!(cheapest_output["model_id"].is_string());
-    assert!(cheapest_output["provider"].is_string());
-    assert!(cheapest_output["output_price"].is_number());
-    assert!(cheapest_output["currency"].is_string());
 }
 
 #[tokio::test]
-async fn compare_summary_includes_pricing_breakdown() {
+async fn compare_summary_keeps_untyped_comparable_cost_unknown() {
     let json = get_json("/api/v1/compare?models=openai/gpt-4o,anthropic/claude-opus-4-7").await;
     assert_success_envelope(&json);
 
@@ -1136,7 +1200,27 @@ async fn compare_summary_includes_pricing_breakdown() {
     assert!(gpt["input"].is_number());
     assert!(gpt["output"].is_number());
     assert!(gpt["currency"].is_string());
-    assert!(gpt["comparable_cost"].is_number());
+    assert!(gpt["comparable_cost"].is_null());
+}
+
+#[tokio::test]
+async fn compare_does_not_rank_token_prices_against_non_token_models() {
+    let json = get_json("/api/v1/compare?models=openai/gpt-4o,meshy/meshy-4").await;
+    assert_success_envelope(&json);
+
+    assert!(json["data"]["summary"]["cheapest_input"].is_null());
+    assert!(json["data"]["summary"]["cheapest_output"].is_null());
+}
+
+#[tokio::test]
+async fn pricing_filters_include_request_fees_when_distinguishing_free_models() {
+    let free = get_json("/api/v1/models?provider=meshy&pricing=free").await;
+    let paid = get_json("/api/v1/models?provider=meshy&pricing=paid").await;
+
+    assert_success_envelope(&free);
+    assert_success_envelope(&paid);
+    assert!(!model_ids(&free).iter().any(|id| id == "meshy-4"));
+    assert!(model_ids(&paid).iter().any(|id| id == "meshy-4"));
 }
 
 #[tokio::test]
