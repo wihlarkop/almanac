@@ -24,14 +24,25 @@ pub struct Model {
     pub sunset_date: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub replacement: Option<String>,
-    pub context_window: u64,
-    pub max_output_tokens: u64,
-    pub modalities: Modalities,
+    pub context_window: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub context_window_state: Option<MetadataState>,
+    pub max_output_tokens: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub max_output_tokens_state: Option<MetadataState>,
+    pub modalities: Option<Modalities>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub modalities_state: Option<MetadataState>,
     pub capabilities: HashMap<String, bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub capabilities_state: Option<MetadataState>,
     pub parameters: ModelParameters,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub parameters_state: Option<MetadataState>,
     pub pricing: Option<Pricing>,
-    pub last_verified: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pricing_state: Option<PricingState>,
+    pub last_verified: Option<String>,
     pub confidence: Confidence,
     pub endpoint_family: EndpointFamily,
     pub sources: Vec<Source>,
@@ -40,6 +51,7 @@ pub struct Model {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, utoipa::ToSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum ModelStatus {
+    Unknown,
     Active,
     Deprecating,
     Deprecated,
@@ -49,12 +61,31 @@ pub enum ModelStatus {
 impl ModelStatus {
     pub fn as_str(&self) -> &'static str {
         match self {
+            Self::Unknown => "unknown",
             Self::Active => "active",
             Self::Deprecating => "deprecating",
             Self::Deprecated => "deprecated",
             Self::Retired => "retired",
         }
     }
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, utoipa::ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum MetadataState {
+    Known,
+    Unknown,
+    NotApplicable,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, utoipa::ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum PricingState {
+    Published,
+    Free,
+    Unknown,
+    NotPublished,
+    NotApplicable,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, utoipa::ToSchema)]
@@ -135,6 +166,7 @@ pub enum Confidence {
 #[derive(Clone, Debug, Deserialize, Serialize, utoipa::ToSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum EndpointFamily {
+    Unknown,
     ChatCompletions,
     Responses,
     Custom,
@@ -155,6 +187,7 @@ pub enum EndpointFamily {
 impl EndpointFamily {
     pub fn as_str(&self) -> &'static str {
         match self {
+            Self::Unknown => "unknown",
             Self::ChatCompletions => "chat_completions",
             Self::Responses => "responses",
             Self::Custom => "custom",
@@ -177,7 +210,8 @@ impl EndpointFamily {
 #[derive(Clone, Debug, Deserialize, Serialize, utoipa::ToSchema)]
 pub struct Source {
     pub url: String,
-    pub last_verified: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub last_verified: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize, utoipa::ToSchema)]
@@ -203,4 +237,65 @@ pub struct CatalogStats {
     pub cheapest_output: Option<ModelPriceStat>,
     pub most_expensive_output: Option<ModelPriceStat>,
     pub last_updated: String,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Model;
+
+    #[test]
+    fn legacy_catalog_model_keeps_known_api_values() {
+        let model: Model =
+            serde_yaml::from_str(include_str!("../../models/openai/gpt-4o.yaml")).unwrap();
+        let api_value = serde_json::to_value(model).unwrap();
+
+        assert_eq!(api_value["context_window"], 128000);
+        assert_eq!(api_value["max_output_tokens"], 16384);
+        assert_eq!(api_value["status"], "active");
+        assert!(api_value["modalities"].is_object());
+    }
+
+    #[test]
+    fn unknown_metadata_remains_explicit_in_api_json() {
+        let model: Model = serde_yaml::from_str(
+            r#"
+id: candidate
+provider: example
+display_name: Candidate
+status: unknown
+context_window: null
+context_window_state: unknown
+max_output_tokens: null
+max_output_tokens_state: unknown
+modalities: null
+modalities_state: unknown
+capabilities: {}
+capabilities_state: unknown
+parameters:
+  supported: []
+  rejected: []
+  deprecated_for_this_model: []
+parameters_state: unknown
+pricing: null
+pricing_state: unknown
+last_verified: null
+confidence: unknown
+endpoint_family: unknown
+sources:
+  - url: https://example.com/models
+"#,
+        )
+        .unwrap();
+        let api_value = serde_json::to_value(model).unwrap();
+
+        assert_eq!(api_value["status"], "unknown");
+        assert!(api_value["context_window"].is_null());
+        assert_eq!(api_value["context_window_state"], "unknown");
+        assert!(api_value["modalities"].is_null());
+        assert_eq!(api_value["modalities_state"], "unknown");
+        assert!(api_value["pricing"].is_null());
+        assert_eq!(api_value["pricing_state"], "unknown");
+        assert!(api_value["last_verified"].is_null());
+        assert!(api_value["sources"][0].get("last_verified").is_none());
+    }
 }

@@ -182,6 +182,16 @@ pub async fn validate(
                 .unwrap_or_default();
 
             match m.status {
+                ModelStatus::Unknown => {
+                    warnings.push(ValidationIssue {
+                        code: "MODEL_STATUS_UNKNOWN".to_string(),
+                        message: format!("'{}' has no verified lifecycle status", id),
+                        suggestions: replacement,
+                        parameter: None,
+                        modality: None,
+                        direction: None,
+                    });
+                }
                 ModelStatus::Retired => {
                     errors.push(ValidationIssue {
                         code: "MODEL_RETIRED".to_string(),
@@ -232,7 +242,7 @@ pub async fn validate(
             }
 
             validate_parameters(m, &req, &mut errors, &mut warnings);
-            validate_modalities(m, &req, &mut errors);
+            validate_modalities(m, &req, &mut errors, &mut warnings);
 
             Some(id)
         }
@@ -265,6 +275,22 @@ fn validate_parameters(
     let Some(parameters) = &req.parameters else {
         return;
     };
+    if matches!(
+        model.parameters_state,
+        Some(crate::catalog::MetadataState::Unknown | crate::catalog::MetadataState::NotApplicable)
+    ) {
+        for parameter in parameters.keys() {
+            warnings.push(ValidationIssue {
+                code: "PARAMETER_SUPPORT_UNKNOWN".to_string(),
+                message: format!("parameter support for '{}' is unknown", parameter),
+                suggestions: vec![],
+                parameter: Some(parameter.clone()),
+                modality: None,
+                direction: None,
+            });
+        }
+        return;
+    }
 
     for parameter in parameters.keys() {
         if model.parameters.rejected.iter().any(|p| p == parameter) {
@@ -306,21 +332,72 @@ fn validate_parameters(
     }
 }
 
-fn validate_modalities(model: &Model, req: &ValidateRequest, errors: &mut Vec<ValidationIssue>) {
+fn validate_modalities(
+    model: &Model,
+    req: &ValidateRequest,
+    errors: &mut Vec<ValidationIssue>,
+    warnings: &mut Vec<ValidationIssue>,
+) {
     let Some(modalities) = &req.modalities else {
         return;
     };
 
+    let Some(model_modalities) = &model.modalities else {
+        for (direction, requested) in [
+            ("input", modalities.input.as_ref()),
+            ("output", modalities.output.as_ref()),
+        ] {
+            if let Some(requested) = requested {
+                for modality in requested {
+                    warnings.push(ValidationIssue {
+                        code: "MODALITY_SUPPORT_UNKNOWN".to_string(),
+                        message: format!(
+                            "{} modality support for '{}' is unknown",
+                            direction, modality
+                        ),
+                        suggestions: vec![],
+                        parameter: None,
+                        modality: Some(modality.clone()),
+                        direction: Some(direction.to_string()),
+                    });
+                }
+            }
+        }
+        return;
+    };
+    if model.modalities_state == Some(crate::catalog::MetadataState::Unknown) {
+        for (direction, requested) in [
+            ("input", modalities.input.as_ref()),
+            ("output", modalities.output.as_ref()),
+        ] {
+            if let Some(requested) = requested {
+                for modality in requested {
+                    warnings.push(ValidationIssue {
+                        code: "MODALITY_SUPPORT_UNKNOWN".to_string(),
+                        message: format!(
+                            "{} modality support for '{}' is unknown",
+                            direction, modality
+                        ),
+                        suggestions: vec![],
+                        parameter: None,
+                        modality: Some(modality.clone()),
+                        direction: Some(direction.to_string()),
+                    });
+                }
+            }
+        }
+        return;
+    }
     if let Some(requested) = &modalities.input {
         for modality in requested {
-            if !model.modalities.input.iter().any(|m| m == modality) {
+            if !model_modalities.input.iter().any(|m| m == modality) {
                 errors.push(ValidationIssue {
                     code: "MODALITY_UNSUPPORTED".to_string(),
                     message: format!(
                         "input modality '{}' is not supported by this model",
                         modality
                     ),
-                    suggestions: model.modalities.input.clone(),
+                    suggestions: model_modalities.input.clone(),
                     parameter: None,
                     modality: Some(modality.clone()),
                     direction: Some("input".to_string()),
@@ -331,14 +408,14 @@ fn validate_modalities(model: &Model, req: &ValidateRequest, errors: &mut Vec<Va
 
     if let Some(requested) = &modalities.output {
         for modality in requested {
-            if !model.modalities.output.iter().any(|m| m == modality) {
+            if !model_modalities.output.iter().any(|m| m == modality) {
                 errors.push(ValidationIssue {
                     code: "MODALITY_UNSUPPORTED".to_string(),
                     message: format!(
                         "output modality '{}' is not supported by this model",
                         modality
                     ),
-                    suggestions: model.modalities.output.clone(),
+                    suggestions: model_modalities.output.clone(),
                     parameter: None,
                     modality: Some(modality.clone()),
                     direction: Some("output".to_string()),

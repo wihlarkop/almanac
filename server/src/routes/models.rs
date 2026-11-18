@@ -358,30 +358,33 @@ pub(crate) fn model_matches_filter(model: &Model, filter: &ModelFilter) -> bool 
     }
     if let Some(modalities) = filter.modality_input() {
         for modality in modalities.split(',') {
-            if !model
-                .modalities
-                .input
-                .iter()
-                .any(|supported| supported == modality.trim())
-            {
+            if !model.modalities.as_ref().is_some_and(|known| {
+                known
+                    .input
+                    .iter()
+                    .any(|supported| supported == modality.trim())
+            }) {
                 return false;
             }
         }
     }
     if let Some(modalities) = filter.modality_output() {
         for modality in modalities.split(',') {
-            if !model
-                .modalities
-                .output
-                .iter()
-                .any(|supported| supported == modality.trim())
-            {
+            if !model.modalities.as_ref().is_some_and(|known| {
+                known
+                    .output
+                    .iter()
+                    .any(|supported| supported == modality.trim())
+            }) {
                 return false;
             }
         }
     }
     if let Some(min_context) = filter.min_context
-        && model.context_window < min_context
+        && model
+            .context_window
+            .map(|value| value < min_context)
+            .unwrap_or(true)
     {
         return false;
     }
@@ -417,9 +420,18 @@ pub(crate) fn model_matches_filter(model: &Model, filter: &ModelFilter) -> bool 
                     return false;
                 }
             }
-            "free" => match &model.pricing {
-                None => return false,
-                Some(p) => {
+            "free" => match (&model.pricing_state, &model.pricing) {
+                (Some(crate::catalog::PricingState::Free), _) => {}
+                (
+                    Some(
+                        crate::catalog::PricingState::Unknown
+                        | crate::catalog::PricingState::NotPublished
+                        | crate::catalog::PricingState::NotApplicable,
+                    ),
+                    _,
+                ) => return false,
+                (_, None) => return false,
+                (_, Some(p)) => {
                     let is_free = p.input == 0.0
                         && p.output == 0.0
                         && p.per_image.unwrap_or(0.0) == 0.0
@@ -432,9 +444,18 @@ pub(crate) fn model_matches_filter(model: &Model, filter: &ModelFilter) -> bool 
                     }
                 }
             },
-            "paid" => match &model.pricing {
-                None => return false,
-                Some(p) => {
+            "paid" => match (&model.pricing_state, &model.pricing) {
+                (
+                    Some(
+                        crate::catalog::PricingState::Free
+                        | crate::catalog::PricingState::Unknown
+                        | crate::catalog::PricingState::NotPublished
+                        | crate::catalog::PricingState::NotApplicable,
+                    ),
+                    _,
+                ) => return false,
+                (_, None) => return false,
+                (_, Some(p)) => {
                     let is_paid = p.input > 0.0
                         || p.output > 0.0
                         || p.per_image.unwrap_or(0.0) > 0.0

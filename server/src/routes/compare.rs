@@ -27,8 +27,8 @@ pub struct CompareResponse {
 
 #[derive(Serialize, utoipa::ToSchema)]
 pub struct CompareSummary {
-    max_context_window: u64,
-    max_output_tokens: u64,
+    max_context_window: Option<u64>,
+    max_output_tokens: Option<u64>,
     cheapest_input: Option<CheapestModel>,
     cheapest_output: Option<CheapestOutputModel>,
     pricing_breakdown: Vec<PricingBreakdownEntry>,
@@ -132,7 +132,7 @@ pub struct PricingBreakdownEntry {
                                         "per_minute": null,
                                         "per_million_chars": null,
                                         "per_page": null,
-                                        "comparable_cost": 2.5
+                                        "comparable_cost": null
                                     }
                                 ]
                             }
@@ -221,16 +221,11 @@ pub async fn compare(
     }
 
     let summary = CompareSummary {
-        max_context_window: models
-            .iter()
-            .map(|model| model.context_window)
-            .max()
-            .unwrap_or(0),
+        max_context_window: models.iter().filter_map(|model| model.context_window).max(),
         max_output_tokens: models
             .iter()
-            .map(|model| model.max_output_tokens)
-            .max()
-            .unwrap_or(0),
+            .filter_map(|model| model.max_output_tokens)
+            .max(),
         cheapest_input: models
             .iter()
             .filter_map(|model| model.pricing.as_ref().map(|pricing| (model, pricing)))
@@ -262,15 +257,8 @@ pub async fn compare(
 }
 
 fn comparable_cost(pricing: &crate::catalog::Pricing) -> Option<f64> {
-    if pricing.input > 0.0 {
-        return Some(pricing.input);
-    }
-    if let Some(pmc) = pricing.per_million_chars {
-        return Some(pmc * 5.0);
-    }
-    if let Some(pm) = pricing.per_minute {
-        return Some(pm * 833.0);
-    }
+    // No cross-unit estimate is valid without a typed workload and unit contract.
+    let _ = pricing;
     None
 }
 

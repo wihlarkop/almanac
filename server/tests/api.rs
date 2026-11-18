@@ -539,6 +539,11 @@ async fn openapi_json_returns_spec() {
     let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
     assert_eq!(json["openapi"], "3.1.0");
     assert_eq!(json["info"]["title"], "Almanac API");
+    let model_properties = &json["components"]["schemas"]["Model"]["properties"];
+    assert!(model_properties["context_window"].is_object());
+    assert!(model_properties["context_window_state"].is_object());
+    assert!(model_properties["pricing_state"].is_object());
+    assert!(model_properties["modalities_state"].is_object());
     assert!(json["paths"]["/api/v1/models"].is_object());
     assert!(json["paths"]["/api/v1/providers/{id}"].is_object());
     assert!(json["paths"]["/api/v1/validate"].is_object());
@@ -1119,7 +1124,7 @@ async fn compare_summary_includes_cheapest_output() {
 }
 
 #[tokio::test]
-async fn compare_summary_includes_pricing_breakdown() {
+async fn compare_summary_keeps_untyped_comparable_cost_unknown() {
     let json = get_json("/api/v1/compare?models=openai/gpt-4o,anthropic/claude-opus-4-7").await;
     assert_success_envelope(&json);
 
@@ -1136,7 +1141,7 @@ async fn compare_summary_includes_pricing_breakdown() {
     assert!(gpt["input"].is_number());
     assert!(gpt["output"].is_number());
     assert!(gpt["currency"].is_string());
-    assert!(gpt["comparable_cost"].is_number());
+    assert!(gpt["comparable_cost"].is_null());
 }
 
 #[tokio::test]

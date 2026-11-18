@@ -34,11 +34,64 @@ pub fn load_state_with_scope(data_dir: &Path, scope: &CatalogScope) -> Result<Ap
     ensure_file(&aliases_path)?;
 
     let providers: Vec<Provider> = load_yaml_dir(&providers_dir)?;
-    let models: Vec<Model> = load_yaml_recursive(&models_dir)?;
+    let mut models: Vec<Model> = load_yaml_recursive(&models_dir)?;
+    for model in &mut models {
+        fill_legacy_metadata_states(model);
+    }
     let aliases = load_aliases(&aliases_path)?;
     let scoped = scope.apply(providers, models, aliases)?;
 
     build_state(scoped.providers, scoped.models, scoped.aliases)
+}
+
+fn fill_legacy_metadata_states(model: &mut Model) {
+    use crate::catalog::{MetadataState, PricingState};
+
+    if model.context_window_state.is_none() {
+        model.context_window_state = Some(if model.context_window.is_some() {
+            MetadataState::Known
+        } else {
+            MetadataState::Unknown
+        });
+    }
+    if model.max_output_tokens_state.is_none() {
+        model.max_output_tokens_state = Some(if model.max_output_tokens.is_some() {
+            MetadataState::Known
+        } else {
+            MetadataState::Unknown
+        });
+    }
+    if model.modalities_state.is_none() {
+        model.modalities_state = Some(if model.modalities.is_some() {
+            MetadataState::Known
+        } else {
+            MetadataState::Unknown
+        });
+    }
+    if model.capabilities_state.is_none() {
+        model.capabilities_state = Some(if model.capabilities.is_empty() {
+            MetadataState::Unknown
+        } else {
+            MetadataState::Known
+        });
+    }
+    if model.parameters_state.is_none() {
+        let has_parameter_facts = !model.parameters.supported.is_empty()
+            || !model.parameters.rejected.is_empty()
+            || !model.parameters.deprecated_for_this_model.is_empty();
+        model.parameters_state = Some(if has_parameter_facts {
+            MetadataState::Known
+        } else {
+            MetadataState::Unknown
+        });
+    }
+    if model.pricing_state.is_none() {
+        model.pricing_state = Some(if model.pricing.is_some() {
+            PricingState::Published
+        } else {
+            PricingState::Unknown
+        });
+    }
 }
 
 fn build_state(
@@ -108,17 +161,25 @@ fn compute_stats(
         *models_by_endpoint_family
             .entry(model.endpoint_family.as_str().to_string())
             .or_insert(0) += 1;
-        for m in &model.modalities.input {
-            *models_by_input_modality.entry(m.clone()).or_insert(0) += 1;
-        }
-        for m in &model.modalities.output {
-            *models_by_output_modality.entry(m.clone()).or_insert(0) += 1;
+        if let Some(modalities) = &model.modalities {
+            for m in &modalities.input {
+                *models_by_input_modality.entry(m.clone()).or_insert(0) += 1;
+            }
+            for m in &modalities.output {
+                *models_by_output_modality.entry(m.clone()).or_insert(0) += 1;
+            }
         }
 
         match &model.pricing {
+            None if model.pricing_state == Some(crate::catalog::PricingState::Free) => {
+                free_models += 1;
+            }
+            None if model.pricing_state == Some(crate::catalog::PricingState::NotApplicable) => {}
             None => models_without_pricing += 1,
             Some(p) => {
-                if p.input == 0.0 && p.output == 0.0 {
+                if model.pricing_state == Some(crate::catalog::PricingState::Free)
+                    || (model.pricing_state.is_none() && p.input == 0.0 && p.output == 0.0)
+                {
                     free_models += 1;
                 }
                 let stat_in = ModelPriceStat {
@@ -329,20 +390,26 @@ mod tests {
             deprecation_date: None,
             sunset_date: None,
             replacement: None,
-            context_window: 4096,
-            max_output_tokens: 1024,
-            modalities: Modalities {
+            context_window: Some(4096),
+            context_window_state: Some(crate::catalog::MetadataState::Known),
+            max_output_tokens: Some(1024),
+            max_output_tokens_state: Some(crate::catalog::MetadataState::Known),
+            modalities: Some(Modalities {
                 input: vec!["text".to_string()],
                 output: vec!["text".to_string()],
-            },
+            }),
+            modalities_state: Some(crate::catalog::MetadataState::Known),
             capabilities: std::collections::HashMap::new(),
+            capabilities_state: Some(crate::catalog::MetadataState::Unknown),
             parameters: ModelParameters {
                 supported: vec![],
                 rejected: vec![],
                 deprecated_for_this_model: vec![],
             },
+            parameters_state: Some(crate::catalog::MetadataState::Unknown),
             pricing,
-            last_verified: "2024-01-01".to_string(),
+            pricing_state: None,
+            last_verified: Some("2024-01-01".to_string()),
             confidence: Confidence::Official,
             endpoint_family: EndpointFamily::ChatCompletions,
             sources: vec![],
@@ -447,5 +514,34 @@ mod tests {
 
         assert!(err.to_string().contains("required catalog directory"));
         std::fs::remove_dir(&data_dir).unwrap();
+    }
+
+    #[test]
+    fn missing_legacy_states_are_exposed_as_unknown_or_known_from_values() {
+        use crate::catalog::{MetadataState, PricingState};
+
+        let mut model = make_model("m1", "p1", ModelStatus::Active, None);
+        model.context_window_state = None;
+        model.max_output_tokens = None;
+        model.max_output_tokens_state = None;
+        model.modalities_state = None;
+        model.capabilities.clear();
+        model.capabilities_state = None;
+        model.parameters = ModelParameters {
+            supported: vec![],
+            rejected: vec![],
+            deprecated_for_this_model: vec![],
+        };
+        model.parameters_state = None;
+        model.pricing_state = None;
+
+        fill_legacy_metadata_states(&mut model);
+
+        assert_eq!(model.context_window_state, Some(MetadataState::Known));
+        assert_eq!(model.max_output_tokens_state, Some(MetadataState::Unknown));
+        assert_eq!(model.modalities_state, Some(MetadataState::Known));
+        assert_eq!(model.capabilities_state, Some(MetadataState::Unknown));
+        assert_eq!(model.parameters_state, Some(MetadataState::Unknown));
+        assert_eq!(model.pricing_state, Some(PricingState::Unknown));
     }
 }
